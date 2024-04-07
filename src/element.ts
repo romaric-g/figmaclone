@@ -1,19 +1,16 @@
-import { Container, Graphics, GraphicsContext, Sprite } from "pixi.js";
+import { Container, Graphics, GraphicsContext, Point, Sprite } from "pixi.js";
 import { Editor } from "./editor";
-
 
 export abstract class Element {
     private graphics: Graphics;
 
     private _contextEditor?: Editor;
-    private _selected: boolean = false;
-    private _hover: boolean = false;
 
-    private _pressed: boolean = false;
-    private _pressedStartX?: number;
-    private _pressedStartY?: number;
-    private _pressedOriginalX?: number;
-    private _pressedOriginalY?: number;
+
+    private _selected: boolean = false;
+    private _pressUpUnselectable: boolean = false;
+
+    private _hover: boolean = false;
 
     private _x: number;
     private _y: number;
@@ -27,70 +24,59 @@ export abstract class Element {
         this._height = height;
 
         this.graphics = new Graphics()
-        this.graphics.on('pointerdown', (event) => {
-            const global = event.global;
 
-            this.requestPressed(global.x, global.y)
-        });
-        this.graphics.on('pointerdown', (event) => this.requestSelect());
+        this.graphics.on('pointerdown', (event) => this.pointerDownHandler(event.global));
+        this.graphics.on('pointerup', (event) => this.pointerUpHandler())
+        this.graphics.on('pointerupoutside', (event) => this.pointerUpHandler())
+
+
         this.graphics.on('pointerenter', (event) => this.requestHoverOn());
         this.graphics.on('pointerleave', (event) => this.requestHoverOff());
 
-        this.graphics.on('pointerup', (event) => this.unpress())
-        this.graphics.on('pointerupoutside', (event) => this.unpress())
 
 
-        this.graphics.on('globalpointermove', (event) => {
+        // this.graphics.on('globalpointermove', (event) => {
 
-            if (this._pressed) {
-                if (this._pressedStartX != undefined && this._pressedStartY != undefined && this._pressedOriginalX != undefined && this._pressedOriginalY != undefined) {
-                    this._x = this._pressedOriginalX + event.global.x - this._pressedStartX
-                    this._y = this._pressedOriginalY + event.global.y - this._pressedStartY
-                }
-            }
-
-
-        })
+        //     if (this._pressed) {
+        //         if (this._pressedStartX != undefined && this._pressedStartY != undefined && this._pressedOriginalX != undefined && this._pressedOriginalY != undefined) {
+        //             this._x = this._pressedOriginalX + event.global.x - this._pressedStartX
+        //             this._y = this._pressedOriginalY + event.global.y - this._pressedStartY
+        //         }
+        //     }
+        // })
 
         this.graphics.eventMode = "static"
     }
 
-    private requestPressed(x: number, y: number) {
-        console.log("Request pressed", x, y)
-
-        if (!this._pressed) {
-            this._pressed = true;
-            this._pressedStartX = x;
-            this._pressedStartY = y;
-            this._pressedOriginalX = this._x;
-            this._pressedOriginalY = this._y;
-        }
-
+    get x() {
+        return this._x;
     }
 
-    private requestSelect() {
-        console.log("Request select")
+    get y() {
+        return this._y;
+    }
 
-        if (this._contextEditor && !this._selected) {
-            this._contextEditor.requestSelect(this)
+
+    private pointerDownHandler(pointerPosition: Point) {
+        if (this._contextEditor) {
+            this._contextEditor.onElementPointerDown(this, pointerPosition)
         }
     }
 
-    private unpress() {
-        console.log("Request unpress")
+    private pointerUpHandler() {
 
-        if (this._pressed) {
-            this._pressed = false;
-            this._pressedStartX = undefined;
-            this._pressedStartY = undefined;
-            this._pressedOriginalX = undefined;
-            this._pressedOriginalY = undefined;
+        // to editor
+        if (this._contextEditor) {
+            this._contextEditor.onElementPointerUp(this)
         }
+
+
+
+
     }
 
     private requestHoverOn() {
-        console.log("Hover on")
-
+        // console.log("Hover on")
         if (!this._hover) {
             this._hover = true;
         }
@@ -98,14 +84,14 @@ export abstract class Element {
     }
 
     private requestHoverOff() {
-        console.log("Hover off")
+        // console.log("Hover off")
 
         if (this._hover) {
             this._hover = false;
         }
     }
 
-    update() {
+    render() {
         const commonContext = new GraphicsContext()
             .rect(0, 0, this._width, this._height)
             .fill("red")
@@ -140,12 +126,30 @@ export abstract class Element {
         this._selected = true;
     }
 
-    deselect() {
+    pressUpUnselectable() {
+        this._pressUpUnselectable = true
+    }
+
+    isPressUpUnselectable() {
+        return this._pressUpUnselectable;
+    }
+
+    unselect() {
         this._selected = false;
+        this._pressUpUnselectable = false;
+    }
+
+    isSelected() {
+        return this._selected;
     }
 
     setEditorContext(editor: Editor) {
         this._contextEditor = editor;
+    }
+
+    setPosition(x: number, y: number) {
+        this._x = x;
+        this._y = y;
     }
 }
 
