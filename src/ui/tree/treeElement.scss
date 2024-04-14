@@ -1,0 +1,9 @@
+
+.TreeElement {
+    display: block;
+    padding: 0 20px;
+
+    &:hover {
+        background-color: gray;
+    }
+}

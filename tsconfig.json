@@ -3,7 +3,10 @@
       "target": "es5",
       "module": "NodeNext",
       "moduleResolution": "NodeNext",
-      "strict": true
-    }
+      "jsx": "react",
+      "strict": true,
+      "esModuleInterop": true
+    },
+    "include": ["src/**/*"]
 }
   
