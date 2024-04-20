@@ -1,9 +1,15 @@
 
 .TreeElement {
     display: block;
-    padding: 0 20px;
+    padding: 8px 20px;
+    box-sizing: border-box;
+    border: 1px solid transparent;
 
     &:hover {
-        background-color: gray;
+        border: 1px solid rgb(52, 71, 71);
+    }
+
+    &--selected {
+        background-color: rgb(52, 71, 71);
     }
 }

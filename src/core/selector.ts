@@ -1,63 +1,60 @@
-import { Element } from "./element";
+import { Editor } from "./editor";
 import { Selection } from "./selections/selection";
+import { TreeComponent } from "./tree/treeComponent";
+import { TreeContainer } from "./tree/treeContainer";
 
 
 export class Selector {
     private _selection: Selection;
-    private _elements: Element[] = []
+    private _innerPositionContainer?: TreeContainer;
 
     constructor() {
         this._selection = new Selection([])
     }
 
-    private registerElement(element: Element) {
-        this._elements.push(element)
-
-        return element;
-    }
-
     setSelection(selection: Selection) {
         if (this._selection.isSameSelection(selection)) {
-            console.log(this._selection, selection)
-            console.log("not apply")
             return;
         }
-
-        console.log("CHANGE SELECTION", selection)
 
         this._selection.destroy()
         this._selection = selection;
         this._selection.init()
         this._selection.emitChangeEvent()
+
+        Editor.getEditor().treeManager.emitTreeChangeEvent()
     }
 
     getSelection() {
         return this._selection;
     }
 
-    getRegistredElement(element: Element) {
-        const selectionElement = this._elements.find(el => el === element);
-
-        if (!selectionElement) {
-            return this.registerElement(element)
-        }
-
-        return selectionElement;
-    }
-
     unselectAll() {
         this.setSelection(new Selection([]))
     }
 
-    clearCache() {
-        const keededSelectionElement = []
+    getInnerPositionContainer() {
+        if (this._innerPositionContainer) {
+            return this._innerPositionContainer;
+        }
+        return Editor.getEditor().treeManager.getTree()
+    }
 
-        for (const selectionElement of this._elements) {
-            if (selectionElement.isSelected()) {
-                keededSelectionElement.push(selectionElement)
-            }
+    restoreInitialPositionContainer() {
+        this._innerPositionContainer = undefined;
+    }
+
+    getInnerTopComponent(component: TreeComponent): TreeComponent {
+        const parentContainer = component.getContainerParent()
+
+        if (!parentContainer) {
+            return component;
         }
 
-        this._elements = keededSelectionElement;
+        if (parentContainer === this.getInnerPositionContainer()) {
+            return component;
+        }
+
+        return this.getInnerTopComponent(parentContainer)
     }
 }

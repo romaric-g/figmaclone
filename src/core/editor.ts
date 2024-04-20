@@ -2,7 +2,7 @@ import { Point, ApplicationOptions } from 'pixi.js';
 import { KeyboardController } from './keyboardController';
 import { Selector } from './selector';
 import { EventsManger } from './eventManager';
-import { Tree } from './tree';
+import { TreeManager } from './tree/treeManager';
 import { ToolManager } from './tools/toolManager';
 import { Zoom } from './zoom';
 import { CanvasApp } from './canvas/app';
@@ -17,7 +17,7 @@ export class Editor {
     readonly keyboardController: KeyboardController;
     readonly selector: Selector;
     readonly eventsManager: EventsManger;
-    readonly tree: Tree;
+    readonly treeManager: TreeManager;
     readonly toolManager: ToolManager;
     readonly zoom: Zoom;
 
@@ -30,7 +30,7 @@ export class Editor {
         this.selector = new Selector()
         this.keyboardController = new KeyboardController()
         this.eventsManager = new EventsManger()
-        this.tree = new Tree(this)
+        this.treeManager = new TreeManager(this)
         this.toolManager = new ToolManager(this)
         this.zoom = new Zoom(this)
     }
@@ -38,7 +38,42 @@ export class Editor {
     async init(options?: Partial<ApplicationOptions>) {
         await this.canvasApp.init(options)
 
+        this.treeManager.init()
         this.toolManager.init()
+
+        this.keyboardController.addListener("backspace", (type) => {
+            for (const element of this.selector.getSelection().getComponents()) {
+                // this.tree.removeElement(element)
+            }
+        })
+
+        this.keyboardController.addListener("left", (type) => {
+            if (type == "down") {
+                this.selector.getSelection().addX(-5)
+            }
+
+        })
+
+        this.keyboardController.addListener("right", (type) => {
+            if (type == "down") {
+                this.selector.getSelection().addX(5)
+            }
+
+        })
+
+        this.keyboardController.addListener("up", (type) => {
+            if (type == "down") {
+                this.selector.getSelection().addY(-5)
+            }
+
+        })
+
+        this.keyboardController.addListener("down", (type) => {
+            if (type == "down") {
+                this.selector.getSelection().addY(5)
+            }
+
+        })
     }
 
     getDrawingSize(width: number, height: number) {
@@ -72,5 +107,6 @@ export class Editor {
     getTreeContainer() {
         return this.canvasApp.getTreeContainer();
     }
+
 }
 

@@ -1,0 +1,34 @@
+
+.SelectionInput {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    padding: 2px 5px;
+    gap: 15px;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid transparent;
+    max-width: 90px;
+    
+    &__label {
+        font-weight: 400;
+        color: gray;
+    }
+
+    &:focus-within {
+        border: 1px solid blue;
+    }
+
+    .SelectionInput__input {
+        width: 100%;
+        height: 22px;
+        color: white;
+        background-color: transparent;
+        border: none;
+
+        &:focus {
+            border: 0px solid transparent;
+            outline: none;
+        }
+    }
+}

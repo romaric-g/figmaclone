@@ -1,5 +1,5 @@
 import { Point } from "pixi.js";
-import { Element } from "../../element";
+import { TreeRect } from "../../tree/treeRect";
 import { SelectTool } from "../selectTool";
 import { SelectionState } from "./selection";
 import { SelectToolState } from "./abstractSelectState";
@@ -7,10 +7,10 @@ import { Editor } from "../../editor";
 
 export class MovableSelectionState extends SelectToolState {
     private _sourceClickedPosition: Point;
-    private _clickedElement: Element;
+    private _clickedElement: TreeRect;
     private _clickedElementAddedOnClickDownSource: boolean;
 
-    constructor(selectTool: SelectTool, sourceClickedPostion: Point, clickElement: Element, clickedElementAddedOnClickDownSource: boolean) {
+    constructor(selectTool: SelectTool, sourceClickedPostion: Point, clickElement: TreeRect, clickedElementAddedOnClickDownSource: boolean) {
         super(selectTool)
         this._sourceClickedPosition = sourceClickedPostion.clone();
         this._clickedElement = clickElement;
@@ -45,7 +45,7 @@ export class MovableSelectionState extends SelectToolState {
         this.selectTool.editor.selector.getSelection().unfreezeMoveOrigin()
     }
 
-    onClickUp(element: Element, shift: boolean) {
+    onClickUp(element: TreeRect, shift: boolean) {
         const editor = this.selectTool.editor
         const selector = editor.selector;
         const selectionBuilder = selector.getSelection().getBuilder(editor)
@@ -72,7 +72,7 @@ export class MovableSelectionState extends SelectToolState {
         this.selectTool.editor.selector.getSelection().move(movementVector)
     }
 
-    onClickDown(element: Element, shift: boolean, pointerPosition: Point): void { }
+    onClickDown(element: TreeRect, shift: boolean, pointerPosition: Point): void { }
     onBackgroundPointerDown(clickPosition: Point): void { }
     onBackgroundPointerUp(clickPosition: Point): void { }
 

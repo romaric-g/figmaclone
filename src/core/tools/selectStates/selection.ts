@@ -1,5 +1,5 @@
 import { Point } from "pixi.js";
-import { Element } from "../../element";
+import { TreeRect } from "../../tree/treeRect";
 import { SelectTool } from "../selectTool";
 import { MovableSelectionState } from "./movableSelection";
 import { SelectToolState } from "./abstractSelectState";
@@ -10,7 +10,7 @@ import { FreeSelectState } from "./freeSelect";
 
 export class SelectionState extends SelectToolState {
 
-    private _singleElement?: Element;
+    private _singleElement?: TreeRect;
     private _reshapeReference: ReshapeReference = "none";
 
     constructor(selectTool: SelectTool) {
@@ -76,7 +76,7 @@ export class SelectionState extends SelectToolState {
         }
     }
 
-    onClickDown(element: Element, shift: boolean, pointerPosition: Point) {
+    onClickDown(element: TreeRect, shift: boolean, pointerPosition: Point) {
         const localPostion = this.selectTool.editor.getDrawingPosition(pointerPosition).clone()
 
         const editor = this.selectTool.editor
@@ -130,14 +130,14 @@ export class SelectionState extends SelectToolState {
     }
 
     onInit() {
-        const elements = this.selectTool.editor.selector.getSelection().getElements()
+        const elements = this.selectTool.editor.selector.getSelection().getComponents()
 
-        if (elements.length === 1) {
+        if (elements.length === 1 && elements[0] instanceof TreeRect) {
             this._singleElement = elements[0]
         }
     }
 
-    onClickUp(element: Element, shift: boolean): void { }
+    onClickUp(element: TreeRect, shift: boolean): void { }
     onDestroy() { }
     onBackgroundPointerUp(clickPosition: Point): void { }
 }

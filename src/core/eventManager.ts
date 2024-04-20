@@ -1,5 +1,5 @@
 import { Point } from "pixi.js";
-import { Element } from "./element";
+import { TreeRect } from "./tree/treeRect";
 
 type EventHandler<T> = (data: T) => void;
 
@@ -24,9 +24,9 @@ class EventManager<T> {
     }
 }
 
-export type ElementPressDownEventData = { element: Element, pointerPosition: Point }
+export type ElementPressDownEventData = { element: TreeRect, pointerPosition: Point }
 
-export type ElementPressUpEventData = { element: Element }
+export type ElementPressUpEventData = { element: TreeRect }
 
 export type PointerMoveEventData = { position: Point }
 

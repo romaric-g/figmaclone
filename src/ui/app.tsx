@@ -1,6 +1,5 @@
 import React from "react";
 import TreeView from "./tree/tree";
-import { TreeElementData } from "./tree/treeElement";
 import ToolbarView from "./tool/toolbar";
 import { ToolType } from "../core/tools/toolManager";
 import Canvas from "./canvas/canvas";
@@ -8,7 +7,7 @@ import "./app.scss";
 import "./reset.scss"
 import ElementEditor from "./selection/selectionEditor";
 import { Editor } from "../core/editor";
-import { currentToolSubject, treeElementSubject } from "./subjects";
+import { currentToolSubject, TreeElementData, treeElementSubject } from "./subjects";
 
 const App: React.FC = () => {
 

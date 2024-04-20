@@ -1,45 +1,45 @@
 import { Editor } from "../editor";
-import { Element } from "../element";
 import { Selector } from "../selector";
 import { Selection } from "./selection";
+import { TreeComponent } from "../tree/treeComponent";
 
 export class SelectionBuilder {
 
     private _editor: Editor;
-    private _elements: Element[];
+    private _components: TreeComponent[];
 
     constructor(editor: Editor) {
         this._editor = editor;
-        this._elements = []
+        this._components = []
     }
 
     removeAll() {
-        this._elements = []
+        this._components = []
         return this;
     }
 
     selectAll() {
-        this._elements = this._editor.tree.getAllElements()
+        this._components = this._editor.treeManager.getTree().getAllRects()
         return this;
     }
 
-    set(...elements: Element[]) {
-        this._elements = elements;
+    set(...compoents: TreeComponent[]) {
+        this._components = compoents;
         return this;
     }
 
-    add(...elements: Element[]) {
-        this._elements.push(...elements)
+    add(...compoents: TreeComponent[]) {
+        this._components.push(...compoents)
         return this;
     }
 
-    remove(...elements: Element[]) {
-        this._elements = this._elements.filter(el => !elements.includes(el));
+    remove(...components: TreeComponent[]) {
+        this._components = this._components.filter(el => !components.includes(el));
         return this;
     }
 
     build() {
-        return new Selection(this._elements)
+        return new Selection(this._components)
     }
 
     apply(selector: Selector) {

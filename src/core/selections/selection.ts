@@ -1,162 +1,164 @@
 import { FillStyleInputs, Point } from "pixi.js";
-import { Element } from "../element";
+import { TreeRect } from "../tree/treeRect";
 import { selectionChangeSubject } from "../../ui/subjects";
 import { SelectionBuilder } from "./selectionBuilder";
 import { Editor } from "../editor";
+import { TreeComponent } from "../tree/treeComponent";
 
 export class Selection {
-    private _elements: Element[]
+    private _components: TreeComponent[]
 
-    constructor(elements: Element[]) {
-        this._elements = elements;
+    constructor(components: TreeComponent[]) {
+        this._components = components;
+    }
+
+    private applyToEachRect(apply: (rectComponent: TreeRect) => void) {
+        for (const component of this._components) {
+            if (component instanceof TreeRect) {
+                apply(component)
+            }
+        }
+    }
+
+    private getRectsValue<T>(apply: (rectComponent: TreeRect) => T) {
+        const values: T[] = []
+
+        for (const component of this._components) {
+            if (component instanceof TreeRect) {
+                values.push(apply(component))
+            }
+        }
+
+        if (values.length > 1) {
+            return "mixed"
+        }
+        return values[0]
     }
 
     init() {
-        for (const element of this._elements) {
-            element.onSelectionInit()
+        for (const component of this._components) {
+            if (component instanceof TreeRect) {
+                component.onSelectionInit()
+            }
         }
     }
 
     destroy() {
-        for (const element of this._elements) {
-            element.onSelectionDestroy()
-        }
+        this.applyToEachRect((c) => c.onSelectionDestroy())
     }
 
     getBuilder(editor: Editor) {
         const newBuilder = new SelectionBuilder(editor)
-        newBuilder.set(...this._elements)
+        newBuilder.set(...this._components)
         return newBuilder;
     }
 
     isSameSelection(selection: Selection) {
-        const elements = this.getElements()
-        const otherElements = selection.getElements()
+        const components = this.getComponents()
+        const otherComponents = selection.getComponents()
 
-        if (elements.length !== otherElements.length) {
+        if (components.length !== otherComponents.length) {
             return false;
         }
 
-        return elements.every(e => otherElements.includes(e));
+        for (let index = 0; index < components.length; index++) {
+            const c1 = components[index]
+            const c2 = otherComponents[index]
+
+            if (c1 != c2) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
-    getElements() {
-        return this._elements;
+    getComponents() {
+        return this._components;
     }
 
     setFillColor(color: FillStyleInputs) {
-        for (const element of this._elements) {
-            element.fill = color
-        }
-
+        this.applyToEachRect((c) => c.fill = color)
         this.emitChangeEvent()
     }
 
     getFillColor() {
-        const fillColors = this._elements.map((e) => e.fill)
-
-        if (fillColors.length > 1) {
-            return "mixed"
-        }
-        return fillColors[0]
+        return this.getRectsValue((e) => e.fill)
     }
 
     setHeight(value: number) {
-        for (const element of this._elements) {
-            element.height = value
-        }
-
+        this.applyToEachRect((c) => c.height = value)
         this.emitChangeEvent()
     }
 
     getHeight() {
-        const heights = this._elements.map((e) => e.height)
-
-        if (heights.length > 1) {
-            return "mixed"
-        }
-        return heights[0]
+        return this.getRectsValue((e) => e.height)
     }
 
     setWidth(value: number) {
-        for (const element of this._elements) {
-            element.width = value
-        }
-
+        this.applyToEachRect((c) => c.width = value)
         this.emitChangeEvent()
     }
 
 
     getWidth() {
-        const widths = this._elements.map((e) => e.width)
-
-        if (widths.length > 1) {
-            return "mixed"
-        }
-        return widths[0]
+        return this.getRectsValue((e) => e.width)
     }
 
     setX(value: number) {
-        for (const element of this._elements) {
-            element.x = value
-        }
+        this.applyToEachRect((c) => c.x = value)
+        this.emitChangeEvent()
+    }
 
+    addX(value: number) {
+        this.applyToEachRect((c) => c.x = c.x + value)
         this.emitChangeEvent()
     }
 
     getX() {
-        const xs = this._elements.map((e) => e.x)
-
-        if (xs.length > 1) {
-            return "mixed"
-        }
-        return xs[0]
+        return this.getRectsValue((e) => e.x)
     }
 
     setY(value: number) {
-        for (const element of this._elements) {
-            element.y = value
-        }
+        this.applyToEachRect((c) => c.y = value)
+        this.emitChangeEvent()
+    }
 
+    addY(value: number) {
+        this.applyToEachRect((c) => c.y = c.y + value)
         this.emitChangeEvent()
     }
 
     getY() {
-        const ys = this._elements.map((e) => e.y)
-
-        if (ys.length > 1) {
-            return "mixed"
-        }
-        return ys[0]
+        return this.getRectsValue((e) => e.y)
     }
 
     move(moveVector: Point) {
-        for (const element of this._elements) {
-            const movePositionOrigin = element.getOriginalPosition()
+
+        const moveRect = (rect: TreeRect) => {
+            const movePositionOrigin = rect.getOriginalPosition()
 
             const newX = movePositionOrigin.x + moveVector.x
             const newY = movePositionOrigin.y + moveVector.y
 
-            element.setPosition(newX, newY)
+            rect.setPosition(newX, newY)
         }
+
+        this.applyToEachRect(moveRect)
         this.emitChangeEvent()
     }
 
     freezeMoveOrigin() {
-        for (const element of this._elements) {
-            element.freezeOriginalPosition()
-        }
+        this.applyToEachRect((e) => e.freezeOriginalPosition())
     }
 
     unfreezeMoveOrigin() {
-        for (const element of this._elements) {
-            element.unfreezeOriginalPosition()
-        }
+        this.applyToEachRect((e) => e.unfreezeOriginalPosition())
     }
 
     emitChangeEvent() {
         selectionChangeSubject.next({
-            lenght: this.getElements().length,
+            lenght: this.getComponents().length,
             x: this.getX(),
             y: this.getY(),
             width: this.getWidth(),

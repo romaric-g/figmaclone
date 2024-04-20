@@ -26,18 +26,14 @@ export class Zoom {
             if (event.button === 1) {
                 event.preventDefault()
 
-                console.log("Mouse pressed")
-
                 this._editor.toolManager.freeze()
 
                 this.wheelClickStart = event.global.clone();
-                console.log("POSITION", this._editor.getTreeContainer().position)
                 this.originalTreeContainerPosition = this._editor.getTreeContainer().position.clone()
             }
         }
         const onMouseUp = (event: FederatedPointerEvent) => {
             if (event.button === 1) {
-                console.log("Mouse un pressed")
 
                 this._editor.toolManager.unfreeze()
 
@@ -57,24 +53,15 @@ export class Zoom {
         }
 
         const onWheel = (event: FederatedWheelEvent) => {
-            console.log("ZOOM", event)
-
             const canvas = this._editor.getCanvas()
 
             const maxX = canvas.width - this._x;
             const maxY = canvas.height - this._y;
 
-            // console.log("canvas", canvas.height, canvas.width, canvas.offsetTop, canvas.offsetLeft)
-
             const global = event.global;
 
             const globalX = global.x - this._x;
             const globalY = global.y - this._y;
-
-
-
-            console.log("max", maxX, maxY)
-            console.log("global", global)
 
             let scaleFactor = 1;
 
@@ -87,22 +74,14 @@ export class Zoom {
             if (scaleFactor !== 1) {
                 this._scale = this._scale * scaleFactor;
 
-                console.log("scaleFactor", scaleFactor)
-
                 const correctionX = globalX - (globalX / maxX) * (maxX * scaleFactor)
                 const correctionY = globalY - (globalY / maxY) * (maxY * scaleFactor)
-
-                console.log("CORRECTION")
-                console.log(correctionX)
-                console.log(correctionY)
 
                 this._x = this._x + correctionX;
                 this._y = this._y + correctionY;
             }
 
             const localPoint = this._editor.getTreeContainer().toLocal(event.global)
-
-            console.log("local", localPoint)
         }
 
         editor.getBackgroundContainer().on("mousedown", onMouseDown)

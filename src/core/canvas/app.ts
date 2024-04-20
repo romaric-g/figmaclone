@@ -40,10 +40,8 @@ export class CanvasApp {
             this._treeLayer.getContainer().y = this.getEditor().zoom.getY()
             this._treeLayer.getContainer().scale = this.getEditor().zoom.getCurrentScale()
 
-            this.getEditor().tree.render()
-            this.getEditor().selector.clearCache()
+            this.getEditor().treeManager.render()
         });
-
     }
 
     getTreeLayer() {

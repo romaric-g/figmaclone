@@ -1,21 +1,30 @@
 import { Container, FillStyleInputs, Graphics, GraphicsContext, Point, Sprite } from "pixi.js";
-import { Editor } from "./editor";
-import { Selector } from "./selector";
-import { Selection } from "./selections/selection";
-import { ElementTreeRenderer } from "./canvas/renderer/elementTree";
-import { ElementSelectorRenderer } from "./canvas/renderer/elementSelector";
+import { Editor } from "../editor";
+import { Selector } from "../selector";
+import { Selection } from "../selections/selection";
+import { ElementTreeRenderer } from "../canvas/renderer/elementTree";
+import { ElementSelectorRenderer } from "../canvas/renderer/elementSelector";
+import { TreeComponent } from "./treeComponent";
 
-export abstract class Element {
+interface ElementProps {
+    x: number,
+    y: number,
+    width?: number,
+    height?: number,
+    fill?: FillStyleInputs
+    name?: string
+}
+
+export class TreeRect extends TreeComponent {
     // private graphics: Graphics;
 
     private _contextEditor?: Editor;
 
     private _selected: boolean = false;
-    private _pressUpUnselectable: boolean = false;
     private _movePositionOrigin?: Point;
 
     private _elementTreeRenderer: ElementTreeRenderer;
-    private _elementSelectoionRenderer: ElementSelectorRenderer;
+    private _elementSelectionRenderer: ElementSelectorRenderer;
 
     private _hover: boolean = false;
 
@@ -24,18 +33,21 @@ export abstract class Element {
     private _width: number;
     private _height: number;
 
-    public name: string = "";
+    public name: string;
 
     fill: FillStyleInputs;
 
-    constructor(x: number, y: number, width: number, height: number, fill = "red") {
+    constructor({ x, y, width = 100, height = 100, fill = "red", name = "" }: ElementProps) {
+        super()
+
         this._x = x;
         this._y = y;
         this._width = width;
         this._height = height;
         this.fill = fill;
+        this.name = name;
 
-        this._elementSelectoionRenderer = new ElementSelectorRenderer(this)
+        this._elementSelectionRenderer = new ElementSelectorRenderer(this)
         this._elementTreeRenderer = new ElementTreeRenderer(this)
 
         const graphics = this._elementTreeRenderer.getContainer()
@@ -106,7 +118,6 @@ export abstract class Element {
     }
 
     private requestHoverOn() {
-        // console.log("Hover on")
         if (!this._hover) {
             this._hover = true;
         }
@@ -114,73 +125,28 @@ export abstract class Element {
     }
 
     private requestHoverOff() {
-        // console.log("Hover off")
-
         if (this._hover) {
             this._hover = false;
         }
     }
 
     render(zIndex: number) {
-
-        this._elementSelectoionRenderer.render(zIndex)
+        this._elementSelectionRenderer.render(zIndex)
         this._elementTreeRenderer.render(zIndex)
 
-        // const commonContext = new GraphicsContext()
-        //     .rect(0, 0, this.width, this.height)
-        //     .fill(this.fill)
-
-        // if (this._selected) {
-        //     const strokeStyle = {
-        //         width: 2,
-        //         color: "blue"
-        //     }
-        //     commonContext.stroke(strokeStyle)
-
-        //     if (this._contextEditor?.selector.getSelection().getElements().length == 1) {
-        //         commonContext.rect(-4, -4, 8, 8).fill("white").stroke(strokeStyle)
-        //         commonContext.rect(-4, this.height - 4, 8, 8).fill("white").stroke(strokeStyle)
-        //         commonContext.rect(this.width - 4, -4, 8, 8).fill("white").stroke(strokeStyle)
-        //         commonContext.rect(this.width - 4, this.height - 4, 8, 8).fill("white").stroke(strokeStyle)
-        //     }
-        // }
-
-
-        // if (this._hover && !this._selected) {
-        //     commonContext
-        //         .stroke({
-        //             width: 1,
-        //             color: "blue"
-        //         })
-        // }
-
-        // this.graphics.zIndex = zIndex;
-        // this.graphics.context = commonContext
-        // this.graphics.x = this.x
-        // this.graphics.y = this.y
+        return zIndex + 1
     }
 
     getContainer() {
         return this._elementTreeRenderer.getContainer();
     }
 
-    pressUpUnselectable() {
-        this._pressUpUnselectable = true
-    }
-
-    // isPressUpUnselectable() {
-    //     return this._pressUpUnselectable;
-    // }
-
     onSelectionInit() {
-        console.log("SELECT ON " + this.name + "prev=" + this._selected)
         this._selected = true;
     }
 
     onSelectionDestroy() {
-        console.log("SELECT OFF " + this.name + "prev=" + this._selected)
         this._selected = false;
-        this._pressUpUnselectable = false;
     }
 
     isSelected() {
@@ -195,13 +161,13 @@ export abstract class Element {
     init(editor: Editor) {
         this._contextEditor = editor;
 
-        this._elementSelectoionRenderer.init(editor.canvasApp.getSelectionLayer())
+        this._elementSelectionRenderer.init(editor.canvasApp.getSelectionLayer())
         this._elementTreeRenderer.init(editor.canvasApp.getTreeLayer())
     }
 
     destroy() {
         if (this._contextEditor) {
-            this._elementSelectoionRenderer.destroy(this._contextEditor.canvasApp.getSelectionLayer())
+            this._elementSelectionRenderer.destroy(this._contextEditor.canvasApp.getSelectionLayer())
             this._elementTreeRenderer.destroy(this._contextEditor.canvasApp.getTreeLayer())
             this._contextEditor = undefined;
         }
@@ -232,15 +198,4 @@ export abstract class Element {
     }
 }
 
-interface Childable {
-    addChild(childElement: Element): void
-}
-
-export class Rect extends Element implements Childable {
-    private children: Element[] = []
-
-    addChild(childElement: Element): void {
-        this.children.push(childElement)
-    }
-}
 

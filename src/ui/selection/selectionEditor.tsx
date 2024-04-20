@@ -5,31 +5,28 @@ import { every } from "rxjs";
 import { Editor } from "../../core/editor";
 import { AlphaPicker, BlockPicker, ChromePicker, CirclePicker, ColorResult, CompactPicker, GithubPicker, HuePicker, PhotoshopPicker, RGBColor, SketchPicker, SliderPicker, SwatchesPicker, TwitterPicker } from 'react-color'
 import "./selectionEditor.scss"
+import SelectionInput from "./selectionInput";
 
 interface Props {
 
 }
 
 
-const changeNumericalValue = (type: "x" | "y" | "height" | "width", value: string) => {
+const changeNumericalValue = (type: "x" | "y" | "height" | "width", value: number) => {
     const selection = Editor.getEditor().selector.getSelection()
 
-    if (Number.isNaN(Number(value))) {
-        return
-    }
-    const newValue = Number(value)
     switch (type) {
         case "x":
-            selection.setX(newValue)
+            selection.setX(value)
             break;
         case "y":
-            selection.setY(newValue)
+            selection.setY(value)
             break;
         case "width":
-            selection.setWidth(newValue)
+            selection.setWidth(value)
             break;
         case "height":
-            selection.setHeight(newValue)
+            selection.setHeight(value)
             break;
         default:
             break;
@@ -92,9 +89,9 @@ const ElementEditor: React.FC<Props> = () => {
 
     }, [])
 
-    if (selection.getElements().length == 0) {
-        return <div>
-            <p>pas de selection</p>
+    if (selection.getComponents().length == 0) {
+        return <div className="SelectionEditor">
+
         </div>
     }
 
@@ -102,15 +99,14 @@ const ElementEditor: React.FC<Props> = () => {
         <div className="SelectionEditor">
             <div className="SelectionEditor__properites">
                 <div className="SelectionEditor__properites__position">
-                    <input className="SelectionEditor__properites__position__input" type="number" value={x} onChange={(event) => changeNumericalValue("x", event.target.value)} />
-                    <input className="SelectionEditor__properites__position__input" type="number" value={y} onChange={(event) => changeNumericalValue("y", event.target.value)} />
+                    <SelectionInput value={x} label="X" setValue={(value) => changeNumericalValue("x", value)} />
+                    <SelectionInput value={y} label="Y" setValue={(value) => changeNumericalValue("y", value)} />
                 </div>
-                <div className="SelectionEditor__properites__dimensions">
-                    <input className="SelectionEditor__properites__dimensions__input" type="number" value={widht} onChange={(event) => changeNumericalValue("width", event.target.value)} />
-                    <input className="SelectionEditor__properites__dimensions__input" type="number" value={height} onChange={(event) => changeNumericalValue("height", event.target.value)} />
+                <div className="SelectionEditor__properites__position">
+                    <SelectionInput value={widht} label="W" setValue={(value) => changeNumericalValue("width", value)} />
+                    <SelectionInput value={height} label="H" setValue={(value) => changeNumericalValue("height", value)} />
                 </div>
             </div>
-
             <hr className="SelectionEditor__separator" />
 
             <div className="SelectionEditor__color">

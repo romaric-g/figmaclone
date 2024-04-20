@@ -1,5 +1,5 @@
 import { Point } from "pixi.js";
-import { Element } from "../../element";
+import { TreeRect } from "../../tree/treeRect";
 import { SelectTool } from "../selectTool";
 import { MovableSelectionState } from "./movableSelection";
 import { SelectToolState } from "./abstractSelectState";
@@ -10,11 +10,13 @@ export class FreeSelectState extends SelectToolState {
         super(selectTool)
     }
 
-    onClickDown(element: Element, shift: boolean, pointerPosition: Point) {
-        const localPosition = this.selectTool.editor.getDrawingPosition(pointerPosition).clone()
-
+    onClickDown(element: TreeRect, shift: boolean, pointerPosition: Point) {
         const editor = this.selectTool.editor
         const selector = editor.selector;
+
+        const localPosition = editor.getDrawingPosition(pointerPosition).clone()
+        const topComponent = selector.getInnerTopComponent(element)
+
         const selectionBuilder = selector.getSelection().getBuilder(editor)
 
         selectionBuilder.set(element).apply(selector)
@@ -23,7 +25,7 @@ export class FreeSelectState extends SelectToolState {
         this.selectTool.setState(newState)
     }
 
-    onClickUp(element: Element, shift: boolean): void { }
+    onClickUp(element: TreeRect, shift: boolean): void { }
     onMove(newPosition: Point): void { }
     onInit() {
         cursorChangeSubject.next("default")

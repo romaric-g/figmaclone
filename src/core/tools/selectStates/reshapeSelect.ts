@@ -1,5 +1,5 @@
 import { Point } from "pixi.js";
-import { Element } from "../../element";
+import { TreeRect } from "../../tree/treeRect";
 import { SelectTool } from "../selectTool";
 import { SelectToolState } from "./abstractSelectState";
 import { SelectionState } from "./selection";
@@ -35,7 +35,7 @@ export function getCursorType(reshapeReference: ReshapeReference): CursorType {
 export class ReshapeSelectState extends SelectToolState {
 
     private reshapeReference: ReshapeReference;
-    private element: Element;
+    private element: TreeRect;
     private sourceClickedPosition: Point;
 
     private originalX: number = 0;
@@ -43,7 +43,7 @@ export class ReshapeSelectState extends SelectToolState {
     private originalWidth: number = 0;
     private originalHeight: number = 0;
 
-    constructor(selectTool: SelectTool, element: Element, reshapeReference: ReshapeReference, sourceClickedPosition: Point) {
+    constructor(selectTool: SelectTool, element: TreeRect, reshapeReference: ReshapeReference, sourceClickedPosition: Point) {
         super(selectTool)
         this.reshapeReference = reshapeReference;
         this.element = element;
@@ -67,9 +67,9 @@ export class ReshapeSelectState extends SelectToolState {
     onDestroy(): void {
 
     }
-    onClickDown(element: Element, shift: boolean, pointerPosition: Point): void {
+    onClickDown(element: TreeRect, shift: boolean, pointerPosition: Point): void {
     }
-    onClickUp(element: Element, shift: boolean): void {
+    onClickUp(element: TreeRect, shift: boolean): void {
         this.selectTool.setState(new SelectionState(this.selectTool))
     }
     onMove(newPosition: Point): void {

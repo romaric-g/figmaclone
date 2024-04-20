@@ -1,14 +1,14 @@
 import { Graphics, GraphicsContext, Point } from "pixi.js";
-import { Element } from "../../element";
+import { TreeRect } from "../../tree/treeRect";
 import { Editor } from "../../editor";
 import { SelectionLayer } from "../layers/selection";
 
 export class ElementSelectorRenderer {
 
     private graphics: Graphics;
-    private element: Element;
+    private element: TreeRect;
 
-    constructor(element: Element) {
+    constructor(element: TreeRect) {
         this.graphics = new Graphics()
         this.element = element;
     }
@@ -24,8 +24,6 @@ export class ElementSelectorRenderer {
         const startPoint = editor.getCanvasPosition(new Point(this.element.x, this.element.y))
         const [width, height] = editor.getCanvasSize(this.element.width, this.element.height)
 
-        console.log(width, height)
-
         const commonContext = new GraphicsContext()
             .rect(0, 0, width, height)
 
@@ -36,7 +34,7 @@ export class ElementSelectorRenderer {
             }
             commonContext.stroke(strokeStyle)
 
-            if (this.element.getContextEditor()?.selector.getSelection().getElements().length == 1) {
+            if (this.element.getContextEditor()?.selector.getSelection().getComponents().length == 1) {
                 commonContext.rect(-4, -4, 8, 8).fill("white").stroke(strokeStyle)
                 commonContext.rect(-4, height - 4, 8, 8).fill("white").stroke(strokeStyle)
                 commonContext.rect(width - 4, -4, 8, 8).fill("white").stroke(strokeStyle)

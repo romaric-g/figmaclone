@@ -2,12 +2,17 @@ import { Point } from "pixi.js";
 import { Editor } from "../editor";
 import { ElementPressDownEventData, ElementPressUpEventData, PointerDownEventData, PointerMoveEventData, PointerUpEventData } from "../eventManager";
 import { Tool } from "./tool";
-import { Element, Rect } from "../element";
+import { TreeRect } from "../tree/treeRect";
+import { SelectTool } from "./selectTool";
+import { SelectToolState } from "./selectStates/abstractSelectState";
+import { SelectionState } from "./selectStates/selection";
+import { Selection } from "../selections/selection";
+import { cursorChangeSubject } from "../../ui/subjects";
 
 
 export class DrawTool extends Tool {
     private pressDownPosition?: Point;
-    private drawingRect?: Rect;
+    private drawingRect?: TreeRect;
 
     constructor(editor: Editor) {
         super(editor, "draw")
@@ -15,8 +20,6 @@ export class DrawTool extends Tool {
         this.onPointerDown = this.onPointerDown.bind(this)
         this.onPointerUp = this.onPointerUp.bind(this)
         this.onPointerMove = this.onPointerMove.bind(this)
-
-        console.log("create")
     }
 
     enable() {
@@ -24,7 +27,7 @@ export class DrawTool extends Tool {
         this.editor.eventsManager.onPointerUp.subscribe(this.onPointerUp)
         this.editor.eventsManager.onPointerMove.subscribe(this.onPointerMove)
 
-        console.log("activate");
+        cursorChangeSubject.next("crosshair")
 
     }
 
@@ -33,18 +36,39 @@ export class DrawTool extends Tool {
         this.editor.eventsManager.onPointerUp.unsubscribe(this.onPointerUp)
         this.editor.eventsManager.onPointerMove.unsubscribe(this.onPointerMove)
 
-        console.log("disable");
+        cursorChangeSubject.next("default")
     }
 
     onPointerDown({ position }: PointerDownEventData) {
         const localPostion = this.editor.getDrawingPosition(position).clone()
 
         this.pressDownPosition = localPostion.clone()
-        this.drawingRect = new Rect(localPostion.x, localPostion.y, 0, 0)
-        this.editor.tree.addElement(this.drawingRect)
+        this.drawingRect = new TreeRect({
+            x: localPostion.x,
+            y: localPostion.y,
+            width: 0,
+            height: 0,
+            name: this.editor.treeManager.getNextName(),
+            fill: {
+                r: 200,
+                g: 200,
+                b: 200
+            }
+        })
+        this.editor.treeManager.registerContainer(this.drawingRect, true)
+        this.editor.treeManager.emitTreeChangeEvent()
     }
 
     onPointerUp({ }: PointerUpEventData) {
+        if (this.drawingRect) {
+            this.editor.selector.setSelection(new Selection([this.drawingRect]))
+            this.editor.toolManager.setCurrentTool("select")
+
+            const currentTool = this.editor.toolManager.getCurrentTool()
+            if (currentTool instanceof SelectTool) {
+                currentTool.setState(new SelectionState(currentTool))
+            }
+        }
         this.pressDownPosition = undefined;
         this.drawingRect = undefined;
     }

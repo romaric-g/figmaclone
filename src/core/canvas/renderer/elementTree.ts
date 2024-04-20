@@ -1,13 +1,13 @@
 import { Graphics, GraphicsContext } from "pixi.js";
-import { Element } from "../../element";
+import { TreeRect } from "../../tree/treeRect";
 import { TreeLayer } from "../layers/tree";
 
 export class ElementTreeRenderer {
 
     private graphics: Graphics;
-    private element: Element;
+    private element: TreeRect;
 
-    constructor(element: Element) {
+    constructor(element: TreeRect) {
         this.graphics = new Graphics()
         this.element = element;
     }

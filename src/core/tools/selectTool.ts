@@ -36,7 +36,6 @@ export class SelectTool extends Tool {
     }
 
     setState(selectToolState: SelectToolState) {
-        console.log(selectToolState)
         this._selectToolState.onDestroy()
         this._selectToolState = selectToolState;
         this._selectToolState.onInit()

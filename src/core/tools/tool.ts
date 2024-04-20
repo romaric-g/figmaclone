@@ -1,7 +1,5 @@
 import { Point } from "pixi.js";
 import { Editor } from "../editor";
-import { Element } from "../element";
-import { ElementPressDownEventData, ElementPressUpEventData } from "../eventManager";
 import { ToolType } from "./toolManager";
 
 export abstract class Tool {
