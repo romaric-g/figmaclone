@@ -14,7 +14,7 @@ export abstract class SelectToolState {
 
     abstract onDestroy(): void
 
-    abstract onClickDown(element: TreeRect, shift: boolean, pointerPosition: Point): void
+    abstract onClickDown(element: TreeRect, shift: boolean, pointerPosition: Point, double: boolean): void
 
     abstract onClickUp(element: TreeRect, shift: boolean): void
 
@@ -23,6 +23,8 @@ export abstract class SelectToolState {
     abstract onBackgroundPointerDown(clickPosition: Point): void
 
     abstract onBackgroundPointerUp(clickPosition: Point): void
+
+    render() { }
 
 }
 

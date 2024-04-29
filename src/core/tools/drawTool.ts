@@ -49,19 +49,22 @@ export class DrawTool extends Tool {
             width: 0,
             height: 0,
             name: this.editor.treeManager.getNextName(),
-            fill: {
-                r: 200,
-                g: 200,
-                b: 200
+            fillColor: {
+                h: 0,
+                s: 0,
+                v: 80,
+                a: 1
             }
         })
+        this.drawingRect.onSelectionInit()
         this.editor.treeManager.registerContainer(this.drawingRect, true)
-        this.editor.treeManager.emitTreeChangeEvent()
+
+        this.editor.selectionManager.setSelection(new Selection([this.drawingRect]))
     }
 
     onPointerUp({ }: PointerUpEventData) {
         if (this.drawingRect) {
-            this.editor.selector.setSelection(new Selection([this.drawingRect]))
+            this.editor.selectionManager.setSelection(new Selection([this.drawingRect]))
             this.editor.toolManager.setCurrentTool("select")
 
             const currentTool = this.editor.toolManager.getCurrentTool()

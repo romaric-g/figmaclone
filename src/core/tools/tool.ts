@@ -14,4 +14,8 @@ export abstract class Tool {
     abstract enable(): void;
 
     abstract disable(): void;
+
+    render() {
+
+    }
 }

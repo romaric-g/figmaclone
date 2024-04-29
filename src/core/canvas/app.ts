@@ -41,6 +41,8 @@ export class CanvasApp {
             this._treeLayer.getContainer().scale = this.getEditor().zoom.getCurrentScale()
 
             this.getEditor().treeManager.render()
+            this.getEditor().selectionManager.render()
+            this.getEditor().toolManager.render()
         });
     }
 
@@ -67,6 +69,7 @@ export class CanvasApp {
     getCanvas() {
         return this._app.canvas;
     }
+
 
     getEditor() {
         return this._editor;

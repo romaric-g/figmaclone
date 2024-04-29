@@ -3,7 +3,7 @@ import { TreeRect } from "../../tree/treeRect";
 import { Editor } from "../../editor";
 import { SelectionLayer } from "../layers/selection";
 
-export class ElementSelectorRenderer {
+export class RectSelectionRenderer {
 
     private graphics: Graphics;
     private element: TreeRect;
@@ -34,7 +34,7 @@ export class ElementSelectorRenderer {
             }
             commonContext.stroke(strokeStyle)
 
-            if (this.element.getContextEditor()?.selector.getSelection().getComponents().length == 1) {
+            if (this.element.getContextEditor()?.selectionManager.getSelection().getFlatComponents().length == 1) {
                 commonContext.rect(-4, -4, 8, 8).fill("white").stroke(strokeStyle)
                 commonContext.rect(-4, height - 4, 8, 8).fill("white").stroke(strokeStyle)
                 commonContext.rect(width - 4, -4, 8, 8).fill("white").stroke(strokeStyle)

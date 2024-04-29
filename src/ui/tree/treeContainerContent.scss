@@ -1,0 +1,11 @@
+
+.TreeContainerContent {
+
+    &__title {
+        background-color: red;
+    }
+
+    &--selected {
+        background-color: rgb(60, 82, 82);
+    }
+}

@@ -80,4 +80,9 @@ export class ToolManager {
         return this._freezed;
     }
 
+    render() {
+        this.getCurrentTool()?.render()
+    }
+
+
 }

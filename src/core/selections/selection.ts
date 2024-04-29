@@ -4,6 +4,8 @@ import { selectionChangeSubject } from "../../ui/subjects";
 import { SelectionBuilder } from "./selectionBuilder";
 import { Editor } from "../editor";
 import { TreeComponent } from "../tree/treeComponent";
+import { TreeContainer } from "../tree/treeContainer";
+import { HsvaColor, RgbaColor } from "@uiw/react-color";
 
 export class Selection {
     private _components: TreeComponent[]
@@ -13,7 +15,7 @@ export class Selection {
     }
 
     private applyToEachRect(apply: (rectComponent: TreeRect) => void) {
-        for (const component of this._components) {
+        for (const component of this.getFlatComponents()) {
             if (component instanceof TreeRect) {
                 apply(component)
             }
@@ -23,16 +25,19 @@ export class Selection {
     private getRectsValue<T>(apply: (rectComponent: TreeRect) => T) {
         const values: T[] = []
 
-        for (const component of this._components) {
+        for (const component of this.getFlatComponents()) {
             if (component instanceof TreeRect) {
                 values.push(apply(component))
             }
         }
 
-        if (values.length > 1) {
+        const valuesSet = Array.from(new Set(values))
+
+        if (valuesSet.length > 1) {
             return "mixed"
         }
-        return values[0]
+
+        return valuesSet[0]
     }
 
     init() {
@@ -40,11 +45,21 @@ export class Selection {
             if (component instanceof TreeRect) {
                 component.onSelectionInit()
             }
+            if (component instanceof TreeContainer) {
+                component.onSelectionInit()
+            }
         }
     }
 
     destroy() {
-        this.applyToEachRect((c) => c.onSelectionDestroy())
+        for (const component of this._components) {
+            if (component instanceof TreeRect) {
+                component.onSelectionDestroy()
+            }
+            if (component instanceof TreeContainer) {
+                component.onSelectionDestroy()
+            }
+        }
     }
 
     getBuilder(editor: Editor) {
@@ -54,8 +69,8 @@ export class Selection {
     }
 
     isSameSelection(selection: Selection) {
-        const components = this.getComponents()
-        const otherComponents = selection.getComponents()
+        const components = this.getFlatComponents()
+        const otherComponents = selection.getFlatComponents()
 
         if (components.length !== otherComponents.length) {
             return false;
@@ -73,17 +88,28 @@ export class Selection {
         return true;
     }
 
-    getComponents() {
-        return this._components;
+    getFlatComponents() {
+        const components: TreeComponent[] = []
+
+        for (const component of this._components) {
+            if (component instanceof TreeContainer) {
+                components.push(...component.getDepthComponents())
+            } else {
+                components.push(component)
+            }
+        }
+
+
+        return components;
     }
 
-    setFillColor(color: FillStyleInputs) {
-        this.applyToEachRect((c) => c.fill = color)
+    setFillColor(fillColor: HsvaColor) {
+        this.applyToEachRect((c) => c.fillColor = fillColor)
         this.emitChangeEvent()
     }
 
     getFillColor() {
-        return this.getRectsValue((e) => e.fill)
+        return this.getRectsValue((e) => e.fillColor)
     }
 
     setHeight(value: number) {
@@ -158,13 +184,29 @@ export class Selection {
 
     emitChangeEvent() {
         selectionChangeSubject.next({
-            lenght: this.getComponents().length,
+            lenght: this.getFlatComponents().length,
             x: this.getX(),
             y: this.getY(),
             width: this.getWidth(),
             height: this.getHeight(),
             color: this.getFillColor()
         })
+    }
+
+    getComponents() {
+        return this._components;
+    }
+
+    getFirstIndexComponent() {
+        for (const component of this._components) {
+            console.log(component.getIndexsChain().join("."))
+        }
+
+        return this._components[0]
+    }
+
+    isEmpty() {
+        return this._components.length === 0
     }
 
 }

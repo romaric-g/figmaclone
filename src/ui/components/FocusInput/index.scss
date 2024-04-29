@@ -1,0 +1,14 @@
+
+
+.FocusInput {
+    width: 100%;
+    height: 22px;
+    color: white;
+    background-color: transparent;
+    border: none;
+
+    &:focus {
+        border: 0px solid transparent;
+        outline: none;
+    }
+}

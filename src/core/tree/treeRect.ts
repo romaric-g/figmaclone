@@ -1,21 +1,22 @@
 import { Container, FillStyleInputs, Graphics, GraphicsContext, Point, Sprite } from "pixi.js";
 import { Editor } from "../editor";
-import { Selector } from "../selector";
-import { Selection } from "../selections/selection";
-import { ElementTreeRenderer } from "../canvas/renderer/elementTree";
-import { ElementSelectorRenderer } from "../canvas/renderer/elementSelector";
+import { RectRenderer } from "../canvas/renderer/rect";
+import { RectSelectionRenderer } from "../canvas/renderer/rectSelectionBox";
 import { TreeComponent } from "./treeComponent";
+import { TreeRectData } from "../../ui/subjects";
+import { HsvaColor, RgbColor } from "@uiw/react-color";
 
 interface ElementProps {
     x: number,
     y: number,
     width?: number,
     height?: number,
-    fill?: FillStyleInputs
+    fillColor?: HsvaColor
     name?: string
 }
 
-export class TreeRect extends TreeComponent {
+export class TreeRect extends TreeComponent<TreeRectData> {
+
     // private graphics: Graphics;
 
     private _contextEditor?: Editor;
@@ -23,8 +24,8 @@ export class TreeRect extends TreeComponent {
     private _selected: boolean = false;
     private _movePositionOrigin?: Point;
 
-    private _elementTreeRenderer: ElementTreeRenderer;
-    private _elementSelectionRenderer: ElementSelectorRenderer;
+    private _elementTreeRenderer: RectRenderer;
+    private _elementSelectionRenderer: RectSelectionRenderer;
 
     private _hover: boolean = false;
 
@@ -33,33 +34,32 @@ export class TreeRect extends TreeComponent {
     private _width: number;
     private _height: number;
 
-    public name: string;
+    private _fillColor: HsvaColor;
 
-    fill: FillStyleInputs;
+    public get fillColor() {
+        return this._fillColor
+    }
 
-    constructor({ x, y, width = 100, height = 100, fill = "red", name = "" }: ElementProps) {
-        super()
+    public set fillColor(value: HsvaColor) {
+        this._fillColor = {
+            h: value.h,
+            s: value.s,
+            v: value.v,
+            a: Math.round((value.a + Number.EPSILON) * 100) / 100
+        }
+    }
+
+    constructor({ x, y, width = 100, height = 100, fillColor = { h: 0, s: 0, v: 0, a: 1 }, name = "" }: ElementProps) {
+        super(name)
 
         this._x = x;
         this._y = y;
         this._width = width;
         this._height = height;
-        this.fill = fill;
-        this.name = name;
+        this._fillColor = fillColor;
 
-        this._elementSelectionRenderer = new ElementSelectorRenderer(this)
-        this._elementTreeRenderer = new ElementTreeRenderer(this)
-
-        const graphics = this._elementTreeRenderer.getContainer()
-
-        graphics.on('pointerdown', (event) => this.pointerDownHandler(event.global));
-        graphics.on('pointerup', (event) => this.pointerUpHandler())
-        graphics.on('pointerupoutside', (event) => this.pointerUpHandler())
-
-        graphics.on('pointerenter', (event) => this.requestHoverOn());
-        graphics.on('pointerleave', (event) => this.requestHoverOff());
-
-        graphics.eventMode = "static"
+        this._elementSelectionRenderer = new RectSelectionRenderer(this)
+        this._elementTreeRenderer = new RectRenderer(this)
     }
 
     set x(value: number) {
@@ -94,40 +94,8 @@ export class TreeRect extends TreeComponent {
         return this._height
     }
 
-    private pointerDownHandler(pointerPosition: Point) {
-        if (this._contextEditor) {
-            this._contextEditor.eventsManager.onElementPressDown.emit({
-                element: this,
-                pointerPosition: pointerPosition
-            })
-        }
-    }
-
-    private pointerUpHandler() {
-
-        // to editor
-        if (this._contextEditor) {
-            this._contextEditor.eventsManager.onElementPressUp.emit({
-                element: this
-            })
-        }
-
-
-
-
-    }
-
-    private requestHoverOn() {
-        if (!this._hover) {
-            this._hover = true;
-        }
-
-    }
-
-    private requestHoverOff() {
-        if (this._hover) {
-            this._hover = false;
-        }
+    setHover(value: boolean) {
+        this._hover = value;
     }
 
     render(zIndex: number) {
@@ -147,6 +115,7 @@ export class TreeRect extends TreeComponent {
 
     onSelectionDestroy() {
         this._selected = false;
+        this._hover = false;
     }
 
     isSelected() {
@@ -158,11 +127,34 @@ export class TreeRect extends TreeComponent {
     }
 
 
-    init(editor: Editor) {
+    init() {
+        if (this._contextEditor) {
+            return;
+        }
+
+        console.log("INIT RECT")
+
+        const editor = Editor.getEditor()
+
         this._contextEditor = editor;
 
         this._elementSelectionRenderer.init(editor.canvasApp.getSelectionLayer())
         this._elementTreeRenderer.init(editor.canvasApp.getTreeLayer())
+
+        const graphics = this._elementTreeRenderer.getContainer()
+        const eventsManager = editor.eventsManager;
+
+        graphics.on('pointerdown', (event) => eventsManager.onElementPressDown.emit({
+            element: this,
+            pointerPosition: event.global
+        }));
+        graphics.on('pointerup', (event) => eventsManager.onElementPressUp.emit({ element: this }))
+        graphics.on('pointerupoutside', (event) => eventsManager.onElementPressUp.emit({ element: this }))
+
+        graphics.on('pointerenter', (event) => eventsManager.onElementHoverOn.emit({ component: this }));
+        graphics.on('pointerleave', (event) => eventsManager.onElementHoverOff.emit({ component: this }));
+
+        graphics.eventMode = "static"
     }
 
     destroy() {
@@ -195,6 +187,29 @@ export class TreeRect extends TreeComponent {
 
     getContextEditor() {
         return this._contextEditor;
+    }
+
+    toData(index: number): TreeRectData {
+        return {
+            type: "rect",
+            index: index,
+            name: this.getName(),
+            selected: this.isSelected()
+        }
+    }
+
+    getCoveredRect(): { minX: number; minY: number; maxX: number; maxY: number; } {
+        const editor = Editor.getEditor()
+
+        const globalPoint = editor.getCanvasPosition(new Point(this.x, this.y))
+        const [globalWidth, globalHeight] = editor.getCanvasSize(this.width, this.height)
+
+        return {
+            minX: globalPoint.x,
+            minY: globalPoint.y,
+            maxX: globalPoint.x + globalWidth,
+            maxY: globalPoint.y + globalHeight
+        }
     }
 }
 

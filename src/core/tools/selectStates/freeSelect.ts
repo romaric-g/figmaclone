@@ -4,6 +4,7 @@ import { SelectTool } from "../selectTool";
 import { MovableSelectionState } from "./movableSelection";
 import { SelectToolState } from "./abstractSelectState";
 import { cursorChangeSubject } from "../../../ui/subjects";
+import { DragSelectionState } from "./dragSelection";
 
 export class FreeSelectState extends SelectToolState {
     constructor(selectTool: SelectTool) {
@@ -12,16 +13,16 @@ export class FreeSelectState extends SelectToolState {
 
     onClickDown(element: TreeRect, shift: boolean, pointerPosition: Point) {
         const editor = this.selectTool.editor
-        const selector = editor.selector;
+        const selector = editor.selectionManager;
 
         const localPosition = editor.getDrawingPosition(pointerPosition).clone()
-        const topComponent = selector.getInnerTopComponent(element)
+        const topComponent = selector.getOriginComponentsChain(element)[0]
 
         const selectionBuilder = selector.getSelection().getBuilder(editor)
 
-        selectionBuilder.set(element).apply(selector)
+        selectionBuilder.set(topComponent).apply(selector)
 
-        const newState = new MovableSelectionState(this.selectTool, localPosition, element, true)
+        const newState = new MovableSelectionState(this.selectTool, localPosition, topComponent, true)
         this.selectTool.setState(newState)
     }
 
@@ -31,7 +32,9 @@ export class FreeSelectState extends SelectToolState {
         cursorChangeSubject.next("default")
     }
     onDestroy() { }
-    onBackgroundPointerDown(clickPosition: Point): void { }
+    onBackgroundPointerDown(clickPosition: Point): void {
+        this.selectTool.setState(new DragSelectionState(this.selectTool, clickPosition))
+    }
     onBackgroundPointerUp(clickPosition: Point): void { }
 
 }

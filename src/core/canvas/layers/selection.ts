@@ -9,7 +9,8 @@ export class SelectionLayer {
     constructor(canvasApp: CanvasApp) {
         this._canvasApp = canvasApp;
         this._backgroundContainer = new Graphics()
-        this._backgroundContainer.eventMode = "static"
+        this._backgroundContainer.eventMode = "none"
+        this._backgroundContainer.interactive = false
     }
 
     init() {

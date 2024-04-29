@@ -1,0 +1,135 @@
+
+
+.ColorPicker {
+
+    &__field {
+        display: flex;
+        padding: 5px;
+        gap: 5px;
+        border: 1px solid transparent;
+        border-radius: 3px;
+
+        &:hover {
+            border: 1px solid #6f6f6f;
+        }
+
+        &__hex {
+            display: flex;
+            flex-direction: row;
+            gap: 5px;
+            align-items: stretch;
+            justify-content: stretch;
+
+            &__preview {
+                display: flex;
+                border-radius: 1px;
+                height: 20px;
+                background-color: white;
+
+                &__color {
+                    width: 10px;
+                    height: 20px;
+                }
+
+                &__alpha {
+                    width: 10px;
+                    height: 20px;
+                }
+                
+                
+            }
+
+            &__input {
+                width: 70px;
+                border: none;
+                background-color: transparent;
+                color: white;
+
+                &:focus {
+                    border: 0px solid transparent;
+                    outline: none;
+                }
+            }
+        }
+
+        &__alpha {
+            display: flex;
+            flex-direction: row;
+            gap: 5px;
+            align-items: stretch;
+            justify-content: stretch;
+
+            &__input {
+                width: 50px;
+                border: none;
+                background-color: transparent;
+                color: white;
+
+                &:focus {
+                    border: 0px solid transparent;
+                    outline: none;
+                }
+            }
+        }
+       
+    }
+
+    &__modal {
+        position: absolute;
+        transform: translateY(-60px);
+        width: 220px;
+        right: 250px;
+        background-color: #2b2b2b;
+        box-shadow: 3px 3px 3px rgba(0, 0, 0, 0.2);
+
+        &__header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 5px;
+
+            &__title {
+                padding: 5px;
+                font-size: 14px;
+                font-weight: 500;
+                color: white;
+            }
+
+            &__close {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                border-radius: 3px;
+                height: 30px;
+                width: 30px;
+
+                svg {
+                    height: 15px;
+                    width: 15px;
+                    fill: white
+                }
+
+                &:hover {
+                    background-color: rgba(255, 255, 255, 0.05);
+                }
+            }
+        }
+
+        &__content {
+            &__bars {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                padding: 20px;
+
+                .w-color-alpha-fill {
+                    height: 14px!important;
+                    width: 14px!important;
+                    transform: translate(-7px, -1px)!important;
+                }
+            }
+        }
+
+        // display: none;
+    }
+}

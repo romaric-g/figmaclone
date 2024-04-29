@@ -3,15 +3,15 @@ import TreeView from "./tree/tree";
 import ToolbarView from "./tool/toolbar";
 import { ToolType } from "../core/tools/toolManager";
 import Canvas from "./canvas/canvas";
-import "./app.scss";
-import "./reset.scss"
 import ElementEditor from "./selection/selectionEditor";
 import { Editor } from "../core/editor";
-import { currentToolSubject, TreeElementData, treeElementSubject } from "./subjects";
+import { currentToolSubject, TreeData, treeElementSubject } from "./subjects";
+import "./app.scss";
+import "./reset.scss"
 
 const App: React.FC = () => {
 
-    const [treeElements, setTreeElements] = React.useState<TreeElementData[]>([]);
+    const [treeData, setTreeData] = React.useState<TreeData>({ tree: [] });
     const [currentTool, setCurrentTool] = React.useState<ToolType>();
 
     React.useEffect(() => {
@@ -19,7 +19,7 @@ const App: React.FC = () => {
         setCurrentTool(Editor.getEditor().toolManager.getCurrentToolType())
 
         const treeSub = treeElementSubject.subscribe(newValue => {
-            setTreeElements(newValue);
+            setTreeData(newValue);
         });
 
         const toolSub = currentToolSubject.subscribe(newValue => {
@@ -36,7 +36,7 @@ const App: React.FC = () => {
         <div className="App">
             <div className="App__leftside">
                 <ToolbarView selectedTool={currentTool} />
-                <TreeView elements={treeElements} />
+                <TreeView treeData={treeData} />
             </div>
             <div className="App__middle">
                 <Canvas />

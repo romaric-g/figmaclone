@@ -1,12 +1,44 @@
 import { TreeRect } from "./treeRect"
 import { TreeComponent } from "./treeComponent"
+import { GlobalSelectionBoxRenderer } from "../canvas/renderer/globalSelectionBox";
+import { ContainerSelectionBox } from "../canvas/renderer/containerSelectionBox";
+import { Editor } from "../editor";
+import { TreeContainerData } from "../../ui/subjects";
+import { Point } from "pixi.js";
 
-export class TreeContainer extends TreeComponent {
+export class TreeContainer extends TreeComponent<TreeContainerData> {
 
     private components: TreeComponent[] = []
+    private selectionRenderer: ContainerSelectionBox;
+    private _selected: boolean = false;
+    private _hover: boolean = false;
+    private _initialized: boolean = false;
+
+    constructor(name: string, components: TreeComponent[] = []) {
+        super(name)
+        this.selectionRenderer = new ContainerSelectionBox(this)
+        components.forEach((c) => this.add(c))
+    }
+
+    init() {
+        console.log("INIT GROUPE")
+        if (!this._initialized) {
+            const selectionLayer = Editor.getEditor().canvasApp.getSelectionLayer()
+            this.selectionRenderer.init(selectionLayer)
+            this._initialized = true
+        }
+
+    }
+
+    destroy() {
+        if (!this._initialized) {
+            const selectionLayer = Editor.getEditor().canvasApp.getSelectionLayer()
+            this.selectionRenderer.destroy(selectionLayer)
+            this._initialized = false
+        }
+    }
 
     add(element: TreeComponent, index?: number): void {
-        console.log("ADD", element, index)
         if (index !== undefined && index >= 0 && index <= this.components.length) {
             this.components.splice(index, 0, element);
         } else {
@@ -16,7 +48,6 @@ export class TreeContainer extends TreeComponent {
     }
 
     remove(element: TreeComponent): void {
-        console.log("REMOVE", element)
         const index = this.components.indexOf(element);
         if (index !== -1) {
             this.components.splice(index, 1);
@@ -24,16 +55,21 @@ export class TreeContainer extends TreeComponent {
 
         }
     }
+
+    isEmpty() {
+        return this.components.length === 0
+    }
+
     getComponents(): TreeComponent[] {
         return this.components;
     }
 
-    getAllComponents() {
+    getDepthComponents() {
         const depthComponents: TreeComponent[] = []
 
         for (const component of this.components) {
             if (component instanceof TreeContainer) {
-                depthComponents.push(...component.getAllComponents())
+                depthComponents.push(component, ...component.getDepthComponents())
             } else {
                 depthComponents.push(component)
             }
@@ -68,7 +104,8 @@ export class TreeContainer extends TreeComponent {
     }
 
     getComponent(depthIndex: number[]): TreeComponent | undefined {
-        const currentIndex = depthIndex.shift()
+        let depthIndexShifted = [...depthIndex]
+        const currentIndex = depthIndexShifted.shift()
 
         if (currentIndex === undefined) {
             return this;
@@ -77,10 +114,10 @@ export class TreeContainer extends TreeComponent {
         const element = this.components[currentIndex]
 
         if (element instanceof TreeContainer) {
-            return element.getComponent(depthIndex)
+            return element.getComponent(depthIndexShifted)
         }
 
-        if (depthIndex.length > 0) {
+        if (depthIndexShifted.length > 0) {
             return undefined;
         }
 
@@ -92,7 +129,82 @@ export class TreeContainer extends TreeComponent {
             nextIndex = component.render(nextIndex)
         }
 
+        this.selectionRenderer.render()
+
         return nextIndex
+    }
+
+    onSelectionInit() {
+        this._selected = true;
+    }
+
+    onSelectionDestroy() {
+        this._selected = false;
+        this._hover = false;
+    }
+
+    isSelected() {
+        return this._selected;
+    }
+
+    setHover(value: boolean) {
+        this._hover = value;
+    }
+
+    isHover() {
+        return this._hover;
+    }
+
+    toData(index: number): TreeContainerData {
+        return ({
+            type: "container",
+            index: index,
+            name: this.getName(),
+            selected: this.isSelected(),
+            children: this.getComponents().map((c, index) => c.toData(index))
+        })
+    }
+
+    getIndexOfChild(treeComponent: TreeComponent) {
+        return this.components.findIndex((c) => c == treeComponent)
+    }
+
+    getCoveredRect(): { minX: number; minY: number; maxX: number; maxY: number; } | undefined {
+        const editor = Editor.getEditor()
+
+        let minX = undefined
+        let minY = undefined
+        let maxX = undefined
+        let maxY = undefined
+
+        for (const rectComponent of this.getAllRects()) {
+            if (minX == undefined || rectComponent.x < minX) {
+                minX = rectComponent.x
+            }
+            if (minY === undefined || rectComponent.y < minY) {
+                minY = rectComponent.y
+            }
+            if (maxX === undefined || rectComponent.x + rectComponent.width > maxX) {
+                maxX = rectComponent.x + rectComponent.width
+            }
+            if (maxY === undefined || rectComponent.y + rectComponent.height > maxY) {
+                maxY = rectComponent.y + rectComponent.height
+            }
+        }
+
+        if (minX == undefined || minY == undefined || maxX === undefined || maxY === undefined) {
+            return undefined
+        }
+
+        const minOrigin = editor.getCanvasPosition(new Point(minX, minY))
+        const maxOrigin = editor.getCanvasPosition(new Point(maxX, maxY))
+
+        return {
+            minX: minOrigin.x,
+            minY: minOrigin.y,
+            maxX: maxOrigin.x,
+            maxY: maxOrigin.y
+        }
     }
 
 }

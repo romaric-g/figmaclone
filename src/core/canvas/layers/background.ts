@@ -15,7 +15,7 @@ export class BackgroundLayer {
     init() {
         this._backgroundContainer.context = new GraphicsContext()
             .rect(0, 0, this._canvasApp.getCanvas().width, this._canvasApp.getCanvas().height)
-            .fill("white")
+            .fill("#EEE")
 
         this.setupEvents()
     }

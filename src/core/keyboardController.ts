@@ -1,5 +1,5 @@
 
-type ValidKey = "shift" | "control" | 'backspace' | 'left' | 'right' | 'up' | 'down' | 'enter'
+type ValidKey = "shift" | "control" | 'backspace' | 'left' | 'right' | 'up' | 'down' | 'enter' | 'g'
 
 const keyMap: { [key: string]: ValidKey } = {
     'ShiftLeft': 'shift',
@@ -9,7 +9,8 @@ const keyMap: { [key: string]: ValidKey } = {
     'ArrowRight': 'right',
     'ArrowUp': 'up',
     'ArrowDown': 'down',
-    'Enter': 'enter'
+    'Enter': 'enter',
+    'KeyG': 'g'
 };
 type KeysState = {
     [key in ValidKey]: {
@@ -36,6 +37,7 @@ export class KeyboardController {
             'up': { pressed: false, doubleTap: false, timestamp: 0 },
             'down': { pressed: false, doubleTap: false, timestamp: 0 },
             'enter': { pressed: false, doubleTap: false, timestamp: 0 },
+            'g': { pressed: false, doubleTap: false, timestamp: 0 },
         };
 
         this.listeners = {
@@ -46,7 +48,8 @@ export class KeyboardController {
             "right": [],
             "up": [],
             "down": [],
-            'enter': []
+            'enter': [],
+            'g': []
         }
 
         // Register event listeners for keydown and keyup events.

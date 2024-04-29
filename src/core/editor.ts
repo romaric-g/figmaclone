@@ -1,6 +1,6 @@
 import { Point, ApplicationOptions } from 'pixi.js';
 import { KeyboardController } from './keyboardController';
-import { Selector } from './selector';
+import { SelectionManager } from './selectionManager';
 import { EventsManger } from './eventManager';
 import { TreeManager } from './tree/treeManager';
 import { ToolManager } from './tools/toolManager';
@@ -15,7 +15,7 @@ export class Editor {
     }
 
     readonly keyboardController: KeyboardController;
-    readonly selector: Selector;
+    readonly selectionManager: SelectionManager;
     readonly eventsManager: EventsManger;
     readonly treeManager: TreeManager;
     readonly toolManager: ToolManager;
@@ -27,7 +27,7 @@ export class Editor {
     constructor() {
         this.canvasApp = new CanvasApp(this)
 
-        this.selector = new Selector()
+        this.selectionManager = new SelectionManager()
         this.keyboardController = new KeyboardController()
         this.eventsManager = new EventsManger()
         this.treeManager = new TreeManager(this)
@@ -40,37 +40,46 @@ export class Editor {
 
         this.treeManager.init()
         this.toolManager.init()
+        this.selectionManager.init()
 
         this.keyboardController.addListener("backspace", (type) => {
-            for (const element of this.selector.getSelection().getComponents()) {
+            for (const element of this.selectionManager.getSelection().getFlatComponents()) {
                 // this.tree.removeElement(element)
             }
         })
 
         this.keyboardController.addListener("left", (type) => {
             if (type == "down") {
-                this.selector.getSelection().addX(-5)
+                this.selectionManager.getSelection().addX(-5)
             }
 
         })
 
         this.keyboardController.addListener("right", (type) => {
             if (type == "down") {
-                this.selector.getSelection().addX(5)
+                this.selectionManager.getSelection().addX(5)
             }
+        })
 
+        this.keyboardController.addListener("g", (type) => {
+            if (type == "down") {
+                if (this.keyboardController.keys.control.pressed) {
+                    const selection = this.selectionManager.getSelection()
+                    this.selectionManager.getRootContainer().groupeSelection(selection)
+                }
+            }
         })
 
         this.keyboardController.addListener("up", (type) => {
             if (type == "down") {
-                this.selector.getSelection().addY(-5)
+                this.selectionManager.getSelection().addY(-5)
             }
 
         })
 
         this.keyboardController.addListener("down", (type) => {
             if (type == "down") {
-                this.selector.getSelection().addY(5)
+                this.selectionManager.getSelection().addY(5)
             }
 
         })

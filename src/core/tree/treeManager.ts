@@ -1,9 +1,10 @@
 import { Container } from "pixi.js";
 import { TreeRect } from "./treeRect";
 import { Editor } from "../editor";
-import { TreeElementData, treeElementSubject } from "../../ui/subjects";
+import { TreeData, treeElementSubject } from "../../ui/subjects";
 import { TreeRoot } from "./treeRoot";
 import { TreeComponent } from "./treeComponent";
+import { TreeContainer } from "./treeContainer";
 
 export class TreeManager {
 
@@ -13,7 +14,7 @@ export class TreeManager {
 
     constructor(editor: Editor) {
         this._editor = editor;
-        this._treeRoot = new TreeRoot()
+        this._treeRoot = new TreeRoot("root")
     }
 
     init() {
@@ -25,7 +26,12 @@ export class TreeManager {
     }
 
     registerContainer(component: TreeComponent, autoMount = false) {
-        component.init(this._editor)
+        component.init()
+        if (component instanceof TreeContainer) {
+            for (const childComponent of component.getComponents()) {
+                this.registerContainer(childComponent, false)
+            }
+        }
         if (autoMount) {
             this._treeRoot.add(component)
         }
@@ -48,23 +54,14 @@ export class TreeManager {
     }
 
     emitTreeChangeEvent() {
-        const treeElements: TreeElementData[] = []
 
-        console.log("tree root", this._treeRoot)
-
-        const elements = this._treeRoot.getAllRects()
-        console.log("elements", elements)
-
-        for (let index = 0; index < elements.length; index++) {
-
-            treeElements.push({
-                index: index,
-                name: elements[index].name,
-                selected: elements[index].isSelected()
-            })
+        const treeData: TreeData = {
+            tree: this._treeRoot.toData(0).children
         }
 
-        treeElementSubject.next(treeElements)
+        const elements = this._treeRoot.getComponents()
+
+        treeElementSubject.next(treeData)
     }
 
     getNextName() {

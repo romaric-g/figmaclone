@@ -1,34 +1,46 @@
 import React from "react";
+import { TreeData } from "../subjects";
 import "./tree.scss"
-import TreeElementView from "./treeElement";
 import classNames from "classnames";
-import { TreeElementData } from "../subjects";
+import TreeContainerContentView from "./treeContainerContent";
 import { Editor } from "../../core/editor";
 
 interface TreeProps {
-    elements: TreeElementData[]
+    treeData: TreeData
 }
 
-const TreeView: React.FC<TreeProps> = ({ elements }) => {
+export interface DragOrigin {
+    indexs: number[]
+}
 
-    const [currentMoveIndex, setCurrentMoveIndex] = React.useState<number>()
-    const [targetIndexPosition, setTargetPositionIndex] = React.useState<number>()
-    const [indicatorTop, setIndicatorTop] = React.useState<number>()
+export interface DragTarget {
+    indexs: number[],
+    target: "before" | "after" | "in"
+}
+
+const TreeView: React.FC<TreeProps> = ({ treeData }) => {
+
+    const [dragOrigin, setDrawOrigin] = React.useState<DragOrigin>()
+    const [dragTarget, setDragTarget] = React.useState<DragTarget>()
 
     React.useEffect(() => {
 
         const onMouseUp = () => {
             const tree = Editor.getEditor().treeManager.getTree()
 
-            if (targetIndexPosition !== undefined && currentMoveIndex !== undefined) {
-                console.log(currentMoveIndex, targetIndexPosition)
 
-                tree.move([currentMoveIndex], [targetIndexPosition])
+
+            if (dragOrigin !== undefined && dragTarget !== undefined) {
+                const targetIndexs = dragTarget.indexs
+
+                if (dragTarget.target === "after") {
+                    targetIndexs[targetIndexs.length - 1] = targetIndexs[targetIndexs.length - 1] + 1
+                }
+                tree.moveFromIndexs(dragOrigin.indexs, targetIndexs)
             }
 
-            setCurrentMoveIndex(undefined)
-            setTargetPositionIndex(undefined)
-            setIndicatorTop(undefined)
+            setDrawOrigin(undefined)
+            setDragTarget(undefined)
         }
 
         document.addEventListener("mouseup", onMouseUp)
@@ -36,45 +48,54 @@ const TreeView: React.FC<TreeProps> = ({ elements }) => {
         return () => {
             document.removeEventListener("mouseup", onMouseUp)
         }
-    }, [currentMoveIndex, targetIndexPosition])
+    }, [dragOrigin, dragTarget])
 
-    return <div className="Tree">
-        <p className="Tree__title">Tree element</p>
-        <br />
-        <div className={classNames("Tree__elements", { "Tree__elements--no-hover": currentMoveIndex !== undefined })}>
-            {
-                currentMoveIndex !== undefined && targetIndexPosition !== undefined && (
-                    <span className="Tree__elements__moovbar" style={{
-                        top: indicatorTop
-                    }}></span>
-                )
+    const isDragging = React.useMemo(() => {
+        return dragOrigin !== undefined
+    }, [dragOrigin])
+
+    const setDragTargetHandler = React.useCallback((dragTarget: DragTarget) => {
+
+        if (dragOrigin !== undefined) {
+            const dragTargetId = dragTarget.indexs.join(".")
+            const dragOriginId = dragOrigin.indexs.join(".")
+
+            if (!dragTargetId.startsWith(dragOriginId)) {
+                setDragTarget(dragTarget)
+            } else if (dragOriginId === dragTargetId && dragTarget.target === "before") {
+                setDragTarget(dragTarget)
+            } else {
+                setDragTarget({
+                    indexs: dragOrigin.indexs,
+                    target: "after"
+                })
             }
-            <ul>
-                {
-                    elements.map((element) => (
-                        <TreeElementView
-                            key={element.index}
-                            index={element.index}
-                            name={element.name}
-                            isSelected={element.selected}
-                            activeMove={() => {
-                                setCurrentMoveIndex(element.index)
-                            }}
-                            updateMoveBar={(direction, offsetTop, offsetHeight) => {
-                                if (direction === "top") {
-                                    setIndicatorTop(offsetTop - 2)
-                                } else {
-                                    setIndicatorTop(offsetTop + offsetHeight - 2)
-                                }
+        }
 
-                                setTargetPositionIndex(element.index)
-                            }}
-                        />
-                    ))
-                }
-            </ul>
+
+    }, [dragOrigin, setDragTarget])
+
+    return (
+        <div className="Tree">
+            <p className="Tree__title">Tree element</p>
+            <br />
+            <div className={classNames("Tree__elements")}>
+                <TreeContainerContentView
+                    indexs={[]}
+                    selected={false}
+                    isDragging={isDragging}
+                    drawActivate={isDragging}
+                    dragTarget={dragTarget}
+                    setDragOrigin={setDrawOrigin}
+                    setDragTarget={setDragTargetHandler}
+                    tree={treeData.tree}
+                />
+            </div>
         </div>
-    </div>
+    )
+
+
+
 }
 
 export default TreeView;

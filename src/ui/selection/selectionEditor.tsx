@@ -3,9 +3,10 @@ import { selectionChangeSubject } from "../subjects";
 import { ColorSource, FillStyleInputs } from "pixi.js";
 import { every } from "rxjs";
 import { Editor } from "../../core/editor";
-import { AlphaPicker, BlockPicker, ChromePicker, CirclePicker, ColorResult, CompactPicker, GithubPicker, HuePicker, PhotoshopPicker, RGBColor, SketchPicker, SliderPicker, SwatchesPicker, TwitterPicker } from 'react-color'
 import "./selectionEditor.scss"
 import SelectionInput from "./selectionInput";
+import { HsvaColor, RgbaColor, RgbColor } from "@uiw/react-color";
+import ColorPicker from "./colorPicker";
 
 interface Props {
 
@@ -13,7 +14,7 @@ interface Props {
 
 
 const changeNumericalValue = (type: "x" | "y" | "height" | "width", value: number) => {
-    const selection = Editor.getEditor().selector.getSelection()
+    const selection = Editor.getEditor().selectionManager.getSelection()
 
     switch (type) {
         case "x":
@@ -34,18 +35,18 @@ const changeNumericalValue = (type: "x" | "y" | "height" | "width", value: numbe
 
 }
 
-function isRGBColor(obj: any): obj is RGBColor {
-    return obj && typeof obj.r === 'number' && typeof obj.g === 'number' && typeof obj.b === 'number';
-}
+// function isRGBColor(obj: any): obj is RGBColor {
+//     return obj && typeof obj.r === 'number' && typeof obj.g === 'number' && typeof obj.b === 'number';
+// }
 
 function getSelection() {
-    return Editor.getEditor().selector.getSelection()
+    return Editor.getEditor().selectionManager.getSelection()
 }
 
 const ElementEditor: React.FC<Props> = () => {
     const selection = getSelection()
 
-    const [color, setColor] = React.useState<RGBColor | "mixed">()
+    const [color, setColor] = React.useState<HsvaColor | "mixed">()
     const [height, setHeight] = React.useState<number | "mixed">(selection.getHeight())
     const [widht, setWidth] = React.useState<number | "mixed">(selection.getWidth())
     const [x, setX] = React.useState<number | "mixed">(selection.getX())
@@ -61,15 +62,7 @@ const ElementEditor: React.FC<Props> = () => {
             if (event.color === "mixed") {
                 setColor("mixed")
             } else {
-                if (isRGBColor(event.color)) {
-                    setColor(event.color)
-                } else {
-                    setColor({
-                        r: 0,
-                        b: 0,
-                        g: 0
-                    })
-                }
+                setColor(event.color)
             }
 
 
@@ -80,16 +73,16 @@ const ElementEditor: React.FC<Props> = () => {
         };
     }, []);
 
-    const handleColorChange = React.useCallback((newColor: ColorResult) => {
+    const handleColorChange = React.useCallback((newColor: HsvaColor) => {
         const selection = getSelection()
 
-        setColor(newColor.rgb)
+        setColor(newColor)
 
-        selection.setFillColor(newColor.rgb)
+        selection.setFillColor(newColor)
 
     }, [])
 
-    if (selection.getComponents().length == 0) {
+    if (selection.getFlatComponents().length == 0) {
         return <div className="SelectionEditor">
 
         </div>
@@ -115,10 +108,19 @@ const ElementEditor: React.FC<Props> = () => {
                     color === "mixed" ? (
                         <p>Mixed</p>
                     ) : (
-                        <SketchPicker
-                            color={color}
-                            onChange={handleColorChange}
-                        />
+
+                        color ? (
+                            <ColorPicker
+                                color={color}
+                                onChange={handleColorChange}
+                            />
+                        ) : undefined
+
+                        // <SketchPicker
+                        //     color={color}
+                        //     onChange={handleColorChange}
+                        // />
+
                     )
                 }
             </div>

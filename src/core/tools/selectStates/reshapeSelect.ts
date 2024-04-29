@@ -119,7 +119,7 @@ export class ReshapeSelectState extends SelectToolState {
         this.element.width = newWidth;
         this.element.height = newHeight;
 
-        this.selectTool.editor.selector.getSelection().emitChangeEvent()
+        this.selectTool.editor.selectionManager.getSelection().emitChangeEvent()
 
 
     }

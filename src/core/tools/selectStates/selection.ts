@@ -6,7 +6,8 @@ import { SelectToolState } from "./abstractSelectState";
 import { cursorChangeSubject } from "../../../ui/subjects";
 import { getCursorType, ReshapeReference, ReshapeSelectState } from "./reshapeSelect";
 import { FreeSelectState } from "./freeSelect";
-
+import { TreeContainer } from "../../tree/treeContainer";
+import { DragSelectionState } from "./dragSelection";
 
 export class SelectionState extends SelectToolState {
 
@@ -76,33 +77,47 @@ export class SelectionState extends SelectToolState {
         }
     }
 
-    onClickDown(element: TreeRect, shift: boolean, pointerPosition: Point) {
-        const localPostion = this.selectTool.editor.getDrawingPosition(pointerPosition).clone()
+    onClickDown(element: TreeRect, shift: boolean, pointerPosition: Point, isDouble: boolean) {
+
+        console.log("IS DOUBLE", isDouble)
 
         const editor = this.selectTool.editor
-        const selector = editor.selector;
-        const selectionBuilder = selector.getSelection().getBuilder(editor)
+        const selector = editor.selectionManager;
 
-        this.updateReshapeReference(localPostion)
+        const localPostion = editor.getDrawingPosition(pointerPosition).clone()
 
-        if (this._reshapeReference === "none") {
-            if (element.isSelected()) {
-                const newState = new MovableSelectionState(this.selectTool, localPostion, element, false)
-                this.selectTool.setState(newState)
-            } else {
-                const newState = new MovableSelectionState(this.selectTool, localPostion, element, true)
+        const topComponentChain = selector.getOriginComponentsChain(element)
 
-                if (shift) {
-                    selectionBuilder.add(element).apply(selector)
+        const chainIdx = isDouble && topComponentChain.length > 1 ? 1 : 0
+        const topComponent = topComponentChain[chainIdx]
+
+        if (topComponent instanceof TreeContainer || topComponent instanceof TreeRect) {
+            const selectionBuilder = selector.getSelection().getBuilder(editor)
+
+            this.updateReshapeReference(localPostion)
+
+            if (this._reshapeReference === "none") {
+                if (topComponent.isSelected()) {
+                    console.log("SELECTED")
+                    const newState = new MovableSelectionState(this.selectTool, localPostion, topComponent, false)
+                    this.selectTool.setState(newState)
                 } else {
-                    selectionBuilder.set(element).apply(selector)
-                }
+                    const newState = new MovableSelectionState(this.selectTool, localPostion, topComponent, true)
 
+                    if (shift) {
+                        console.log("SELECT WITH ADD")
+                        selectionBuilder.add(topComponent).apply(selector)
+                    } else {
+                        console.log("SELECT WITH SET")
+                        selectionBuilder.set(topComponent).apply(selector)
+                    }
+
+                    this.selectTool.setState(newState)
+                }
+            } else if (this._singleElement) {
+                const newState = new ReshapeSelectState(this.selectTool, this._singleElement, this._reshapeReference, localPostion);
                 this.selectTool.setState(newState)
             }
-        } else if (this._singleElement) {
-            const newState = new ReshapeSelectState(this.selectTool, this._singleElement, this._reshapeReference, localPostion);
-            this.selectTool.setState(newState)
         }
     }
 
@@ -116,9 +131,8 @@ export class SelectionState extends SelectToolState {
             this.selectTool.setState(newState)
 
         } else if (!this.selectTool.editor.keyboardController.keys.shift.pressed) {
-            this.selectTool.editor.selector.unselectAll()
-            this.selectTool.setState(new FreeSelectState(this.selectTool))
-
+            this.selectTool.editor.selectionManager.unselectAll()
+            this.selectTool.setState(new DragSelectionState(this.selectTool, clickPosition))
         }
 
     }
@@ -130,7 +144,7 @@ export class SelectionState extends SelectToolState {
     }
 
     onInit() {
-        const elements = this.selectTool.editor.selector.getSelection().getComponents()
+        const elements = this.selectTool.editor.selectionManager.getSelection().getFlatComponents()
 
         if (elements.length === 1 && elements[0] instanceof TreeRect) {
             this._singleElement = elements[0]

@@ -2,7 +2,7 @@ import { Graphics, GraphicsContext } from "pixi.js";
 import { TreeRect } from "../../tree/treeRect";
 import { TreeLayer } from "../layers/tree";
 
-export class ElementTreeRenderer {
+export class RectRenderer {
 
     private graphics: Graphics;
     private element: TreeRect;
@@ -23,7 +23,7 @@ export class ElementTreeRenderer {
     render(zIndex: number) {
         const commonContext = new GraphicsContext()
             .rect(0, 0, this.element.width, this.element.height)
-            .fill(this.element.fill)
+            .fill(this.element.fillColor)
 
         this.graphics.zIndex = zIndex;
         this.graphics.context = commonContext

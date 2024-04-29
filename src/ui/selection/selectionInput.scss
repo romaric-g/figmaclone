@@ -8,6 +8,7 @@
     justify-content: center;
     align-items: center;
     border: 1px solid transparent;
+    border-radius: 3px;
     max-width: 90px;
     
     &__label {
@@ -17,18 +18,5 @@
 
     &:focus-within {
         border: 1px solid blue;
-    }
-
-    .SelectionInput__input {
-        width: 100%;
-        height: 22px;
-        color: white;
-        background-color: transparent;
-        border: none;
-
-        &:focus {
-            border: 0px solid transparent;
-            outline: none;
-        }
     }
 }
