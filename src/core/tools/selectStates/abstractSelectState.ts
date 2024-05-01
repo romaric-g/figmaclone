@@ -24,7 +24,7 @@ export abstract class SelectToolState {
 
     abstract onBackgroundPointerUp(clickPosition: Point): void
 
-    render() { }
+    abstract render(): void
 
 }
 

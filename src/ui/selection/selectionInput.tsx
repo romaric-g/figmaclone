@@ -5,11 +5,12 @@ import FocusInput from "../components/FocusInput";
 
 interface Props {
     value: number | "mixed",
-    label: string,
+    icon?: React.ReactNode,
+    label?: string,
     setValue: (value: number) => void
 }
 
-const SelectionInput: React.FC<Props> = ({ value, label, setValue }) => {
+const SelectionInput: React.FC<Props> = ({ value, label, icon, setValue }) => {
 
     const onValueConfirmHandler = React.useCallback((currentInput: HTMLInputElement | null) => {
         if (currentInput) {
@@ -22,14 +23,13 @@ const SelectionInput: React.FC<Props> = ({ value, label, setValue }) => {
             } else {
                 currentInput.value = value.toString()
             }
-
-            currentInput.blur()
         }
     }, [])
 
     return (
         <div className="SelectionInput">
-            <label className="SelectionInput__label">{label}</label>
+            {!!icon && icon}
+            {!!label && <label className="SelectionInput__label">{label}</label>}
             <FocusInput
                 value={value}
                 disabled={value === "mixed"}

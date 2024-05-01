@@ -50,6 +50,9 @@ export class SelectTool extends Tool {
     setState(selectToolState: SelectToolState) {
         this._selectToolState.onDestroy()
         this._selectToolState = selectToolState;
+
+        console.log("selectToolState", selectToolState)
+
         this._selectToolState.onInit()
     }
 
@@ -57,18 +60,29 @@ export class SelectTool extends Tool {
         this._selectToolState.onMove(position)
     }
 
-    onBackgroundPointerDown({ position }: PointerBackgroundEventData) {
+    onBackgroundPointerDown({ position, button }: PointerBackgroundEventData) {
+        if (button === 1) {
+            return;
+        }
+
         this._selectToolState.onBackgroundPointerDown(position)
     }
 
-    onBackgroundPointerUp({ position }: PointerBackgroundEventData) {
+    onBackgroundPointerUp({ position, button }: PointerBackgroundEventData) {
+        if (button === 1) {
+            return;
+        }
+
         this._selectToolState.onBackgroundPointerUp(position)
     }
 
     private lastClickDown?: [Date, TreeComponent];
 
-    onElementPressDown({ element, pointerPosition }: ElementPressDownEventData) {
-        const isShift = this.editor.keyboardController.keys.shift.pressed;
+    onElementPressDown({ element, pointerPosition, button }: ElementPressDownEventData) {
+        if (button === 1) {
+            return;
+        }
+        const isShift = this.editor.keyboardManager.keyboardController.keys.shift.pressed;
         let isDouble = false
 
         const currentDate = new Date()
@@ -92,8 +106,12 @@ export class SelectTool extends Tool {
         this._selectToolState.onClickDown(element, isShift, pointerPosition, isDouble)
     }
 
-    onElementPressUp({ element }: ElementPressUpEventData) {
-        const isShift = this.editor.keyboardController.keys.shift.pressed;
+    onElementPressUp({ element, button }: ElementPressUpEventData) {
+        if (button === 1) {
+            return;
+        }
+
+        const isShift = this.editor.keyboardManager.keyboardController.keys.shift.pressed;
 
         this._selectToolState.onClickUp(element, isShift)
     }
@@ -118,6 +136,10 @@ export class SelectTool extends Tool {
         if (topComponent instanceof TreeContainer) {
             topComponent.setHover(false)
         }
+    }
+
+    getCurrentState() {
+        return this._selectToolState;
     }
 
     render() {

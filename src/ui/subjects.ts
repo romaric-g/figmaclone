@@ -34,5 +34,7 @@ export interface SelectionData {
     y: number | "mixed",
     width: number | "mixed",
     height: number | "mixed",
-    color: HsvaColor | "mixed"
+    color: HsvaColor | "mixed",
+    borderColor: HsvaColor | "mixed",
+    borderWidth: number | "mixed"
 }

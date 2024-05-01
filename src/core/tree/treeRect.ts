@@ -11,7 +11,8 @@ interface ElementProps {
     y: number,
     width?: number,
     height?: number,
-    fillColor?: HsvaColor
+    fillColor?: HsvaColor,
+    borderColor?: HsvaColor
     name?: string
 }
 
@@ -35,6 +36,9 @@ export class TreeRect extends TreeComponent<TreeRectData> {
     private _height: number;
 
     private _fillColor: HsvaColor;
+    private _borderColor: HsvaColor;
+
+    private _borderWidth: number = 0;
 
     public get fillColor() {
         return this._fillColor
@@ -49,7 +53,12 @@ export class TreeRect extends TreeComponent<TreeRectData> {
         }
     }
 
-    constructor({ x, y, width = 100, height = 100, fillColor = { h: 0, s: 0, v: 0, a: 1 }, name = "" }: ElementProps) {
+    constructor({
+        x, y, width = 100, height = 100,
+        name = "",
+        borderColor = { h: 0, s: 0, v: 0, a: 1 },
+        fillColor = { h: 0, s: 0, v: 0, a: 1 },
+    }: ElementProps) {
         super(name)
 
         this._x = x;
@@ -57,6 +66,7 @@ export class TreeRect extends TreeComponent<TreeRectData> {
         this._width = width;
         this._height = height;
         this._fillColor = fillColor;
+        this._borderColor = borderColor;
 
         this._elementSelectionRenderer = new RectSelectionRenderer(this)
         this._elementTreeRenderer = new RectRenderer(this)
@@ -94,8 +104,26 @@ export class TreeRect extends TreeComponent<TreeRectData> {
         return this._height
     }
 
-    setHover(value: boolean) {
-        this._hover = value;
+
+    get borderColor() {
+        return this._borderColor;
+    }
+
+    set borderColor(value: HsvaColor) {
+        this._borderColor = {
+            h: value.h,
+            s: value.s,
+            v: value.v,
+            a: Math.round((value.a + Number.EPSILON) * 100) / 100
+        }
+    }
+
+    get borderWidth() {
+        return this._borderWidth;
+    }
+
+    set borderWidth(value: number) {
+        this._borderWidth = Math.round((value) * 100) / 100
     }
 
     render(zIndex: number) {
@@ -126,6 +154,11 @@ export class TreeRect extends TreeComponent<TreeRectData> {
         return this._hover;
     }
 
+    setHover(value: boolean) {
+        this._hover = value;
+    }
+
+
 
     init() {
         if (this._contextEditor) {
@@ -144,15 +177,31 @@ export class TreeRect extends TreeComponent<TreeRectData> {
         const graphics = this._elementTreeRenderer.getContainer()
         const eventsManager = editor.eventsManager;
 
-        graphics.on('pointerdown', (event) => eventsManager.onElementPressDown.emit({
-            element: this,
-            pointerPosition: event.global
-        }));
-        graphics.on('pointerup', (event) => eventsManager.onElementPressUp.emit({ element: this }))
-        graphics.on('pointerupoutside', (event) => eventsManager.onElementPressUp.emit({ element: this }))
+        graphics.on('pointerdown', (event) => {
+            eventsManager.onElementPressDown.emit({
+                element: this,
+                pointerPosition: event.global,
+                button: event.button
+            })
+        });
+        graphics.on('pointerup', (event) => {
+            eventsManager.onElementPressUp.emit({ element: this, button: event.button })
+        })
+        graphics.on('pointerupoutside', (event) => {
+            eventsManager.onElementPressUp.emit({ element: this, button: event.button })
+        })
 
-        graphics.on('pointerenter', (event) => eventsManager.onElementHoverOn.emit({ component: this }));
-        graphics.on('pointerleave', (event) => eventsManager.onElementHoverOff.emit({ component: this }));
+        graphics.on('pointerenter', (event) => {
+            if ((event.nativeEvent.target as HTMLElement).tagName === "CANVAS") {
+                eventsManager.onElementHoverOn.emit({ component: this })
+            }
+        });
+
+        graphics.on('pointerleave', (event) => {
+            if ((event.nativeEvent.target as HTMLElement).tagName === "CANVAS") {
+                eventsManager.onElementHoverOff.emit({ component: this })
+            }
+        });
 
         graphics.eventMode = "static"
     }
@@ -198,7 +247,16 @@ export class TreeRect extends TreeComponent<TreeRectData> {
         }
     }
 
-    getCoveredRect(): { minX: number; minY: number; maxX: number; maxY: number; } {
+    getDrawingCoveredRect(): { minX: number; minY: number; maxX: number; maxY: number; } {
+        return {
+            minX: this.x,
+            minY: this.y,
+            maxX: this.x + this.width,
+            maxY: this.y + this.height
+        }
+    }
+
+    getCanvasCoveredRect(): { minX: number; minY: number; maxX: number; maxY: number; } {
         const editor = Editor.getEditor()
 
         const globalPoint = editor.getCanvasPosition(new Point(this.x, this.y))

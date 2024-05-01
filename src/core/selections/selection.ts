@@ -1,13 +1,16 @@
-import { FillStyleInputs, Point } from "pixi.js";
+import { Point } from "pixi.js";
 import { TreeRect } from "../tree/treeRect";
 import { selectionChangeSubject } from "../../ui/subjects";
 import { SelectionBuilder } from "./selectionBuilder";
 import { Editor } from "../editor";
 import { TreeComponent } from "../tree/treeComponent";
 import { TreeContainer } from "../tree/treeContainer";
-import { HsvaColor, RgbaColor } from "@uiw/react-color";
+import { HsvaColor } from "@uiw/react-color";
+import { getDrawingCoveredRect } from "../utils/getDrawingCoveredRect";
+import { findMinimumDifference } from "../utils/findMinimumDifference";
 
 export class Selection {
+
     private _components: TreeComponent[]
 
     constructor(components: TreeComponent[]) {
@@ -159,8 +162,103 @@ export class Selection {
         return this.getRectsValue((e) => e.y)
     }
 
-    move(moveVector: Point) {
+    getBorderWidth(): number | "mixed" {
+        return this.getRectsValue((e) => e.borderWidth)
+    }
 
+    setBorderWidth(newWidth: number) {
+        this.applyToEachRect((c) => c.borderWidth = newWidth)
+        this.emitChangeEvent()
+    }
+
+    setBorderColor(newColor: HsvaColor) {
+        this.applyToEachRect((c) => c.borderColor = newColor)
+        this.emitChangeEvent()
+    }
+
+    getBorderColor(): "mixed" | HsvaColor {
+        return this.getRectsValue((e) => e.borderColor)
+    }
+
+
+    getAllRects() {
+        const rects: TreeRect[] = []
+
+        for (const component of this.getComponents()) {
+            if (component instanceof TreeRect) {
+                rects.push(component)
+            }
+            if (component instanceof TreeContainer) {
+                rects.push(...component.getAllRects())
+            }
+        }
+
+        return rects
+    }
+
+
+    getStickyMoveVector(moveVector: Point) {
+        const selectionRects = this.getAllRects()
+        const drawingCovered = getDrawingCoveredRect(selectionRects, true)
+
+        let stickyX = undefined;
+        let stickyY = undefined;
+
+        if (!drawingCovered) {
+            return {
+                vector: moveVector,
+                stickyX,
+                stickyY
+            };
+        }
+
+        drawingCovered.minX += moveVector.x;
+        drawingCovered.maxX += moveVector.x;
+        drawingCovered.minY += moveVector.y;
+        drawingCovered.maxY += moveVector.y;
+
+        const editor = Editor.getEditor()
+
+        const rects = editor.treeManager.getTree().getAllRects().filter((r) => !selectionRects.includes(r))
+
+        const xs = rects.map((r) => [r.x, r.x + r.width]).flat()
+        const ys = rects.map((r) => [r.y, r.y + r.height]).flat()
+
+        const sel_xs = [drawingCovered.minX, drawingCovered.maxX]
+        const sel_ys = [drawingCovered.minY, drawingCovered.maxY]
+
+        if (xs.length === 0 || sel_xs.length === 0) {
+            return {
+                vector: moveVector,
+                stickyX,
+                stickyY
+            };
+        }
+
+        const [x, sel_x, min_diff_x] = findMinimumDifference(xs, sel_xs);
+        const [y, sel_y, min_diff_y] = findMinimumDifference(ys, sel_ys);
+
+        const newMoveVector = moveVector.clone()
+
+        if (min_diff_x < 10) {
+            newMoveVector.x = x - (sel_x - moveVector.x)
+            stickyX = x
+        }
+
+        if (min_diff_y < 10) {
+            newMoveVector.y = y - (sel_y - moveVector.y)
+            stickyY = y
+        }
+
+        return {
+            vector: newMoveVector,
+            stickyX,
+            stickyY
+        }
+    }
+
+
+    move(moveVector: Point) {
         const moveRect = (rect: TreeRect) => {
             const movePositionOrigin = rect.getOriginalPosition()
 
@@ -189,7 +287,9 @@ export class Selection {
             y: this.getY(),
             width: this.getWidth(),
             height: this.getHeight(),
-            color: this.getFillColor()
+            color: this.getFillColor(),
+            borderColor: this.getBorderColor(),
+            borderWidth: this.getBorderWidth()
         })
     }
 

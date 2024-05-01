@@ -68,7 +68,7 @@ export class DragSelectionState extends SelectToolState {
         const rootComponents = editor.treeManager.getTree().getComponents()
 
         for (const rootComponent of rootComponents) {
-            const componentCoveredRect = rootComponent.getCoveredRect()
+            const componentCoveredRect = rootComponent.getCanvasCoveredRect()
             if (componentCoveredRect) {
 
                 const isLeft = componentCoveredRect.maxX < selectionCoveredRect.minX;

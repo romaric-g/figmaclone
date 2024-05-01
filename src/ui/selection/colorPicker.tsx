@@ -20,7 +20,8 @@ const ColorPicker = ({ color, onChange }: Props) => {
             if (validHex(currentInput.value)) {
 
                 const newColor = hexToHsva(currentInput.value)
-                newColor.a = 1
+
+                newColor.a = color.a
 
                 onChange(newColor)
 
@@ -77,8 +78,6 @@ const ColorPicker = ({ color, onChange }: Props) => {
         }
     }, [color, onChange])
 
-    console.log("COLOR CHANGE", color)
-
     React.useEffect(() => {
 
         function onClick(e: MouseEvent) {
@@ -101,8 +100,6 @@ const ColorPicker = ({ color, onChange }: Props) => {
             document.removeEventListener("pointerdown", onClick)
         }
     }, [isOpen, setIsOpen])
-
-    console.log(color)
 
     return (
         <div className='ColorPicker'>

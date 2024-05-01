@@ -9,9 +9,10 @@
     
     &__separator {
         display: block;
-        height: 1px;
         width: 100%;
-        background-color: black;
+        border: none;
+        height: 1px;
+        background-color: #464646;
     }
 
     &__properites {
@@ -30,7 +31,6 @@
         }
     
         &__dimensions {
-    
             display: flex;
             flex-direction: row;
             gap: 10px;
@@ -51,6 +51,20 @@
         gap: 10px;
         width: 100%;
         padding: 0 20px;
+
+        &__title {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        &__mixed {
+            padding: 10px 0;
+
+            &__title {
+                font-size: 14px;
+                color: #707070;
+            }
+        }
     }
 
 }

@@ -38,7 +38,15 @@ export class TreeManager {
     }
 
     unregisterContainer(component: TreeComponent) {
+        const parent = component.getContainerParent()
+        if (parent) {
+            parent.remove(component)
+        }
         component.destroy()
+
+        const editor = Editor.getEditor()
+
+        editor.selectionManager.getSelection().getBuilder(editor).remove(component).apply(editor.selectionManager)
     }
 
     render() {

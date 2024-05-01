@@ -36,5 +36,6 @@ export class FreeSelectState extends SelectToolState {
         this.selectTool.setState(new DragSelectionState(this.selectTool, clickPosition))
     }
     onBackgroundPointerUp(clickPosition: Point): void { }
+    render() { }
 
 }

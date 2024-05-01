@@ -59,6 +59,6 @@ export abstract class TreeComponent<T extends TreeComponentData = TreeComponentD
 
     abstract toData(index: number): T
 
-    abstract getCoveredRect(): { minX: number, minY: number, maxX: number, maxY: number } | undefined
+    abstract getCanvasCoveredRect(): { minX: number, minY: number, maxX: number, maxY: number } | undefined
 
 }

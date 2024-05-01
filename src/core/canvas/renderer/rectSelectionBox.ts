@@ -2,6 +2,8 @@ import { Graphics, GraphicsContext, Point } from "pixi.js";
 import { TreeRect } from "../../tree/treeRect";
 import { Editor } from "../../editor";
 import { SelectionLayer } from "../layers/selection";
+import { SelectTool } from "../../tools/selectTool";
+import { MovableSelectionState } from "../../tools/selectStates/movableSelection";
 
 export class RectSelectionRenderer {
 
@@ -17,6 +19,21 @@ export class RectSelectionRenderer {
         const editor = Editor.getEditor()
 
         if (!this.element.isHover() && !this.element.isSelected()) {
+            this.graphics.context = new GraphicsContext();
+            return
+        }
+
+        let haveMove = false;
+
+        const currentTool = editor.toolManager.getCurrentTool()
+        if (currentTool instanceof SelectTool) {
+            const state = currentTool.getCurrentState()
+            if (state instanceof MovableSelectionState) {
+                haveMove = state.haveMove()
+            }
+        }
+
+        if (haveMove) {
             this.graphics.context = new GraphicsContext();
             return
         }

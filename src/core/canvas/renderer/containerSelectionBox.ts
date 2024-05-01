@@ -22,7 +22,7 @@ export class ContainerSelectionBox {
             return
         }
 
-        const coveredRect = this.container.getCoveredRect()
+        const coveredRect = this.container.getCanvasCoveredRect()
 
         if (!coveredRect) {
             this.graphics.context = new GraphicsContext();

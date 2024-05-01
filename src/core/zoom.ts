@@ -80,8 +80,6 @@ export class Zoom {
                 this._x = this._x + correctionX;
                 this._y = this._y + correctionY;
             }
-
-            const localPoint = this._editor.getTreeContainer().toLocal(event.global)
         }
 
         editor.getBackgroundContainer().on("mousedown", onMouseDown)

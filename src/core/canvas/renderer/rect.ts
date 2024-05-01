@@ -24,6 +24,11 @@ export class RectRenderer {
         const commonContext = new GraphicsContext()
             .rect(0, 0, this.element.width, this.element.height)
             .fill(this.element.fillColor)
+            .stroke({
+                width: this.element.borderWidth,
+                color: this.element.borderColor,
+                alignment: 1
+            })
 
         this.graphics.zIndex = zIndex;
         this.graphics.context = commonContext

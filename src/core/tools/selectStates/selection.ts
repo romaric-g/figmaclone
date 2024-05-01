@@ -130,7 +130,7 @@ export class SelectionState extends SelectToolState {
             const newState = new ReshapeSelectState(this.selectTool, this._singleElement, this._reshapeReference, localPosition);
             this.selectTool.setState(newState)
 
-        } else if (!this.selectTool.editor.keyboardController.keys.shift.pressed) {
+        } else if (!this.selectTool.editor.keyboardManager.keyboardController.keys.shift.pressed) {
             this.selectTool.editor.selectionManager.unselectAll()
             this.selectTool.setState(new DragSelectionState(this.selectTool, clickPosition))
         }
@@ -154,4 +154,5 @@ export class SelectionState extends SelectToolState {
     onClickUp(element: TreeRect, shift: boolean): void { }
     onDestroy() { }
     onBackgroundPointerUp(clickPosition: Point): void { }
+    render() { }
 }

@@ -1,5 +1,5 @@
 
-type ValidKey = "shift" | "control" | 'backspace' | 'left' | 'right' | 'up' | 'down' | 'enter' | 'g'
+export type ValidKey = "shift" | "control" | 'backspace' | 'left' | 'right' | 'up' | 'down' | 'enter' | 'g'
 
 const keyMap: { [key: string]: ValidKey } = {
     'ShiftLeft': 'shift',
@@ -20,11 +20,14 @@ type KeysState = {
     };
 };
 
+
+export type KeyboardLister = ((type: "up" | "down") => void)
+
 // Class for handling keyboard inputs.
 export class KeyboardController {
 
     keys: KeysState
-    listeners: { [key in ValidKey]: ((type: "up" | "down") => void)[] };
+    listeners: { [key in ValidKey]: KeyboardLister[] };
 
     constructor() {
         // The controller's state.

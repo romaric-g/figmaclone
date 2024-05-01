@@ -24,21 +24,25 @@ export class BackgroundLayer {
         const eventsManager = this._canvasApp.getEditor().eventsManager
 
         this._backgroundContainer.on("pointerdown", (event) => eventsManager.onBackgroundPressDown.emit({
-            position: event.global
+            position: event.global,
+            button: event.button
         }))
 
         this._backgroundContainer.on("pointerup", (event) => eventsManager.onBackgroundPressUp.emit({
-            position: event.global
+            position: event.global,
+            button: event.button
         }))
 
         this._backgroundContainer.on('pointerdown', (event) => eventsManager.onPointerDown.emit({
             position: event.global,
-            onBackground: true
+            onBackground: true,
+            button: event.button
         }))
 
         this._backgroundContainer.on('pointerup', (event) => eventsManager.onPointerUp.emit({
             position: event.global,
-            onBackground: true
+            onBackground: true,
+            button: event.button
         }))
     }
 

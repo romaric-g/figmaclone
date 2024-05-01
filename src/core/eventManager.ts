@@ -25,17 +25,17 @@ class EventManager<T> {
     }
 }
 
-export type ElementPressDownEventData = { element: TreeRect, pointerPosition: Point }
+export type ElementPressDownEventData = { element: TreeRect, pointerPosition: Point, button: number }
 
-export type ElementPressUpEventData = { element: TreeRect }
+export type ElementPressUpEventData = { element: TreeRect, button: number }
 
 export type PointerMoveEventData = { position: Point }
 
-export type PointerDownEventData = { position: Point, onBackground: boolean }
+export type PointerDownEventData = { position: Point, onBackground: boolean, button: number }
 
-export type PointerUpEventData = { position: Point, onBackground: boolean }
+export type PointerUpEventData = { position: Point, onBackground: boolean, button: number }
 
-export type PointerBackgroundEventData = { position: Point }
+export type PointerBackgroundEventData = { position: Point, button: number }
 
 export type ElementOverOnEventData = { component: TreeComponent }
 

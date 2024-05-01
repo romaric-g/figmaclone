@@ -7,6 +7,7 @@ import "./selectionEditor.scss"
 import SelectionInput from "./selectionInput";
 import { HsvaColor, RgbaColor, RgbColor } from "@uiw/react-color";
 import ColorPicker from "./colorPicker";
+import Icon from "../components/Icon";
 
 interface Props {
 
@@ -47,6 +48,8 @@ const ElementEditor: React.FC<Props> = () => {
     const selection = getSelection()
 
     const [color, setColor] = React.useState<HsvaColor | "mixed">()
+    const [borderColor, setBorderColor] = React.useState<HsvaColor | "mixed">()
+    const [borderWidth, setBorderWidth] = React.useState<number | "mixed">()
     const [height, setHeight] = React.useState<number | "mixed">(selection.getHeight())
     const [widht, setWidth] = React.useState<number | "mixed">(selection.getWidth())
     const [x, setX] = React.useState<number | "mixed">(selection.getX())
@@ -58,14 +61,9 @@ const ElementEditor: React.FC<Props> = () => {
             setY(event.y)
             setWidth(event.width)
             setHeight(event.height)
-
-            if (event.color === "mixed") {
-                setColor("mixed")
-            } else {
-                setColor(event.color)
-            }
-
-
+            setColor(event.color)
+            setBorderColor(event.borderColor)
+            setBorderWidth(event.borderWidth)
         });
 
         return () => {
@@ -73,12 +71,24 @@ const ElementEditor: React.FC<Props> = () => {
         };
     }, []);
 
-    const handleColorChange = React.useCallback((newColor: HsvaColor) => {
+    const handleFillColorChange = React.useCallback((newColor: HsvaColor) => {
         const selection = getSelection()
-
         setColor(newColor)
-
         selection.setFillColor(newColor)
+
+    }, [])
+
+    const handlBorderColorChange = React.useCallback((newColor: HsvaColor) => {
+        const selection = getSelection()
+        setBorderColor(newColor)
+        selection.setBorderColor(newColor)
+
+    }, [])
+
+    const handlBorderWidthChange = React.useCallback((newWidth: number) => {
+        const selection = getSelection()
+        setBorderWidth(newWidth)
+        selection.setBorderWidth(newWidth)
 
     }, [])
 
@@ -103,24 +113,50 @@ const ElementEditor: React.FC<Props> = () => {
             <hr className="SelectionEditor__separator" />
 
             <div className="SelectionEditor__color">
-                <span>Remplissage</span>
+                <span className="SelectionEditor__color__title">Remplissage</span>
                 {
                     color === "mixed" ? (
-                        <p>Mixed</p>
+                        <div className="SelectionEditor__color__mixed">
+                            <p className="SelectionEditor__color__mixed__title">Couleur mixte</p>
+                        </div>
                     ) : (
 
                         color ? (
                             <ColorPicker
                                 color={color}
-                                onChange={handleColorChange}
+                                onChange={handleFillColorChange}
                             />
                         ) : undefined
+                    )
+                }
+            </div>
 
-                        // <SketchPicker
-                        //     color={color}
-                        //     onChange={handleColorChange}
-                        // />
+            <hr className="SelectionEditor__separator" />
 
+            <div className="SelectionEditor__color">
+                <span className="SelectionEditor__color__title">Bordure</span>
+                {
+                    borderColor === "mixed" ? (
+                        <div className="SelectionEditor__color__mixed">
+                            <p className="SelectionEditor__color__mixed__title">Couleur mixte</p>
+                        </div>
+                    ) : (
+
+                        borderColor !== undefined && borderWidth !== undefined ? (
+                            <div>
+                                <ColorPicker
+                                    color={borderColor}
+                                    onChange={handlBorderColorChange}
+                                />
+                                <SelectionInput
+                                    value={borderWidth}
+                                    icon={(
+                                        <Icon type="stroke" />
+                                    )}
+                                    setValue={handlBorderWidthChange}
+                                />
+                            </div>
+                        ) : undefined
                     )
                 }
             </div>

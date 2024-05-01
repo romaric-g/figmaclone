@@ -39,7 +39,11 @@ export class DrawTool extends Tool {
         cursorChangeSubject.next("default")
     }
 
-    onPointerDown({ position }: PointerDownEventData) {
+    onPointerDown({ position, button }: PointerDownEventData) {
+        if (button === 1) {
+            return;
+        }
+
         const localPostion = this.editor.getDrawingPosition(position).clone()
 
         this.pressDownPosition = localPostion.clone()
@@ -62,7 +66,11 @@ export class DrawTool extends Tool {
         this.editor.selectionManager.setSelection(new Selection([this.drawingRect]))
     }
 
-    onPointerUp({ }: PointerUpEventData) {
+    onPointerUp({ button }: PointerUpEventData) {
+        if (button === 1) {
+            return;
+        }
+
         if (this.drawingRect) {
             this.editor.selectionManager.setSelection(new Selection([this.drawingRect]))
             this.editor.toolManager.setCurrentTool("select")

@@ -4,6 +4,7 @@ import { SelectTool } from "../selectTool";
 import { SelectionState } from "./selection";
 import { SelectToolState } from "./abstractSelectState";
 import { TreeComponent } from "../../tree/treeComponent";
+import { StickyLineRenderer } from "../../canvas/renderer/stickyLine";
 
 export class MovableSelectionState extends SelectToolState {
     private _sourceClickedPosition: Point;
@@ -11,11 +12,17 @@ export class MovableSelectionState extends SelectToolState {
     private _moveComponent: TreeComponent;
     private _haveMove: boolean = false;
 
+    private _stickyX?: number;
+    private _stickyY?: number;
+
+    private stickyLineRenderer: StickyLineRenderer;
+
     constructor(selectTool: SelectTool, sourceClickedPostion: Point, moveComponent: TreeComponent, componentAddedBefore: boolean) {
         super(selectTool)
         this._sourceClickedPosition = sourceClickedPostion.clone();
         this._moveComponent = moveComponent;
         this._componentAddedBefore = componentAddedBefore;
+        this.stickyLineRenderer = new StickyLineRenderer(this)
     }
 
     private getMouvementVector(currentPointerPosition: Point) {
@@ -30,11 +37,17 @@ export class MovableSelectionState extends SelectToolState {
     }
 
     onInit() {
-        this.selectTool.editor.selectionManager.getSelection().freezeMoveOrigin()
+        const editor = this.selectTool.editor;
+
+        editor.selectionManager.getSelection().freezeMoveOrigin()
+        this.stickyLineRenderer.init(editor.canvasApp.getSelectionLayer())
     }
 
     onDestroy() {
-        this.selectTool.editor.selectionManager.getSelection().unfreezeMoveOrigin()
+        const editor = this.selectTool.editor;
+
+        editor.selectionManager.getSelection().unfreezeMoveOrigin()
+        this.stickyLineRenderer.destroy(editor.canvasApp.getSelectionLayer())
     }
 
     onClickUp(element: TreeRect, shift: boolean) {
@@ -59,8 +72,22 @@ export class MovableSelectionState extends SelectToolState {
     onMove(newPosition: Point): void {
         const localPostion = this.selectTool.editor.getDrawingPosition(newPosition).clone()
         const movementVector = this.getMouvementVector(localPostion)
+        const selection = this.selectTool.editor.selectionManager.getSelection()
 
-        this.selectTool.editor.selectionManager.getSelection().move(movementVector)
+        console.log("movementVector", movementVector)
+
+        const {
+            vector,
+            stickyX,
+            stickyY
+        } = selection.getStickyMoveVector(movementVector)
+
+        this._stickyX = stickyX;
+        this._stickyY = stickyY;
+
+        console.log("vector", vector)
+
+        selection.move(vector)
 
         if (!this._haveMove) {
             this._haveMove = true;
@@ -71,4 +98,18 @@ export class MovableSelectionState extends SelectToolState {
     onBackgroundPointerDown(clickPosition: Point): void { }
     onBackgroundPointerUp(clickPosition: Point): void { }
 
+    render() {
+        this.stickyLineRenderer.render()
+    }
+
+    getStickyInfo() {
+        return {
+            x: this._stickyX,
+            y: this._stickyY
+        }
+    }
+
+    haveMove() {
+        return this._haveMove;
+    }
 }

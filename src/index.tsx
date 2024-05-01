@@ -21,35 +21,36 @@ async function main() {
     })
 
     const rootComponents: TreeComponent[] = [
-        new TreeContainer("group 1", [
-            a,
-            new TreeContainer("group 2 in group 1", [
-                new TreeRect({
-                    x: 500,
-                    y: 500,
-                    height: 100,
-                    width: 100,
-                    fillColor: { h: 50, s: 100, v: 50, a: 1 },
-                    name: "in group 2"
-                }),
-                new TreeRect({
-                    x: 600,
-                    y: 600,
-                    height: 100,
-                    width: 100,
-                    fillColor: { h: 100, s: 50, v: 50, a: 1 },
-                    name: "in group 2"
-                })
-            ]),
-            new TreeRect({
-                x: 400,
-                y: 400,
-                height: 100,
-                width: 100,
-                fillColor: { h: 20, s: 100, v: 100, a: 1 },
-                name: "in group 1"
-            })
-        ]),
+
+        // new TreeContainer("group 1", [
+        //     a,
+        //     new TreeContainer("group 2 in group 1", [
+        //         new TreeRect({
+        //             x: 500,
+        //             y: 500,
+        //             height: 100,
+        //             width: 100,
+        //             fillColor: { h: 50, s: 100, v: 50, a: 1 },
+        //             name: "in group 2"
+        //         }),
+        //         new TreeRect({
+        //             x: 600,
+        //             y: 600,
+        //             height: 100,
+        //             width: 100,
+        //             fillColor: { h: 100, s: 50, v: 50, a: 1 },
+        //             name: "in group 2"
+        //         })
+        //     ]),
+        //     new TreeRect({
+        //         x: 400,
+        //         y: 400,
+        //         height: 100,
+        //         width: 100,
+        //         fillColor: { h: 20, s: 100, v: 100, a: 1 },
+        //         name: "in group 1"
+        //     })
+        // ]),
         new TreeRect({
             x: 0,
             y: 0,

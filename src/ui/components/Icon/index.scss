@@ -1,0 +1,15 @@
+
+
+.Icon { 
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 24px;
+    width: 24px;
+
+    svg {
+        fill: #ababab;
+        height: 100%;
+        width: 100%;
+    }
+}

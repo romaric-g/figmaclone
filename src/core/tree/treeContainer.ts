@@ -5,6 +5,7 @@ import { ContainerSelectionBox } from "../canvas/renderer/containerSelectionBox"
 import { Editor } from "../editor";
 import { TreeContainerData } from "../../ui/subjects";
 import { Point } from "pixi.js";
+import { getDrawingCoveredRect } from "../utils/getDrawingCoveredRect";
 
 export class TreeContainer extends TreeComponent<TreeContainerData> {
 
@@ -169,35 +170,18 @@ export class TreeContainer extends TreeComponent<TreeContainerData> {
         return this.components.findIndex((c) => c == treeComponent)
     }
 
-    getCoveredRect(): { minX: number; minY: number; maxX: number; maxY: number; } | undefined {
+    getCanvasCoveredRect(): { minX: number; minY: number; maxX: number; maxY: number; } | undefined {
+
+        const drawingCovered = getDrawingCoveredRect(this.getAllRects())
+
+        if (!drawingCovered) {
+            return undefined;
+        }
+
         const editor = Editor.getEditor()
 
-        let minX = undefined
-        let minY = undefined
-        let maxX = undefined
-        let maxY = undefined
-
-        for (const rectComponent of this.getAllRects()) {
-            if (minX == undefined || rectComponent.x < minX) {
-                minX = rectComponent.x
-            }
-            if (minY === undefined || rectComponent.y < minY) {
-                minY = rectComponent.y
-            }
-            if (maxX === undefined || rectComponent.x + rectComponent.width > maxX) {
-                maxX = rectComponent.x + rectComponent.width
-            }
-            if (maxY === undefined || rectComponent.y + rectComponent.height > maxY) {
-                maxY = rectComponent.y + rectComponent.height
-            }
-        }
-
-        if (minX == undefined || minY == undefined || maxX === undefined || maxY === undefined) {
-            return undefined
-        }
-
-        const minOrigin = editor.getCanvasPosition(new Point(minX, minY))
-        const maxOrigin = editor.getCanvasPosition(new Point(maxX, maxY))
+        const minOrigin = editor.getCanvasPosition(new Point(drawingCovered.minX, drawingCovered.minY))
+        const maxOrigin = editor.getCanvasPosition(new Point(drawingCovered.maxX, drawingCovered.maxY))
 
         return {
             minX: minOrigin.x,

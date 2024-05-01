@@ -35,7 +35,7 @@ const TreeComponentView: React.FC<Props> = ({
         const container = editor.treeManager.getTree().getComponent(indexs)
 
         if (container) {
-            if (editor.keyboardController.keys.control.pressed) {
+            if (editor.keyboardManager.keyboardController.keys.control.pressed) {
                 editor.selectionManager.getSelection().getBuilder(editor).add(container).apply(editor.selectionManager)
             } else {
                 editor.selectionManager.setSelection(new Selection([container]))
