@@ -1,6 +1,5 @@
 import { Point, ApplicationOptions } from 'pixi.js';
-import { KeyboardController } from './keyboard/keyboardController';
-import { SelectionManager } from './selectionManager';
+import { SelectionManager } from './selections/selectionManager';
 import { EventsManger } from './eventManager';
 import { TreeManager } from './tree/treeManager';
 import { ToolManager } from './tools/toolManager';
@@ -8,6 +7,7 @@ import { Zoom } from './zoom';
 import { CanvasApp } from './canvas/app';
 import { KeyboardManager } from './keyboard/keyboardManager';
 import { CanvasAttach } from './keyboard/canvas/canvasAttach';
+import { ActionManager } from './actions/actionManger';
 
 export class Editor {
     private static editor: Editor = new Editor()
@@ -21,6 +21,7 @@ export class Editor {
     readonly treeManager: TreeManager;
     readonly toolManager: ToolManager;
     readonly keyboardManager: KeyboardManager;
+    readonly actionManager: ActionManager;
     readonly zoom: Zoom;
 
     readonly canvasApp: CanvasApp;
@@ -34,6 +35,7 @@ export class Editor {
         this.treeManager = new TreeManager(this)
         this.toolManager = new ToolManager(this)
         this.keyboardManager = new KeyboardManager()
+        this.actionManager = new ActionManager()
         this.zoom = new Zoom(this)
     }
 

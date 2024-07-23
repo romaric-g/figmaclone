@@ -61,7 +61,6 @@ export class KeyboardController {
     }
 
     keydownHandler(event: KeyboardEvent) {
-        console.log(event.code)
         if (!(event.code in keyMap)) {
             return
         }

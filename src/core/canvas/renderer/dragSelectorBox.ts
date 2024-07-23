@@ -1,8 +1,6 @@
 import { Graphics, GraphicsContext, Point } from "pixi.js";
-import { SelectionLayer } from "../layers/selection";
 import { DragSelectionState } from "../../tools/selectStates/dragSelection";
 import { Editor } from "../../editor";
-import { TreeRect } from "../../tree/treeRect";
 
 
 export class DragSelectionBoxRenderer {

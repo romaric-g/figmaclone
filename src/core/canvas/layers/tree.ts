@@ -27,12 +27,14 @@ export class TreeLayer {
 
         this._treeContainer.on('pointerdown', (event) => eventsManager.onPointerDown.emit({
             position: event.global,
-            onBackground: false
+            onBackground: false,
+            button: event.button
         }))
 
         this._treeContainer.on('pointerup', (event) => eventsManager.onPointerUp.emit({
             position: event.global,
-            onBackground: false
+            onBackground: false,
+            button: event.button
         }))
 
     }

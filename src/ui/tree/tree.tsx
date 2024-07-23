@@ -4,6 +4,7 @@ import "./tree.scss"
 import classNames from "classnames";
 import TreeContainerContentView from "./treeContainerContent";
 import { Editor } from "../../core/editor";
+import { MoveElementAction } from "../../core/actions/moveElementAction";
 
 interface TreeProps {
     treeData: TreeData
@@ -26,8 +27,6 @@ const TreeView: React.FC<TreeProps> = ({ treeData }) => {
     React.useEffect(() => {
 
         const onMouseUp = () => {
-            const tree = Editor.getEditor().treeManager.getTree()
-
 
 
             if (dragOrigin !== undefined && dragTarget !== undefined) {
@@ -36,7 +35,13 @@ const TreeView: React.FC<TreeProps> = ({ treeData }) => {
                 if (dragTarget.target === "after") {
                     targetIndexs[targetIndexs.length - 1] = targetIndexs[targetIndexs.length - 1] + 1
                 }
-                tree.moveFromIndexs(dragOrigin.indexs, targetIndexs)
+
+                const from = dragOrigin.indexs
+                const to = targetIndexs
+
+                Editor.getEditor().actionManager.push(
+                    new MoveElementAction(from, to)
+                )
             }
 
             setDrawOrigin(undefined)

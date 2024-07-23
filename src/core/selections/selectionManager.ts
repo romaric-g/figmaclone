@@ -1,9 +1,9 @@
-import { GlobalSelectionBoxRenderer } from "./canvas/renderer/globalSelectionBox";
-import { Editor } from "./editor";
-import { Selection } from "./selections/selection";
-import { TreeComponent } from "./tree/treeComponent";
-import { TreeContainer } from "./tree/treeContainer";
-import { TreeRect } from "./tree/treeRect";
+import { GlobalSelectionBoxRenderer } from "../canvas/renderer/globalSelectionBox";
+import { Editor } from "../editor";
+import { Selection } from "./selection";
+import { TreeComponent } from "../tree/treeComponent";
+import { TreeContainer } from "../tree/treeContainer";
+import { TreeRect } from "../tree/treeRect";
 
 
 export class SelectionManager {
@@ -27,9 +27,6 @@ export class SelectionManager {
         this._selection.destroy()
         this._selection = selection;
         this._selection.init()
-        this._selection.emitChangeEvent()
-
-        Editor.getEditor().treeManager.emitTreeChangeEvent()
     }
 
     getSelection() {
@@ -46,7 +43,7 @@ export class SelectionManager {
 
     getOriginComponentsChain(component: TreeComponent, componentsChain: TreeComponent[] = []): TreeComponent[] {
 
-        const parentContainer = component.getContainerParent()
+        const parentContainer = component.getParentContainer()
 
         const newComponentsChain = [component].concat(componentsChain)
 

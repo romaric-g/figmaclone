@@ -18,35 +18,35 @@ export class TreeManager {
     }
 
     init() {
-        this.emitTreeChangeEvent()
+        treeElementSubject.next(this.toData())
     }
 
     getTree() {
         return this._treeRoot;
     }
 
-    registerContainer(component: TreeComponent, autoMount = false) {
+    registerComponent(component: TreeComponent) {
         component.init()
         if (component instanceof TreeContainer) {
             for (const childComponent of component.getComponents()) {
-                this.registerContainer(childComponent, false)
+                this.registerComponent(childComponent)
             }
-        }
-        if (autoMount) {
-            this._treeRoot.add(component)
         }
     }
 
-    unregisterContainer(component: TreeComponent) {
-        const parent = component.getContainerParent()
+    unregisterComponent(component: TreeComponent) {
+        const parent = component.getParentContainer()
         if (parent) {
+            if (component instanceof TreeContainer) {
+                const allChildren = [...component.getComponents()]
+
+                for (const children of allChildren) {
+                    this.unregisterComponent(children)
+                }
+            }
             parent.remove(component)
         }
         component.destroy()
-
-        const editor = Editor.getEditor()
-
-        editor.selectionManager.getSelection().getBuilder(editor).remove(component).apply(editor.selectionManager)
     }
 
     render() {
@@ -61,15 +61,12 @@ export class TreeManager {
         return this._treeRoot.getComponent(depthIndex)
     }
 
-    emitTreeChangeEvent() {
-
+    toData() {
         const treeData: TreeData = {
             tree: this._treeRoot.toData(0).children
         }
 
-        const elements = this._treeRoot.getComponents()
-
-        treeElementSubject.next(treeData)
+        return treeData;
     }
 
     getNextName() {

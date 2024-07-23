@@ -1,8 +1,6 @@
 import { Graphics, GraphicsContext, Point } from "pixi.js";
-import { TreeRect } from "../../tree/treeRect";
 import { Editor } from "../../editor";
 import { SelectionLayer } from "../layers/selection";
-import { DragSelectionState } from "../../tools/selectStates/dragSelection";
 import { MovableSelectionState } from "../../tools/selectStates/movableSelection";
 import { getDrawingCoveredRect } from "../../utils/getDrawingCoveredRect";
 import { drawCross } from "../../utils/drawCross";

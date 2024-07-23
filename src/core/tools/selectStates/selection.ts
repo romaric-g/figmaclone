@@ -5,9 +5,11 @@ import { MovableSelectionState } from "./movableSelection";
 import { SelectToolState } from "./abstractSelectState";
 import { cursorChangeSubject } from "../../../ui/subjects";
 import { getCursorType, ReshapeReference, ReshapeSelectState } from "./reshapeSelect";
-import { FreeSelectState } from "./freeSelect";
 import { TreeContainer } from "../../tree/treeContainer";
 import { DragSelectionState } from "./dragSelection";
+import { Editor } from "../../editor";
+import { UpdateSelectionAction } from "../../actions/updateSelectionAction";
+import { ClearSelection } from "../../actions/clearSelection";
 
 export class SelectionState extends SelectToolState {
 
@@ -78,9 +80,6 @@ export class SelectionState extends SelectToolState {
     }
 
     onClickDown(element: TreeRect, shift: boolean, pointerPosition: Point, isDouble: boolean) {
-
-        console.log("IS DOUBLE", isDouble)
-
         const editor = this.selectTool.editor
         const selector = editor.selectionManager;
 
@@ -98,18 +97,23 @@ export class SelectionState extends SelectToolState {
 
             if (this._reshapeReference === "none") {
                 if (topComponent.isSelected()) {
-                    console.log("SELECTED")
                     const newState = new MovableSelectionState(this.selectTool, localPostion, topComponent, false)
                     this.selectTool.setState(newState)
                 } else {
                     const newState = new MovableSelectionState(this.selectTool, localPostion, topComponent, true)
 
                     if (shift) {
-                        console.log("SELECT WITH ADD")
-                        selectionBuilder.add(topComponent).apply(selector)
+                        editor.actionManager.push(
+                            new UpdateSelectionAction(
+                                selectionBuilder.add(topComponent).build()
+                            )
+                        )
                     } else {
-                        console.log("SELECT WITH SET")
-                        selectionBuilder.set(topComponent).apply(selector)
+                        editor.actionManager.push(
+                            new UpdateSelectionAction(
+                                selectionBuilder.set(topComponent).build()
+                            )
+                        )
                     }
 
                     this.selectTool.setState(newState)
@@ -131,7 +135,9 @@ export class SelectionState extends SelectToolState {
             this.selectTool.setState(newState)
 
         } else if (!this.selectTool.editor.keyboardManager.keyboardController.keys.shift.pressed) {
-            this.selectTool.editor.selectionManager.unselectAll()
+            Editor.getEditor().actionManager.push(
+                new ClearSelection()
+            )
             this.selectTool.setState(new DragSelectionState(this.selectTool, clickPosition))
         }
 

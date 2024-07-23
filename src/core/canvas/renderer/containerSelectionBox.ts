@@ -1,5 +1,4 @@
 import { Graphics, GraphicsContext, Point } from "pixi.js";
-import { TreeRect } from "../../tree/treeRect";
 import { Editor } from "../../editor";
 import { SelectionLayer } from "../layers/selection";
 import { TreeContainer } from "../../tree/treeContainer";

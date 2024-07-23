@@ -50,9 +50,6 @@ export class SelectTool extends Tool {
     setState(selectToolState: SelectToolState) {
         this._selectToolState.onDestroy()
         this._selectToolState = selectToolState;
-
-        console.log("selectToolState", selectToolState)
-
         this._selectToolState.onInit()
     }
 
@@ -92,8 +89,6 @@ export class SelectTool extends Tool {
 
             if (lastClickElement == element) {
                 const timeDiff = currentDate.valueOf() - lastClickDate.valueOf()
-
-                console.log(timeDiff)
 
                 if (timeDiff < 300) {
                     isDouble = true

@@ -1,6 +1,6 @@
 import { Point } from "pixi.js";
 import { TreeRect } from "../tree/treeRect";
-import { selectionChangeSubject } from "../../ui/subjects";
+import { SelectionData } from "../../ui/subjects";
 import { SelectionBuilder } from "./selectionBuilder";
 import { Editor } from "../editor";
 import { TreeComponent } from "../tree/treeComponent";
@@ -37,10 +37,14 @@ export class Selection {
         const valuesSet = Array.from(new Set(values))
 
         if (valuesSet.length > 1) {
-            return "mixed"
+            return "mixed";
         }
 
-        return valuesSet[0]
+        if (valuesSet.length == 0) {
+            throw new Error("Aucun element dans la selection")
+        }
+
+        return valuesSet[0];
     }
 
     init() {
@@ -108,7 +112,6 @@ export class Selection {
 
     setFillColor(fillColor: HsvaColor) {
         this.applyToEachRect((c) => c.fillColor = fillColor)
-        this.emitChangeEvent()
     }
 
     getFillColor() {
@@ -117,7 +120,6 @@ export class Selection {
 
     setHeight(value: number) {
         this.applyToEachRect((c) => c.height = value)
-        this.emitChangeEvent()
     }
 
     getHeight() {
@@ -126,7 +128,6 @@ export class Selection {
 
     setWidth(value: number) {
         this.applyToEachRect((c) => c.width = value)
-        this.emitChangeEvent()
     }
 
 
@@ -136,12 +137,10 @@ export class Selection {
 
     setX(value: number) {
         this.applyToEachRect((c) => c.x = value)
-        this.emitChangeEvent()
     }
 
     addX(value: number) {
         this.applyToEachRect((c) => c.x = c.x + value)
-        this.emitChangeEvent()
     }
 
     getX() {
@@ -150,33 +149,29 @@ export class Selection {
 
     setY(value: number) {
         this.applyToEachRect((c) => c.y = value)
-        this.emitChangeEvent()
     }
 
     addY(value: number) {
         this.applyToEachRect((c) => c.y = c.y + value)
-        this.emitChangeEvent()
     }
 
     getY() {
         return this.getRectsValue((e) => e.y)
     }
 
-    getBorderWidth(): number | "mixed" {
+    getBorderWidth() {
         return this.getRectsValue((e) => e.borderWidth)
     }
 
     setBorderWidth(newWidth: number) {
         this.applyToEachRect((c) => c.borderWidth = newWidth)
-        this.emitChangeEvent()
     }
 
     setBorderColor(newColor: HsvaColor) {
         this.applyToEachRect((c) => c.borderColor = newColor)
-        this.emitChangeEvent()
     }
 
-    getBorderColor(): "mixed" | HsvaColor {
+    getBorderColor() {
         return this.getRectsValue((e) => e.borderColor)
     }
 
@@ -269,7 +264,6 @@ export class Selection {
         }
 
         this.applyToEachRect(moveRect)
-        this.emitChangeEvent()
     }
 
     freezeMoveOrigin() {
@@ -280,9 +274,26 @@ export class Selection {
         this.applyToEachRect((e) => e.unfreezeOriginalPosition())
     }
 
-    emitChangeEvent() {
-        selectionChangeSubject.next({
-            lenght: this.getFlatComponents().length,
+    getComponents() {
+        return this._components;
+    }
+
+    getFirstIndexComponent() {
+        return this._components[0]
+    }
+
+    isEmpty() {
+        return this._components.length === 0
+    }
+
+    toData(): SelectionData | undefined {
+        const lenght = this.getFlatComponents().length
+
+        if (lenght == 0) {
+            return undefined
+        }
+        return {
+            lenght: lenght,
             x: this.getX(),
             y: this.getY(),
             width: this.getWidth(),
@@ -290,23 +301,7 @@ export class Selection {
             color: this.getFillColor(),
             borderColor: this.getBorderColor(),
             borderWidth: this.getBorderWidth()
-        })
-    }
-
-    getComponents() {
-        return this._components;
-    }
-
-    getFirstIndexComponent() {
-        for (const component of this._components) {
-            console.log(component.getIndexsChain().join("."))
         }
-
-        return this._components[0]
-    }
-
-    isEmpty() {
-        return this._components.length === 0
     }
 
 }

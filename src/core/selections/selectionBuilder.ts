@@ -1,5 +1,5 @@
 import { Editor } from "../editor";
-import { SelectionManager } from "../selectionManager";
+import { SelectionManager } from "./selectionManager";
 import { Selection } from "./selection";
 import { TreeComponent } from "../tree/treeComponent";
 import { TreeContainer } from "../tree/treeContainer";
@@ -65,9 +65,5 @@ export class SelectionBuilder {
 
     build() {
         return new Selection(this._components)
-    }
-
-    apply(selector: SelectionManager) {
-        selector.setSelection(this.build())
     }
 }

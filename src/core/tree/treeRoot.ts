@@ -1,3 +1,4 @@
+import { UpdateSelectionAction } from "../actions/updateSelectionAction";
 import { Editor } from "../editor";
 import { Selection } from "../selections/selection";
 import { TreeComponent } from "./treeComponent";
@@ -14,7 +15,7 @@ export class TreeRoot extends TreeContainer {
             return false
         }
 
-        const fromContainer = component.getContainerParent()
+        const fromContainer = component.getParentContainer()
 
         if (fromContainer) {
             let fromIdx = fromIndexs.slice(-1)[0]
@@ -27,17 +28,15 @@ export class TreeRoot extends TreeContainer {
             }
 
             fromContainer.remove(component)
-            toContainer.add(component, toIdx)
+            toContainer.addAtIndex(component, toIdx)
 
             if (fromContainer.isEmpty()) {
-                const parent = fromContainer.getContainerParent()
+                const parent = fromContainer.getParentContainer()
                 if (parent) {
                     parent.remove(fromContainer)
                 }
             }
         }
-
-        Editor.getEditor().treeManager.emitTreeChangeEvent()
     }
 
     groupeSelection(selection: Selection) {
@@ -47,25 +46,23 @@ export class TreeRoot extends TreeContainer {
         const newGroupeComponent = new TreeContainer(`groupe ${treeManager.getNextName()}`)
 
         if (selection.isEmpty()) {
-            console.log("SELECTION EMPTY")
             return
         }
 
-        const targetParent = selection.getFirstIndexComponent().getContainerParent()
+        const targetParent = selection.getFirstIndexComponent().getParentContainer()
 
         if (!targetParent) {
-            console.log("NO PARENT")
             return
         }
 
         editor.selectionManager.unselectAll()
 
         for (const component of selection.getComponents()) {
-            component.getContainerParent()?.remove(component)
+            component.getParentContainer()?.remove(component)
             newGroupeComponent.add(component)
         }
 
-        treeManager.registerContainer(newGroupeComponent, false)
+        treeManager.registerComponent(newGroupeComponent)
         targetParent.add(newGroupeComponent)
 
         editor.selectionManager.setSelection(new Selection([newGroupeComponent]))

@@ -7,6 +7,7 @@ import { SelectionState } from "../../core/tools/selectStates/selection";
 import "./treeComponent.scss";
 import { DragOrigin, DragTarget } from "./tree";
 import { Selection } from "../../core/selections/selection";
+import { UpdateSelectionAction } from "../../core/actions/updateSelectionAction";
 
 interface Props {
     indexs: number[],
@@ -36,9 +37,17 @@ const TreeComponentView: React.FC<Props> = ({
 
         if (container) {
             if (editor.keyboardManager.keyboardController.keys.control.pressed) {
-                editor.selectionManager.getSelection().getBuilder(editor).add(container).apply(editor.selectionManager)
+                editor.actionManager.push(
+                    new UpdateSelectionAction(
+                        editor.selectionManager.getSelection().getBuilder(editor).add(container).build()
+                    )
+                )
             } else {
-                editor.selectionManager.setSelection(new Selection([container]))
+                editor.actionManager.push(
+                    new UpdateSelectionAction(
+                        new Selection([container])
+                    )
+                )
             }
         }
 
@@ -46,8 +55,6 @@ const TreeComponentView: React.FC<Props> = ({
         if (currentTool instanceof SelectTool) {
             currentTool.setState(new SelectionState(currentTool))
         }
-
-        // activeMove()
 
         setDragOrigin({
             indexs: indexs

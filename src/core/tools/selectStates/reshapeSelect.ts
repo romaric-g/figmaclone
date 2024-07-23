@@ -6,6 +6,8 @@ import { SelectionState } from "./selection";
 import { Editor } from "../../editor";
 import { findMinimumDifference } from "../../utils/findMinimumDifference";
 import { StickyLineReshapeRenderer } from "../../canvas/renderer/stickyLineReshape";
+import { UpdateSelectionAction } from "../../actions/updateSelectionAction";
+import { UpdateSelectionPropertiesAction } from "../../actions/updateSelectionPropertiesAction";
 
 
 export type ReshapeReference = "none" | "top" | "left" | "bottom" | "right" | "top-left" | "top-right" | "bottom-left" | "bottom-right"
@@ -144,12 +146,19 @@ export class ReshapeSelectState extends SelectToolState {
 
         const stickyShape = this.getStickyReshape(newX, newY, newWidth, newHeight)
 
-        this.element.x = stickyShape.x;
-        this.element.y = stickyShape.y;
-        this.element.width = stickyShape.width;
-        this.element.height = stickyShape.height;
+        const selection = this.selectTool.editor.selectionManager.getSelection()
 
-        this.selectTool.editor.selectionManager.getSelection().emitChangeEvent()
+        this.selectTool.editor.actionManager.push(
+            new UpdateSelectionPropertiesAction(
+                selection,
+                (selection) => {
+                    selection.setX(stickyShape.x)
+                    selection.setY(stickyShape.y)
+                    selection.setWidth(stickyShape.width)
+                    selection.setHeight(stickyShape.height)
+                }
+            )
+        )
     }
 
     getStickyReshape(x: number, y: number, width: number, height: number) {

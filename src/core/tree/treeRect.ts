@@ -165,8 +165,6 @@ export class TreeRect extends TreeComponent<TreeRectData> {
             return;
         }
 
-        console.log("INIT RECT")
-
         const editor = Editor.getEditor()
 
         this._contextEditor = editor;

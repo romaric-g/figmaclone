@@ -12,15 +12,11 @@ export abstract class TreeComponent<T extends TreeComponentData = TreeComponentD
         this.name = name
     }
 
-    setParentContainer(treeContainer: TreeContainer) {
+    updateParentContainerCache(treeContainer?: TreeContainer) {
         this.currentContainerParent = treeContainer
     }
 
-    deleteParentContainer() {
-        this.currentContainerParent = undefined;
-    }
-
-    getContainerParent() {
+    getParentContainer() {
         return this.currentContainerParent;
     }
 

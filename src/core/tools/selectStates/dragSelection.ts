@@ -13,6 +13,7 @@ import { SelectionBuilder } from "../../selections/selectionBuilder";
 import { TreeComponent } from "../../tree/treeComponent";
 import { Selection } from "../../selections/selection";
 import { SelectionState } from "./selection";
+import { UpdateSelectionAction } from "../../actions/updateSelectionAction";
 
 export class DragSelectionState extends SelectToolState {
 
@@ -82,17 +83,16 @@ export class DragSelectionState extends SelectToolState {
             }
         }
 
-        editor.selectionManager.setSelection(new Selection(toSelectComponents))
-
+        editor.actionManager.push(
+            new UpdateSelectionAction(new Selection(toSelectComponents))
+        )
     }
 
     onInit(): void {
-        console.log("INIT DRAG STATE")
         this._renderer.init()
     }
 
     onDestroy(): void {
-        console.log("DESTROY DRAG STATE")
         this._renderer.destroy()
     }
 

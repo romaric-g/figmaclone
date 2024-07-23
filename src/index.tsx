@@ -7,6 +7,7 @@ import { TreeRect } from './core/tree/treeRect';
 import { TreeContainer } from './core/tree/treeContainer';
 import { TreeComponent } from './core/tree/treeComponent';
 import { Selection } from './core/selections/selection';
+import { treeElementSubject } from './ui/subjects';
 
 async function main() {
     const editor = Editor.getEditor()
@@ -70,11 +71,12 @@ async function main() {
     ]
 
     for (let rect of rootComponents) {
-        editor.treeManager.registerContainer(rect, true)
+        editor.treeManager.registerComponent(rect)
+        editor.treeManager.getTree().add(rect)
     }
 
     editor.treeManager.getTree().moveFromIndexs([1], [3])
-    editor.treeManager.emitTreeChangeEvent()
+    treeElementSubject.next(editor.treeManager.toData())
 
     const domElement = document.getElementById('app')
 

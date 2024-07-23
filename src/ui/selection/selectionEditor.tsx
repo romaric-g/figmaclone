@@ -1,69 +1,87 @@
 import React, { useCallback } from "react";
 import { selectionChangeSubject } from "../subjects";
-import { ColorSource, FillStyleInputs } from "pixi.js";
-import { every } from "rxjs";
 import { Editor } from "../../core/editor";
 import "./selectionEditor.scss"
 import SelectionInput from "./selectionInput";
 import { HsvaColor, RgbaColor, RgbColor } from "@uiw/react-color";
 import ColorPicker from "./colorPicker";
 import Icon from "../components/Icon";
+import { UpdateSelectionPropertiesAction } from "../../core/actions/updateSelectionPropertiesAction";
 
-interface Props {
 
+
+
+const getSelection = () => {
+    return Editor.getEditor().selectionManager.getSelection()
+}
+
+const getActionManager = () => {
+    return Editor.getEditor().actionManager
 }
 
 
 const changeNumericalValue = (type: "x" | "y" | "height" | "width", value: number) => {
-    const selection = Editor.getEditor().selectionManager.getSelection()
-
-    switch (type) {
-        case "x":
-            selection.setX(value)
-            break;
-        case "y":
-            selection.setY(value)
-            break;
-        case "width":
-            selection.setWidth(value)
-            break;
-        case "height":
-            selection.setHeight(value)
-            break;
-        default:
-            break;
-    }
-
-}
-
-// function isRGBColor(obj: any): obj is RGBColor {
-//     return obj && typeof obj.r === 'number' && typeof obj.g === 'number' && typeof obj.b === 'number';
-// }
-
-function getSelection() {
-    return Editor.getEditor().selectionManager.getSelection()
-}
-
-const ElementEditor: React.FC<Props> = () => {
     const selection = getSelection()
+    const actionManager = getActionManager()
+
+    actionManager.push(
+        new UpdateSelectionPropertiesAction(selection, (selection) => {
+            switch (type) {
+                case "x":
+                    selection.setX(value)
+                    break;
+                case "y":
+                    selection.setY(value)
+                    break;
+                case "width":
+                    selection.setWidth(value)
+                    break;
+                case "height":
+                    selection.setHeight(value)
+                    break;
+                default:
+                    break;
+            }
+        })
+    )
+}
+
+interface Props {
+    initialHeight: number | "mixed",
+    initialWidth: number | "mixed",
+    initialX: number | "mixed",
+    initialY: number | "mixed"
+}
+
+
+const SelectionEditor: React.FC<Props> = (props) => {
+    const selection = getSelection()
+    const {
+        initialHeight,
+        initialWidth,
+        initialX,
+        initialY
+    } = props
 
     const [color, setColor] = React.useState<HsvaColor | "mixed">()
     const [borderColor, setBorderColor] = React.useState<HsvaColor | "mixed">()
     const [borderWidth, setBorderWidth] = React.useState<number | "mixed">()
-    const [height, setHeight] = React.useState<number | "mixed">(selection.getHeight())
-    const [widht, setWidth] = React.useState<number | "mixed">(selection.getWidth())
-    const [x, setX] = React.useState<number | "mixed">(selection.getX())
-    const [y, setY] = React.useState<number | "mixed">(selection.getY())
+    const [height, setHeight] = React.useState<number | "mixed">(initialHeight)
+    const [widht, setWidth] = React.useState<number | "mixed">(initialWidth)
+    const [x, setX] = React.useState<number | "mixed">(initialX)
+    const [y, setY] = React.useState<number | "mixed">(initialY)
 
     React.useEffect(() => {
         const eventSub = selectionChangeSubject.subscribe(event => {
-            setX(event.x)
-            setY(event.y)
-            setWidth(event.width)
-            setHeight(event.height)
-            setColor(event.color)
-            setBorderColor(event.borderColor)
-            setBorderWidth(event.borderWidth)
+            if (event) {
+                setX(event.x)
+                setY(event.y)
+                setWidth(event.width)
+                setHeight(event.height)
+                setColor(event.color)
+                setBorderColor(event.borderColor)
+                setBorderWidth(event.borderWidth)
+            }
         });
 
         return () => {
@@ -73,23 +91,40 @@ const ElementEditor: React.FC<Props> = () => {
 
     const handleFillColorChange = React.useCallback((newColor: HsvaColor) => {
         const selection = getSelection()
-        setColor(newColor)
-        selection.setFillColor(newColor)
+        const actionManager = getActionManager()
 
+        setColor(newColor)
+
+        actionManager.push(
+            new UpdateSelectionPropertiesAction(selection, (selection) => {
+                selection.setFillColor(newColor)
+            })
+        )
     }, [])
 
     const handlBorderColorChange = React.useCallback((newColor: HsvaColor) => {
         const selection = getSelection()
-        setBorderColor(newColor)
-        selection.setBorderColor(newColor)
+        const actionManager = getActionManager()
 
+        setBorderColor(newColor)
+
+        actionManager.push(
+            new UpdateSelectionPropertiesAction(selection, (selection) => {
+                selection.setBorderColor(newColor)
+            })
+        )
     }, [])
 
     const handlBorderWidthChange = React.useCallback((newWidth: number) => {
         const selection = getSelection()
+        const actionManager = getActionManager()
         setBorderWidth(newWidth)
-        selection.setBorderWidth(newWidth)
 
+        actionManager.push(
+            new UpdateSelectionPropertiesAction(selection, (selection) => {
+                selection.setBorderWidth(newWidth)
+            })
+        )
     }, [])
 
     if (selection.getFlatComponents().length == 0) {
@@ -166,4 +201,4 @@ const ElementEditor: React.FC<Props> = () => {
     )
 }
 
-export default ElementEditor;
+export default SelectionEditor;

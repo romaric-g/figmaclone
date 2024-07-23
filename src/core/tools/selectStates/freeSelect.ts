@@ -5,6 +5,8 @@ import { MovableSelectionState } from "./movableSelection";
 import { SelectToolState } from "./abstractSelectState";
 import { cursorChangeSubject } from "../../../ui/subjects";
 import { DragSelectionState } from "./dragSelection";
+import { UpdateSelectionAction } from "../../actions/updateSelectionAction";
+import { Selection } from "../../selections/selection";
 
 export class FreeSelectState extends SelectToolState {
     constructor(selectTool: SelectTool) {
@@ -18,9 +20,11 @@ export class FreeSelectState extends SelectToolState {
         const localPosition = editor.getDrawingPosition(pointerPosition).clone()
         const topComponent = selector.getOriginComponentsChain(element)[0]
 
-        const selectionBuilder = selector.getSelection().getBuilder(editor)
-
-        selectionBuilder.set(topComponent).apply(selector)
+        editor.actionManager.push(
+            new UpdateSelectionAction(
+                new Selection([topComponent])
+            )
+        )
 
         const newState = new MovableSelectionState(this.selectTool, localPosition, topComponent, true)
         this.selectTool.setState(newState)

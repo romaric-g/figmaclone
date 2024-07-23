@@ -2,17 +2,17 @@ import { Graphics, GraphicsContext, Point } from "pixi.js";
 import { Editor } from "../../editor";
 import { SelectionLayer } from "../layers/selection";
 import { getDrawingCoveredRect } from "../../utils/getDrawingCoveredRect";
-import { ReshapeSelectState } from "../../tools/selectStates/reshapeSelect";
 import { drawCross } from "../../utils/drawCross";
+import { DrawTool } from "../../tools/drawTool";
 
-export class StickyLineReshapeRenderer {
+export class StickyLineDrawRenderer {
 
     private graphics: Graphics;
-    private reshapeSelectState: ReshapeSelectState;
+    private drawTool: DrawTool;
 
-    constructor(reshapeSelectState: ReshapeSelectState) {
+    constructor(drawTool: DrawTool) {
         this.graphics = new Graphics()
-        this.reshapeSelectState = reshapeSelectState;
+        this.drawTool = drawTool;
     }
 
     render() {
@@ -35,7 +35,7 @@ export class StickyLineReshapeRenderer {
 
         const mergedIndexs: number[] = []
 
-        const { left, right, top, bottom } = this.reshapeSelectState.getStickyInfo()
+        const { left, right, top, bottom } = this.drawTool.getStickyInfo()
 
         if (left) {
             mergedIndexs.push(...xs.map((_x, i) => [_x, i]).filter(([_x, _]) => _x === minX).map(([_x, i]) => i))

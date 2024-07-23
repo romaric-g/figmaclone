@@ -173,9 +173,6 @@ const ColorPicker = ({ color, onChange }: Props) => {
                                 hue={color.h}
                                 style={{ height: 14 }}
                                 onChange={(newHue) => {
-
-                                    console.log("newHue", newHue)
-
                                     const newHsva = { ...color, ...newHue }
 
                                     onChange(newHsva);

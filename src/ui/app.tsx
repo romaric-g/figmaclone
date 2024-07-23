@@ -3,11 +3,12 @@ import TreeView from "./tree/tree";
 import ToolbarView from "./tool/toolbar";
 import { ToolType } from "../core/tools/toolManager";
 import Canvas from "./canvas/canvas";
-import ElementEditor from "./selection/selectionEditor";
+import SelectionEditor from "./selection/selectionEditor";
 import { Editor } from "../core/editor";
 import { currentToolSubject, TreeData, treeElementSubject } from "./subjects";
 import "./app.scss";
 import "./reset.scss"
+import SelectionEditorBox from "./selection/selectionEditorBox";
 
 const App: React.FC = () => {
 
@@ -42,7 +43,7 @@ const App: React.FC = () => {
                 <Canvas />
             </div>
             <div className="App__rightside">
-                <ElementEditor />
+                <SelectionEditorBox />
             </div>
         </div >
     )

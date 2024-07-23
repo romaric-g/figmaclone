@@ -1,6 +1,5 @@
 import { TreeRect } from "./treeRect"
 import { TreeComponent } from "./treeComponent"
-import { GlobalSelectionBoxRenderer } from "../canvas/renderer/globalSelectionBox";
 import { ContainerSelectionBox } from "../canvas/renderer/containerSelectionBox";
 import { Editor } from "../editor";
 import { TreeContainerData } from "../../ui/subjects";
@@ -15,45 +14,46 @@ export class TreeContainer extends TreeComponent<TreeContainerData> {
     private _hover: boolean = false;
     private _initialized: boolean = false;
 
-    constructor(name: string, components: TreeComponent[] = []) {
+    constructor(name: string) {
         super(name)
         this.selectionRenderer = new ContainerSelectionBox(this)
-        components.forEach((c) => this.add(c))
     }
 
     init() {
-        console.log("INIT GROUPE")
         if (!this._initialized) {
             const selectionLayer = Editor.getEditor().canvasApp.getSelectionLayer()
             this.selectionRenderer.init(selectionLayer)
             this._initialized = true
         }
-
     }
 
     destroy() {
-        if (!this._initialized) {
+        if (this._initialized) {
             const selectionLayer = Editor.getEditor().canvasApp.getSelectionLayer()
             this.selectionRenderer.destroy(selectionLayer)
             this._initialized = false
         }
     }
 
-    add(element: TreeComponent, index?: number): void {
-        if (index !== undefined && index >= 0 && index <= this.components.length) {
+    add(element: TreeComponent): void {
+        this.components.push(element);
+        element.updateParentContainerCache(this);
+    }
+
+    addAtIndex(element: TreeComponent, index: number): void {
+        if (index >= 0 && index <= this.components.length) {
             this.components.splice(index, 0, element);
+            element.updateParentContainerCache(this);
         } else {
-            this.components.push(element);
+            this.add(element)
         }
-        element.setParentContainer(this);
     }
 
     remove(element: TreeComponent): void {
         const index = this.components.indexOf(element);
         if (index !== -1) {
             this.components.splice(index, 1);
-            element.deleteParentContainer()
-
+            element.updateParentContainerCache(undefined)
         }
     }
 

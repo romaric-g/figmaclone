@@ -5,6 +5,8 @@ import { SelectionState } from "./selection";
 import { SelectToolState } from "./abstractSelectState";
 import { TreeComponent } from "../../tree/treeComponent";
 import { StickyLineRenderer } from "../../canvas/renderer/stickyLine";
+import { UpdateSelectionPropertiesAction } from "../../actions/updateSelectionPropertiesAction";
+import { UpdateSelectionAction } from "../../actions/updateSelectionAction";
 
 export class MovableSelectionState extends SelectToolState {
     private _sourceClickedPosition: Point;
@@ -52,17 +54,25 @@ export class MovableSelectionState extends SelectToolState {
 
     onClickUp(element: TreeRect, shift: boolean) {
         const editor = this.selectTool.editor
-        const selector = editor.selectionManager;
-        const selectionBuilder = selector.getSelection().getBuilder(editor)
+        const selectionManager = editor.selectionManager;
+        const selectionBuilder = selectionManager.getSelection().getBuilder(editor)
 
         if (!this.haveMoov()) {
             if (shift) {
                 // Si l'element n'a pas été ajouté lors du click down source
                 if (!this._componentAddedBefore) {
-                    selectionBuilder.remove(this._moveComponent).apply(selector)
+                    editor.actionManager.push(
+                        new UpdateSelectionAction(
+                            selectionBuilder.remove(this._moveComponent).build()
+                        )
+                    )
                 }
             } else {
-                selectionBuilder.set(this._moveComponent).apply(selector)
+                editor.actionManager.push(
+                    new UpdateSelectionAction(
+                        selectionBuilder.set(this._moveComponent).build()
+                    )
+                )
             }
         }
 
@@ -74,8 +84,6 @@ export class MovableSelectionState extends SelectToolState {
         const movementVector = this.getMouvementVector(localPostion)
         const selection = this.selectTool.editor.selectionManager.getSelection()
 
-        console.log("movementVector", movementVector)
-
         const {
             vector,
             stickyX,
@@ -85,9 +93,11 @@ export class MovableSelectionState extends SelectToolState {
         this._stickyX = stickyX;
         this._stickyY = stickyY;
 
-        console.log("vector", vector)
-
-        selection.move(vector)
+        this.selectTool.editor.actionManager.push(
+            new UpdateSelectionPropertiesAction(selection, (selection) => {
+                selection.move(vector)
+            })
+        )
 
         if (!this._haveMove) {
             this._haveMove = true;

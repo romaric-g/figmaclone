@@ -5,7 +5,7 @@ import { HsvaColor, RgbaColor, RgbColor } from '@uiw/react-color';
 
 export const treeElementSubject = new Subject<TreeData>();
 export const currentToolSubject = new Subject<ToolType>();
-export const selectionChangeSubject = new Subject<SelectionData>();
+export const selectionChangeSubject = new Subject<SelectionData | undefined>();
 export const cursorChangeSubject = new Subject<string>()
 
 
