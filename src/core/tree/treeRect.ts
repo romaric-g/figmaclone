@@ -5,10 +5,13 @@ import { RectSelectionRenderer } from "../canvas/renderer/rectSelectionBox";
 import { TreeComponent } from "./treeComponent";
 import { TreeRectData } from "../../ui/subjects";
 import { HsvaColor, RgbColor } from "@uiw/react-color";
+import { SerialisedTreeComponent } from "./serialized/serialisedTreeComponent";
+import { SerialisedTreeRect } from "./serialized/serialisedTreeRect";
+import { hsvaToRgba, rgbaToHsva } from '@uiw/color-convert'
 
 interface ElementProps {
-    x: number,
-    y: number,
+    x?: number,
+    y?: number,
     width?: number,
     height?: number,
     fillColor?: HsvaColor,
@@ -17,7 +20,6 @@ interface ElementProps {
 }
 
 export class TreeRect extends TreeComponent<TreeRectData> {
-
     // private graphics: Graphics;
 
     private _contextEditor?: Editor;
@@ -30,47 +32,34 @@ export class TreeRect extends TreeComponent<TreeRectData> {
 
     private _hover: boolean = false;
 
-    private _x: number;
-    private _y: number;
-    private _width: number;
-    private _height: number;
-
-    private _fillColor: HsvaColor;
-    private _borderColor: HsvaColor;
+    private _x!: number;
+    private _y!: number;
+    private _width!: number;
+    private _height!: number;
+    private _fillColor!: HsvaColor;
+    private _borderColor!: HsvaColor;
 
     private _borderWidth: number = 0;
 
-    public get fillColor() {
-        return this._fillColor
-    }
-
-    public set fillColor(value: HsvaColor) {
-        this._fillColor = {
-            h: value.h,
-            s: value.s,
-            v: value.v,
-            a: Math.round((value.a + Number.EPSILON) * 100) / 100
-        }
-    }
-
     constructor({
-        x, y, width = 100, height = 100,
         name = "",
+        x = 0, y = 0, width = 100, height = 100,
         borderColor = { h: 0, s: 0, v: 0, a: 1 },
         fillColor = { h: 0, s: 0, v: 0, a: 1 },
     }: ElementProps) {
         super(name)
 
-        this._x = x;
-        this._y = y;
-        this._width = width;
-        this._height = height;
-        this._fillColor = fillColor;
-        this._borderColor = borderColor;
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.fillColor = fillColor;
+        this.borderColor = borderColor;
 
         this._elementSelectionRenderer = new RectSelectionRenderer(this)
         this._elementTreeRenderer = new RectRenderer(this)
     }
+
 
     set x(value: number) {
         this._x = Math.round((value) * 100) / 100
@@ -105,17 +94,35 @@ export class TreeRect extends TreeComponent<TreeRectData> {
     }
 
 
-    get borderColor() {
-        return this._borderColor;
+    public get fillColor() {
+        return this._fillColor
     }
 
-    set borderColor(value: HsvaColor) {
-        this._borderColor = {
+    public set fillColor(value: HsvaColor) {
+
+        const roundOpacityValue = {
             h: value.h,
             s: value.s,
             v: value.v,
             a: Math.round((value.a + Number.EPSILON) * 100) / 100
         }
+
+        this._fillColor = rgbaToHsva(hsvaToRgba(roundOpacityValue))
+    }
+
+    get borderColor() {
+        return this._borderColor;
+    }
+
+    set borderColor(value: HsvaColor) {
+        const roundOpacityValue = {
+            h: value.h,
+            s: value.s,
+            v: value.v,
+            a: Math.round((value.a + Number.EPSILON) * 100) / 100
+        }
+
+        this._borderColor = rgbaToHsva(hsvaToRgba(roundOpacityValue))
     }
 
     get borderWidth() {
@@ -160,10 +167,12 @@ export class TreeRect extends TreeComponent<TreeRectData> {
 
 
 
-    init() {
+    init(resetId: boolean) {
         if (this._contextEditor) {
             return;
         }
+
+        super.init(resetId)
 
         const editor = Editor.getEditor()
 
@@ -176,17 +185,29 @@ export class TreeRect extends TreeComponent<TreeRectData> {
         const eventsManager = editor.eventsManager;
 
         graphics.on('pointerdown', (event) => {
+            if (event.button === 2) return
             eventsManager.onElementPressDown.emit({
                 element: this,
                 pointerPosition: event.global,
                 button: event.button
             })
+
         });
         graphics.on('pointerup', (event) => {
+            if (event.button === 2) return
             eventsManager.onElementPressUp.emit({ element: this, button: event.button })
         })
         graphics.on('pointerupoutside', (event) => {
+            if (event.button === 2) return
             eventsManager.onElementPressUp.emit({ element: this, button: event.button })
+        })
+
+        graphics.on('rightdown', (event) => {
+            eventsManager.onElementRightDown.emit({
+                element: this,
+                pointerPosition: event.global,
+                originalEvent: event
+            })
         })
 
         graphics.on('pointerenter', (event) => {
@@ -206,6 +227,8 @@ export class TreeRect extends TreeComponent<TreeRectData> {
 
     destroy() {
         if (this._contextEditor) {
+            super.destroy()
+
             this._elementSelectionRenderer.destroy(this._contextEditor.canvasApp.getSelectionLayer())
             this._elementTreeRenderer.destroy(this._contextEditor.canvasApp.getTreeLayer())
             this._contextEditor = undefined;
@@ -267,6 +290,41 @@ export class TreeRect extends TreeComponent<TreeRectData> {
             maxY: globalPoint.y + globalHeight
         }
     }
+
+    serialize(): SerialisedTreeRect {
+        return new SerialisedTreeRect({
+            name: this.getName(),
+            id: this.getId(),
+            x: this.x,
+            y: this.y,
+            width: this.width,
+            height: this.height,
+            fillColor: this.fillColor,
+            borderColor: this.borderColor,
+            borderWidth: this.borderWidth
+        })
+    }
+
+    public static deserialize(serialisedTreeRect: SerialisedTreeRect) {
+
+        const newRect = new TreeRect({
+            name: serialisedTreeRect.props.name
+        })
+
+        newRect._id = serialisedTreeRect.props.id;
+        newRect._x = serialisedTreeRect.props.x;
+        newRect._y = serialisedTreeRect.props.y;
+        newRect._width = serialisedTreeRect.props.width;
+        newRect._height = serialisedTreeRect.props.height;
+        newRect._fillColor = serialisedTreeRect.props.fillColor;
+        newRect._borderColor = serialisedTreeRect.props.borderColor;
+
+        newRect._borderWidth = serialisedTreeRect.props.borderWidth || 0
+
+        return newRect;
+
+    }
+
 }
 
 

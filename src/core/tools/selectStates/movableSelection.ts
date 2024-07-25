@@ -6,7 +6,11 @@ import { SelectToolState } from "./abstractSelectState";
 import { TreeComponent } from "../../tree/treeComponent";
 import { StickyLineRenderer } from "../../canvas/renderer/stickyLine";
 import { UpdateSelectionPropertiesAction } from "../../actions/updateSelectionPropertiesAction";
-import { UpdateSelectionAction } from "../../actions/updateSelectionAction";
+import { Editor } from "../../editor";
+import { ClearSelection } from "../../actions/clearSelection";
+import { FreeSelectState } from "./freeSelect";
+import { SetSelectionAction } from "../../actions/setSelectionAction";
+import { SetSelectionPropertiesAction } from "../../actions/setSelectionPropertiesAction";
 
 export class MovableSelectionState extends SelectToolState {
     private _sourceClickedPosition: Point;
@@ -62,18 +66,22 @@ export class MovableSelectionState extends SelectToolState {
                 // Si l'element n'a pas été ajouté lors du click down source
                 if (!this._componentAddedBefore) {
                     editor.actionManager.push(
-                        new UpdateSelectionAction(
+                        new SetSelectionAction(
                             selectionBuilder.remove(this._moveComponent).build()
                         )
                     )
                 }
             } else {
                 editor.actionManager.push(
-                    new UpdateSelectionAction(
+                    new SetSelectionAction(
                         selectionBuilder.set(this._moveComponent).build()
                     )
                 )
             }
+        } else {
+            this.selectTool.editor.actionManager.push(
+                new SetSelectionPropertiesAction(Editor.getEditor().selectionManager.getSelection())
+            )
         }
 
         this.selectTool.setState(new SelectionState(this.selectTool))
@@ -106,7 +114,23 @@ export class MovableSelectionState extends SelectToolState {
 
     onClickDown(element: TreeRect, shift: boolean, pointerPosition: Point): void { }
     onBackgroundPointerDown(clickPosition: Point): void { }
-    onBackgroundPointerUp(clickPosition: Point): void { }
+    onBackgroundPointerUp(clickPosition: Point): void {
+
+        if (this.haveMoov()) {
+            this.selectTool.editor.actionManager.push(
+                new SetSelectionPropertiesAction(Editor.getEditor().selectionManager.getSelection())
+            )
+
+            this.selectTool.setState(new SelectionState(this.selectTool))
+        } else {
+            Editor.getEditor().actionManager.push(
+                new ClearSelection()
+            )
+
+            this.selectTool.setState(new FreeSelectState(this.selectTool))
+        }
+
+    }
 
     render() {
         this.stickyLineRenderer.render()

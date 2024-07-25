@@ -8,6 +8,8 @@ type UpdatePropertiesCallback = (selection: Selection) => void
 
 export class UpdateSelectionPropertiesAction extends Action {
 
+    public static lastActions: UpdateSelectionPropertiesAction;
+
     private selection: Selection;
     private updateProperties: UpdatePropertiesCallback;
 

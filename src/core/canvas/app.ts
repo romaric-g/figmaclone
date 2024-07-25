@@ -36,9 +36,12 @@ export class CanvasApp {
         this._app.ticker.maxFPS = 90
         this._app.ticker.add(() => {
 
+
             this._treeLayer.getContainer().x = this.getEditor().zoom.getX()
             this._treeLayer.getContainer().y = this.getEditor().zoom.getY()
             this._treeLayer.getContainer().scale = this.getEditor().zoom.getCurrentScale()
+
+            this._backgroundLayer.render()
 
             this.getEditor().treeManager.render()
             this.getEditor().selectionManager.render()
@@ -69,7 +72,6 @@ export class CanvasApp {
     getCanvas() {
         return this._app.canvas;
     }
-
 
     getEditor() {
         return this._editor;

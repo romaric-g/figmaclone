@@ -1,7 +1,5 @@
-import { UpdateSelectionAction } from "../actions/updateSelectionAction";
 import { Editor } from "../editor";
 import { Selection } from "../selections/selection";
-import { TreeComponent } from "./treeComponent";
 import { TreeContainer } from "./treeContainer";
 
 
@@ -62,9 +60,12 @@ export class TreeRoot extends TreeContainer {
             newGroupeComponent.add(component)
         }
 
-        treeManager.registerComponent(newGroupeComponent)
+        newGroupeComponent.init(true)
+
         targetParent.add(newGroupeComponent)
 
         editor.selectionManager.setSelection(new Selection([newGroupeComponent]))
     }
+
+
 }

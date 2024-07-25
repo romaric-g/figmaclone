@@ -6,10 +6,10 @@ import { SelectToolState } from "./abstractSelectState";
 import { cursorChangeSubject } from "../../../ui/subjects";
 import { getCursorType, ReshapeReference, ReshapeSelectState } from "./reshapeSelect";
 import { TreeContainer } from "../../tree/treeContainer";
-import { DragSelectionState } from "./dragSelection";
 import { Editor } from "../../editor";
-import { UpdateSelectionAction } from "../../actions/updateSelectionAction";
 import { ClearSelection } from "../../actions/clearSelection";
+import { DragSelectionState } from "./dragSelection";
+import { UpdatingSelectionAction } from "../../actions/updatingSelectionAction";
 
 export class SelectionState extends SelectToolState {
 
@@ -83,9 +83,9 @@ export class SelectionState extends SelectToolState {
         const editor = this.selectTool.editor
         const selector = editor.selectionManager;
 
-        const localPostion = editor.getDrawingPosition(pointerPosition).clone()
+        const localPosition = editor.getDrawingPosition(pointerPosition).clone()
 
-        const topComponentChain = selector.getOriginComponentsChain(element)
+        const topComponentChain = selector.getComponentsChainFromRoot(element)
 
         const chainIdx = isDouble && topComponentChain.length > 1 ? 1 : 0
         const topComponent = topComponentChain[chainIdx]
@@ -93,24 +93,24 @@ export class SelectionState extends SelectToolState {
         if (topComponent instanceof TreeContainer || topComponent instanceof TreeRect) {
             const selectionBuilder = selector.getSelection().getBuilder(editor)
 
-            this.updateReshapeReference(localPostion)
+            this.updateReshapeReference(localPosition)
 
             if (this._reshapeReference === "none") {
                 if (topComponent.isSelected()) {
-                    const newState = new MovableSelectionState(this.selectTool, localPostion, topComponent, false)
+                    const newState = new MovableSelectionState(this.selectTool, localPosition, topComponent, false)
                     this.selectTool.setState(newState)
                 } else {
-                    const newState = new MovableSelectionState(this.selectTool, localPostion, topComponent, true)
+                    const newState = new MovableSelectionState(this.selectTool, localPosition, topComponent, true)
 
                     if (shift) {
                         editor.actionManager.push(
-                            new UpdateSelectionAction(
+                            new UpdatingSelectionAction(
                                 selectionBuilder.add(topComponent).build()
                             )
                         )
                     } else {
                         editor.actionManager.push(
-                            new UpdateSelectionAction(
+                            new UpdatingSelectionAction(
                                 selectionBuilder.set(topComponent).build()
                             )
                         )
@@ -118,9 +118,11 @@ export class SelectionState extends SelectToolState {
 
                     this.selectTool.setState(newState)
                 }
-            } else if (this._singleElement) {
-                const newState = new ReshapeSelectState(this.selectTool, this._singleElement, this._reshapeReference, localPostion);
-                this.selectTool.setState(newState)
+            } else {
+                if (this._singleElement) {
+                    const newState = new ReshapeSelectState(this.selectTool, this._singleElement, this._reshapeReference, localPosition);
+                    this.selectTool.setState(newState)
+                }
             }
         }
     }
@@ -133,12 +135,26 @@ export class SelectionState extends SelectToolState {
         if (this._singleElement && this._reshapeReference !== "none") {
             const newState = new ReshapeSelectState(this.selectTool, this._singleElement, this._reshapeReference, localPosition);
             this.selectTool.setState(newState)
+        } else {
+            const isShift = this.selectTool.editor.keyboardManager.keyboardController.keys.shift.pressed
+            const selection = this.selectTool.editor.selectionManager.getSelection()
+            const isInSelection = selection.mouseIsIn(clickPosition)
 
-        } else if (!this.selectTool.editor.keyboardManager.keyboardController.keys.shift.pressed) {
-            Editor.getEditor().actionManager.push(
-                new ClearSelection()
-            )
-            this.selectTool.setState(new DragSelectionState(this.selectTool, clickPosition))
+            if (selection.isEmpty()) {
+                return
+            }
+
+            if (!isShift && !isInSelection) {
+                Editor.getEditor().actionManager.push(
+                    new ClearSelection()
+                )
+                this.selectTool.setState(new DragSelectionState(this.selectTool, localPosition))
+            } else if (isInSelection) {
+                const topComponent = selection.getComponents()[0]
+
+                const newState = new MovableSelectionState(this.selectTool, localPosition, topComponent, false)
+                this.selectTool.setState(newState)
+            }
         }
 
     }

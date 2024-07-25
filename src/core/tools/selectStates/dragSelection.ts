@@ -1,20 +1,18 @@
 import { Point } from "pixi.js";
 import { TreeRect } from "../../tree/treeRect";
 import { SelectTool } from "../selectTool";
-import { MovableSelectionState } from "./movableSelection";
 import { SelectToolState } from "./abstractSelectState";
-import { cursorChangeSubject } from "../../../ui/subjects";
-import { getCursorType, ReshapeReference, ReshapeSelectState } from "./reshapeSelect";
 import { FreeSelectState } from "./freeSelect";
-import { TreeContainer } from "../../tree/treeContainer";
 import { DragSelectionBoxRenderer } from "../../canvas/renderer/dragSelectorBox";
 import { Editor } from "../../editor";
-import { SelectionBuilder } from "../../selections/selectionBuilder";
 import { TreeComponent } from "../../tree/treeComponent";
 import { Selection } from "../../selections/selection";
 import { SelectionState } from "./selection";
-import { UpdateSelectionAction } from "../../actions/updateSelectionAction";
+import { UpdatingSelectionAction } from "../../actions/updatingSelectionAction";
+import { SetSelectionAction } from "../../actions/setSelectionAction";
 
+// Quand l'utilisateur presse le bouton gauche de sa souris et alors peut bouger 
+// sa souris pour selectionner un ensemble d'elements
 export class DragSelectionState extends SelectToolState {
 
     private _renderer: DragSelectionBoxRenderer;
@@ -84,7 +82,7 @@ export class DragSelectionState extends SelectToolState {
         }
 
         editor.actionManager.push(
-            new UpdateSelectionAction(new Selection(toSelectComponents))
+            new UpdatingSelectionAction(new Selection(toSelectComponents))
         )
     }
 
@@ -113,9 +111,17 @@ export class DragSelectionState extends SelectToolState {
     }
 
     exit() {
-        if (Editor.getEditor().selectionManager.getSelection().isEmpty()) {
+        const editor = Editor.getEditor()
+        const selection = editor.selectionManager.getSelection()
+
+        if (selection.isEmpty()) {
             this.selectTool.setState(new FreeSelectState(this.selectTool))
         } else {
+
+            editor.actionManager.push(
+                new SetSelectionAction(selection)
+            )
+
             this.selectTool.setState(new SelectionState(this.selectTool))
         }
     }

@@ -7,6 +7,7 @@ import { HsvaColor, RgbaColor, RgbColor } from "@uiw/react-color";
 import ColorPicker from "./colorPicker";
 import Icon from "../components/Icon";
 import { UpdateSelectionPropertiesAction } from "../../core/actions/updateSelectionPropertiesAction";
+import { SetSelectionPropertiesAction } from "../../core/actions/setSelectionPropertiesAction";
 
 
 
@@ -24,25 +25,25 @@ const changeNumericalValue = (type: "x" | "y" | "height" | "width", value: numbe
     const selection = getSelection()
     const actionManager = getActionManager()
 
+    switch (type) {
+        case "x":
+            selection.setX(value)
+            break;
+        case "y":
+            selection.setY(value)
+            break;
+        case "width":
+            selection.setWidth(value)
+            break;
+        case "height":
+            selection.setHeight(value)
+            break;
+        default:
+            break;
+    }
+
     actionManager.push(
-        new UpdateSelectionPropertiesAction(selection, (selection) => {
-            switch (type) {
-                case "x":
-                    selection.setX(value)
-                    break;
-                case "y":
-                    selection.setY(value)
-                    break;
-                case "width":
-                    selection.setWidth(value)
-                    break;
-                case "height":
-                    selection.setHeight(value)
-                    break;
-                default:
-                    break;
-            }
-        })
+        new SetSelectionPropertiesAction(selection)
     )
 }
 
@@ -95,10 +96,10 @@ const SelectionEditor: React.FC<Props> = (props) => {
 
         setColor(newColor)
 
+        selection.setFillColor(newColor)
+
         actionManager.push(
-            new UpdateSelectionPropertiesAction(selection, (selection) => {
-                selection.setFillColor(newColor)
-            })
+            new SetSelectionPropertiesAction(selection)
         )
     }, [])
 
@@ -108,10 +109,10 @@ const SelectionEditor: React.FC<Props> = (props) => {
 
         setBorderColor(newColor)
 
+        selection.setBorderColor(newColor)
+
         actionManager.push(
-            new UpdateSelectionPropertiesAction(selection, (selection) => {
-                selection.setBorderColor(newColor)
-            })
+            new SetSelectionPropertiesAction(selection)
         )
     }, [])
 
@@ -120,10 +121,10 @@ const SelectionEditor: React.FC<Props> = (props) => {
         const actionManager = getActionManager()
         setBorderWidth(newWidth)
 
+        selection.setBorderWidth(newWidth)
+
         actionManager.push(
-            new UpdateSelectionPropertiesAction(selection, (selection) => {
-                selection.setBorderWidth(newWidth)
-            })
+            new SetSelectionPropertiesAction(selection)
         )
     }, [])
 

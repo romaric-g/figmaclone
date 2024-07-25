@@ -1,5 +1,5 @@
 
-export type ValidKey = "shift" | "control" | 'backspace' | 'left' | 'right' | 'up' | 'down' | 'enter' | 'g'
+export type ValidKey = "shift" | "control" | 'backspace' | 'left' | 'right' | 'up' | 'down' | 'enter' | 'g' | 'c' | 'v' | 'y' | 'z'
 
 const keyMap: { [key: string]: ValidKey } = {
     'ShiftLeft': 'shift',
@@ -10,54 +10,52 @@ const keyMap: { [key: string]: ValidKey } = {
     'ArrowUp': 'up',
     'ArrowDown': 'down',
     'Enter': 'enter',
-    'KeyG': 'g'
+    'KeyG': 'g',
+    'KeyC': 'c',
+    'KeyV': 'v',
+    'KeyY': 'y',
+    'KeyW': 'z'
 };
+
+type KeyState = {
+    pressed: boolean;
+    doubleTap: boolean;
+    timestamp: number;
+};
+
 type KeysState = {
-    [key in ValidKey]: {
-        pressed: boolean;
-        doubleTap: boolean;
-        timestamp: number;
-    };
+    [key in ValidKey]: KeyState;
 };
 
 
-export type KeyboardLister = ((type: "up" | "down") => void)
+export type KeyboardListener = ((type: "up" | "down") => void)
 
 // Class for handling keyboard inputs.
 export class KeyboardController {
 
     keys: KeysState
-    listeners: { [key in ValidKey]: KeyboardLister[] };
+    listeners: { [key in ValidKey]: KeyboardListener[] };
 
     constructor() {
-        // The controller's state.
-        this.keys = {
-            'shift': { pressed: false, doubleTap: false, timestamp: 0 },
-            'control': { pressed: false, doubleTap: false, timestamp: 0 },
-            'backspace': { pressed: false, doubleTap: false, timestamp: 0 },
-            'left': { pressed: false, doubleTap: false, timestamp: 0 },
-            'right': { pressed: false, doubleTap: false, timestamp: 0 },
-            'up': { pressed: false, doubleTap: false, timestamp: 0 },
-            'down': { pressed: false, doubleTap: false, timestamp: 0 },
-            'enter': { pressed: false, doubleTap: false, timestamp: 0 },
-            'g': { pressed: false, doubleTap: false, timestamp: 0 },
-        };
+        const defaultKeyState: KeyState = { pressed: false, doubleTap: false, timestamp: 0 };
+        const validKeys: ValidKey[] = ["shift", "control", "backspace", "left", "right", "up", "down", "enter", "g", "c", "v", "y", "z"];
 
-        this.listeners = {
-            "control": [],
-            "shift": [],
-            "backspace": [],
-            "left": [],
-            "right": [],
-            "up": [],
-            "down": [],
-            'enter': [],
-            'g': []
-        }
+        this.keys = Object.fromEntries(
+            validKeys.map(key => [key, { ...defaultKeyState }])
+        ) as KeysState;
 
-        // Register event listeners for keydown and keyup events.
-        window.addEventListener('keydown', (event) => this.keydownHandler(event));
-        window.addEventListener('keyup', (event) => this.keyupHandler(event));
+        this.listeners = Object.fromEntries(
+            validKeys.map(key => [key, [] as KeyboardListener[]])
+        ) as { [key in ValidKey]: KeyboardListener[] };
+
+        document.addEventListener('keydown', (event) => this.keydownHandler(event));
+        document.addEventListener('keyup', (event) => this.keyupHandler(event));
+
+        document.addEventListener('keydown', function (event) {
+            if (event.ctrlKey && event.key === 'g') {
+                event.preventDefault();
+            }
+        });
     }
 
     keydownHandler(event: KeyboardEvent) {

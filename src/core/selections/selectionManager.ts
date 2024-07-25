@@ -2,13 +2,14 @@ import { GlobalSelectionBoxRenderer } from "../canvas/renderer/globalSelectionBo
 import { Editor } from "../editor";
 import { Selection } from "./selection";
 import { TreeComponent } from "../tree/treeComponent";
-import { TreeContainer } from "../tree/treeContainer";
-import { TreeRect } from "../tree/treeRect";
+import { SerializedSelection } from "./serialized/serializedSelection";
 
 
 export class SelectionManager {
+
     private _selection: Selection;
     private _globalSelectionBoxRenderer: GlobalSelectionBoxRenderer;
+    private _copiedSelection?: SerializedSelection;
 
     constructor() {
         this._selection = new Selection([])
@@ -41,7 +42,7 @@ export class SelectionManager {
         return Editor.getEditor().treeManager.getTree()
     }
 
-    getOriginComponentsChain(component: TreeComponent, componentsChain: TreeComponent[] = []): TreeComponent[] {
+    getComponentsChainFromRoot(component: TreeComponent, componentsChain: TreeComponent[] = []): TreeComponent[] {
 
         const parentContainer = component.getParentContainer()
 
@@ -63,10 +64,20 @@ export class SelectionManager {
             return newComponentsChain;
         }
 
-        return this.getOriginComponentsChain(parentContainer, newComponentsChain)
+        return this.getComponentsChainFromRoot(parentContainer, newComponentsChain)
     }
 
     render() {
         this._globalSelectionBoxRenderer.render()
     }
+
+
+    copySelection() {
+        this._copiedSelection = this._selection.serialize()
+    }
+
+    getCopiedSelection(): SerializedSelection | undefined {
+        return this._copiedSelection;
+    }
+
 }

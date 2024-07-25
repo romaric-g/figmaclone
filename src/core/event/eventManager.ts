@@ -1,6 +1,6 @@
-import { Point } from "pixi.js";
-import { TreeRect } from "./tree/treeRect";
-import { TreeComponent } from "./tree/treeComponent";
+import { FederatedPointerEvent, Point } from "pixi.js";
+import { TreeRect } from "../tree/treeRect";
+import { TreeComponent } from "../tree/treeComponent";
 
 type EventHandler<T> = (data: T) => void;
 
@@ -41,14 +41,20 @@ export type ElementOverOnEventData = { component: TreeComponent }
 
 export type ElementOverOffEventData = { component: TreeComponent }
 
+export type ElementRightDownData = { element: TreeRect, pointerPosition: Point, originalEvent: FederatedPointerEvent }
+
+export type PointerRightDownData = { pointerPosition: Point, originalEvent: FederatedPointerEvent }
+
 export class EventsManger {
     onElementPressDown = new EventManager<ElementPressDownEventData>()
     onElementPressUp = new EventManager<ElementPressUpEventData>()
     onElementHoverOn = new EventManager<ElementOverOnEventData>()
     onElementHoverOff = new EventManager<ElementOverOffEventData>()
+    onElementRightDown = new EventManager<ElementRightDownData>()
     onBackgroundPressDown = new EventManager<PointerBackgroundEventData>()
     onBackgroundPressUp = new EventManager<PointerBackgroundEventData>()
     onPointerMove = new EventManager<PointerMoveEventData>()
     onPointerDown = new EventManager<PointerDownEventData>()
     onPointerUp = new EventManager<PointerUpEventData>()
+    onPointerRightDown = new EventManager<PointerRightDownData>()
 }

@@ -1,6 +1,9 @@
 import { currentToolSubject } from "../../ui/subjects";
 import { Editor } from "../editor";
+import { Selection } from "../selections/selection";
 import { DrawTool } from "./drawTool";
+import { FreeSelectState } from "./selectStates/freeSelect";
+import { SelectionState } from "./selectStates/selection";
 import { SelectTool } from "./selectTool";
 import { Tool } from "./tool";
 
@@ -84,5 +87,17 @@ export class ToolManager {
         this.getCurrentTool()?.render()
     }
 
+    resetSelection(selection: Selection) {
+        if (selection.isEmpty()) {
+            this._selectTool.setState(
+                new FreeSelectState(this._selectTool)
+            )
+        } else {
+            this._selectTool.setState(
+                new SelectionState(this._selectTool)
+            )
+        }
 
+
+    }
 }

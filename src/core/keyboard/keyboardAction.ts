@@ -1,5 +1,5 @@
 import { Editor } from "../editor";
-import { KeyboardController, KeyboardLister as KeyboardListener, ValidKey } from "./keyboardController";
+import { KeyboardController, KeyboardListener as KeyboardListener, ValidKey } from "./keyboardController";
 
 
 export class KeyboardAction {

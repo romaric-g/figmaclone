@@ -4,9 +4,7 @@ import { SelectTool } from "../selectTool";
 import { SelectToolState } from "./abstractSelectState";
 import { SelectionState } from "./selection";
 import { Editor } from "../../editor";
-import { findMinimumDifference } from "../../utils/findMinimumDifference";
 import { StickyLineReshapeRenderer } from "../../canvas/renderer/stickyLineReshape";
-import { UpdateSelectionAction } from "../../actions/updateSelectionAction";
 import { UpdateSelectionPropertiesAction } from "../../actions/updateSelectionPropertiesAction";
 
 

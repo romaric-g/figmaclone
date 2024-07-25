@@ -1,12 +1,14 @@
 import { TreeComponentData } from "../../ui/subjects";
-import { Editor } from "../editor";
+import { SerialisedTreeComponent } from "./serialized/serialisedTreeComponent";
 import { TreeContainer } from "./treeContainer"
+import { v4 as uuidv4 } from 'uuid';
 
 
 export abstract class TreeComponent<T extends TreeComponentData = TreeComponentData> {
 
     private currentContainerParent?: TreeContainer;
     private name: string;
+    protected _id?: string;
 
     constructor(name: string) {
         this.name = name
@@ -28,12 +30,18 @@ export abstract class TreeComponent<T extends TreeComponentData = TreeComponentD
         return this.name;
     }
 
-    init() {
-
+    init(resetId: boolean = true) {
+        if (resetId || !this._id) {
+            this._id = uuidv4();
+        }
     }
 
     destroy() {
+        const parent = this.getParentContainer()
 
+        if (parent) {
+            parent.remove(this)
+        }
     }
 
     getIndexsChain(): number[] {
@@ -52,6 +60,12 @@ export abstract class TreeComponent<T extends TreeComponentData = TreeComponentD
 
         return []
     }
+
+    getId() {
+        return this._id;
+    }
+
+    abstract serialize(): SerialisedTreeComponent
 
     abstract toData(index: number): T
 

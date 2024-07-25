@@ -4,14 +4,12 @@ import { Selection } from "../selections/selection";
 import { Action } from "./action";
 
 
-
-
-export class UpdateSelectionAction extends Action {
+export class UpdatingSelectionAction extends Action {
 
     private selection: Selection;
 
     constructor(newSelection: Selection) {
-        super("Update selection")
+        super("Updating selection")
         this.selection = newSelection
     }
 

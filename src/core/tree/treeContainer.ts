@@ -5,6 +5,8 @@ import { Editor } from "../editor";
 import { TreeContainerData } from "../../ui/subjects";
 import { Point } from "pixi.js";
 import { getDrawingCoveredRect } from "../utils/getDrawingCoveredRect";
+import { SerialisedTreeComponent } from "./serialized/serialisedTreeComponent";
+import { SerialisedTreeContainer } from "./serialized/serialisedTreeContainer";
 
 export class TreeContainer extends TreeComponent<TreeContainerData> {
 
@@ -19,8 +21,14 @@ export class TreeContainer extends TreeComponent<TreeContainerData> {
         this.selectionRenderer = new ContainerSelectionBox(this)
     }
 
-    init() {
+    init(resetId: boolean) {
         if (!this._initialized) {
+            super.init(resetId)
+
+            for (const childComponent of this.getComponents()) {
+                childComponent.init(resetId)
+            }
+
             const selectionLayer = Editor.getEditor().canvasApp.getSelectionLayer()
             this.selectionRenderer.init(selectionLayer)
             this._initialized = true
@@ -29,6 +37,14 @@ export class TreeContainer extends TreeComponent<TreeContainerData> {
 
     destroy() {
         if (this._initialized) {
+            const children = [...this.getComponents()]
+
+            for (const child of children) {
+                child.destroy()
+            }
+
+            super.destroy()
+
             const selectionLayer = Editor.getEditor().canvasApp.getSelectionLayer()
             this.selectionRenderer.destroy(selectionLayer)
             this._initialized = false
@@ -189,6 +205,33 @@ export class TreeContainer extends TreeComponent<TreeContainerData> {
             maxX: maxOrigin.x,
             maxY: maxOrigin.y
         }
+    }
+
+    serialize(): SerialisedTreeContainer {
+        return new SerialisedTreeContainer({
+            name: this.getName(),
+            id: this.getId(),
+            components: this.getComponents().map((c) => c.serialize())
+        })
+    }
+
+
+    public static deserialize(serialisedTreeContainer: SerialisedTreeContainer) {
+
+        const newContainer = new TreeContainer(serialisedTreeContainer.props.name)
+
+        newContainer.components = serialisedTreeContainer.props.components.map((stc) => {
+            const component = stc.deserialize()
+
+            component.updateParentContainerCache(newContainer)
+
+            return component;
+        })
+
+        newContainer._id = serialisedTreeContainer.props.id;
+
+        return newContainer;
+
     }
 
 }

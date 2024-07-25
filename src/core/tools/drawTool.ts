@@ -1,6 +1,6 @@
 import { Point } from "pixi.js";
 import { Editor } from "../editor";
-import { ElementPressDownEventData, ElementPressUpEventData, PointerDownEventData, PointerMoveEventData, PointerUpEventData } from "../eventManager";
+import { ElementPressDownEventData, ElementPressUpEventData, PointerDownEventData, PointerMoveEventData, PointerUpEventData } from "../event/eventManager";
 import { Tool } from "./tool";
 import { TreeRect } from "../tree/treeRect";
 import { SelectTool } from "./selectTool";
@@ -9,7 +9,9 @@ import { SelectionState } from "./selectStates/selection";
 import { Selection } from "../selections/selection";
 import { cursorChangeSubject } from "../../ui/subjects";
 import { StickyLineDrawRenderer } from "../canvas/renderer/stickyLineDraw";
-import { CreateRectAction } from "../actions/createRectAction";
+import { CreateRectStartAction } from "../actions/createRectStartAction";
+import { UpdateSelectionPropertiesAction } from "../actions/updateSelectionPropertiesAction";
+import { SetSelectionAction } from "../actions/setSelectionAction";
 
 
 export class DrawTool extends Tool {
@@ -78,7 +80,7 @@ export class DrawTool extends Tool {
         this.drawingRect.onSelectionInit()
 
         this.editor.actionManager.push(
-            new CreateRectAction(this.drawingRect)
+            new CreateRectStartAction(this.drawingRect)
         )
     }
 
@@ -90,6 +92,10 @@ export class DrawTool extends Tool {
         if (this.drawingRect) {
             this.editor.selectionManager.setSelection(new Selection([this.drawingRect]))
             this.editor.toolManager.setCurrentTool("select")
+
+            this.editor.actionManager.push(
+                new SetSelectionAction(this.editor.selectionManager.getSelection())
+            )
 
             const currentTool = this.editor.toolManager.getCurrentTool()
             if (currentTool instanceof SelectTool) {
@@ -136,10 +142,16 @@ export class DrawTool extends Tool {
 
             const stickyReshape = this.getStickyReshape(newX, newY, newWidth, newHeight)
 
-            this.drawingRect.x = stickyReshape.x
-            this.drawingRect.y = stickyReshape.y
-            this.drawingRect.width = stickyReshape.width
-            this.drawingRect.height = stickyReshape.height
+            const selection = this.editor.selectionManager.getSelection()
+
+            this.editor.actionManager.push(
+                new UpdateSelectionPropertiesAction(selection, (selection) => {
+                    selection.setX(stickyReshape.x)
+                    selection.setY(stickyReshape.y)
+                    selection.setWidth(stickyReshape.width)
+                    selection.setHeight(stickyReshape.height)
+                })
+            )
         }
     }
 

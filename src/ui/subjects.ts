@@ -1,12 +1,12 @@
 import { Subject } from 'rxjs';
 import { ToolType } from '../core/tools/toolManager';
-import { FillStyleInputs, ColorSource } from 'pixi.js';
-import { HsvaColor, RgbaColor, RgbColor } from '@uiw/react-color';
+import { HsvaColor } from '@uiw/react-color';
 
 export const treeElementSubject = new Subject<TreeData>();
 export const currentToolSubject = new Subject<ToolType>();
 export const selectionChangeSubject = new Subject<SelectionData | undefined>();
 export const cursorChangeSubject = new Subject<string>()
+export const contextMenuChangeSubject = new Subject<ContextMenuData>()
 
 
 export interface TreeData {
@@ -37,4 +37,12 @@ export interface SelectionData {
     color: HsvaColor | "mixed",
     borderColor: HsvaColor | "mixed",
     borderWidth: number | "mixed"
+}
+
+
+
+export interface ContextMenuData {
+    x: number;
+    y: number;
+    items: { label: string; onClick: () => void }[];
 }

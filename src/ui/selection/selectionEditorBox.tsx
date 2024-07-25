@@ -6,8 +6,9 @@ import SelectionEditor from "./selectionEditor"
 
 const SelectionEditorBox: React.FC = () => {
     const selection = Editor.getEditor().selectionManager.getSelection()
+    const data = selection.toData()
 
-    if (selection.isEmpty()) {
+    if (!data) {
         return (
             <div className="SelectionEditorBox">
             </div>
@@ -16,10 +17,10 @@ const SelectionEditorBox: React.FC = () => {
         return (
             <div className="SelectionEditorBox">
                 <SelectionEditor
-                    initialHeight={selection.getHeight()}
-                    initialWidth={selection.getWidth()}
-                    initialX={selection.getX()}
-                    initialY={selection.getY()}
+                    initialHeight={data.height}
+                    initialWidth={data.width}
+                    initialX={data.x}
+                    initialY={data.y}
                 />
             </div>
         )

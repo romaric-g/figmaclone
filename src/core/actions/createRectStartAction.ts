@@ -6,12 +6,12 @@ import { Action } from "./action";
 
 
 
-export class CreateRectAction extends Action {
+export class CreateRectStartAction extends Action {
 
     private treeRect: TreeRect;
 
     constructor(treeRect: TreeRect) {
-        super("Create rect")
+        super("Create rect start")
         this.treeRect = treeRect;
     }
 
@@ -19,7 +19,8 @@ export class CreateRectAction extends Action {
 
         const selection = new Selection([this.treeRect])
 
-        editor.treeManager.registerComponent(this.treeRect)
+        this.treeRect.init(true)
+
         editor.treeManager.getTree().add(this.treeRect)
         editor.selectionManager.setSelection(selection)
 

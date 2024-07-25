@@ -3,23 +3,26 @@ import { Editor } from "../editor";
 import { Selection } from "../selections/selection";
 import { Action } from "./action";
 
-export class GroupeSelectionAction extends Action {
+
+
+
+export class SetSelectionAction extends Action {
 
     private selection: Selection;
 
-    constructor(selection: Selection) {
-        super("Groupe selection")
-        this.selection = selection
+    constructor(newSelection: Selection) {
+        super("Set selection")
+        this.selection = newSelection
     }
 
     apply(editor: Editor) {
-        editor.selectionManager.getRootContainer().groupeSelection(this.selection)
+        editor.selectionManager.setSelection(this.selection)
 
-        const selection = editor.selectionManager.getSelection()
-
-        selectionChangeSubject.next(selection.toData())
+        selectionChangeSubject.next(this.selection.toData())
         treeElementSubject.next(editor.treeManager.toData())
 
         editor.history.add(editor.makeSnapshot())
     }
+
+
 }

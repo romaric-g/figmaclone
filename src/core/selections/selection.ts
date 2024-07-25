@@ -8,9 +8,9 @@ import { TreeContainer } from "../tree/treeContainer";
 import { HsvaColor } from "@uiw/react-color";
 import { getDrawingCoveredRect } from "../utils/getDrawingCoveredRect";
 import { findMinimumDifference } from "../utils/findMinimumDifference";
+import { SerializedSelection } from "./serialized/serializedSelection";
 
 export class Selection {
-
     private _components: TreeComponent[]
 
     constructor(components: TreeComponent[]) {
@@ -41,11 +41,48 @@ export class Selection {
         }
 
         if (valuesSet.length == 0) {
-            throw new Error("Aucun element dans la selection")
+            return undefined;
         }
 
         return valuesSet[0];
     }
+
+
+    private getRectsObjectValue<T>(apply: (rectComponent: TreeRect) => T) {
+        const values: T[] = []
+
+        this.getAllRects()
+
+        for (const component of this.getFlatComponents()) {
+            if (component instanceof TreeRect) {
+                values.push(apply(component))
+            }
+        }
+
+        const map = new Map<string, T>();
+
+        values.forEach(value => {
+            const key = JSON.stringify(value);
+            if (!map.has(key)) {
+                map.set(key, value);
+            }
+        });
+
+        const valuesSet = Array.from(map.values());
+
+        if (valuesSet.length > 1) {
+            return "mixed";
+        }
+
+        if (valuesSet.length == 0) {
+            return undefined;
+        }
+
+        return valuesSet[0];
+    }
+
+
+
 
     init() {
         for (const component of this._components) {
@@ -115,7 +152,7 @@ export class Selection {
     }
 
     getFillColor() {
-        return this.getRectsValue((e) => e.fillColor)
+        return this.getRectsObjectValue((e) => e.fillColor)
     }
 
     setHeight(value: number) {
@@ -172,7 +209,7 @@ export class Selection {
     }
 
     getBorderColor() {
-        return this.getRectsValue((e) => e.borderColor)
+        return this.getRectsObjectValue((e) => e.borderColor)
     }
 
 
@@ -253,6 +290,26 @@ export class Selection {
     }
 
 
+
+    mouseIsIn(canvasPosition: Point) {
+        const selectionRects = this.getAllRects()
+        const drawingCovered = getDrawingCoveredRect(selectionRects)
+
+        const drawingPoint = Editor.getEditor().getDrawingPosition(canvasPosition)
+
+        if (!drawingCovered) return false;
+
+        const { minX, maxX, minY, maxY } = drawingCovered
+
+        return (
+            drawingPoint.x >= minX &&
+            drawingPoint.x <= maxX &&
+            drawingPoint.y >= minY &&
+            drawingPoint.y <= maxY
+        );
+    }
+
+
     move(moveVector: Point) {
         const moveRect = (rect: TreeRect) => {
             const movePositionOrigin = rect.getOriginalPosition()
@@ -288,20 +345,47 @@ export class Selection {
 
     toData(): SelectionData | undefined {
         const lenght = this.getFlatComponents().length
+        const x = this.getX()
+        const y = this.getY()
+        const width = this.getWidth()
+        const height = this.getHeight()
+        const color = this.getFillColor()
+        const borderColor = this.getBorderColor()
+        const borderWidth = this.getBorderWidth()
 
-        if (lenght == 0) {
+        if (
+            lenght == 0 ||
+            x === undefined ||
+            y === undefined ||
+            width === undefined ||
+            height === undefined ||
+            color === undefined ||
+            borderColor === undefined ||
+            borderWidth === undefined
+        ) {
             return undefined
         }
+
         return {
-            lenght: lenght,
-            x: this.getX(),
-            y: this.getY(),
-            width: this.getWidth(),
-            height: this.getHeight(),
-            color: this.getFillColor(),
-            borderColor: this.getBorderColor(),
-            borderWidth: this.getBorderWidth()
+            lenght,
+            x,
+            y,
+            width,
+            height,
+            color,
+            borderColor,
+            borderWidth
         }
+    }
+
+    serialize(): SerializedSelection {
+        return {
+            components: this.getComponents().map((c) => c.serialize())
+        }
+    }
+
+    getSelectedIds(): string[] {
+        return this._components.map((c) => c.getId()).filter((c) => !!c) as string[]
     }
 
 }

@@ -3,9 +3,6 @@ import { Editor } from "../../core/editor";
 import { cursorChangeSubject } from "../subjects";
 import "./canvas.scss";
 
-interface CanvasProps {
-
-}
 
 const Canvas: React.FC = () => {
 

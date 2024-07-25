@@ -21,5 +21,7 @@ export class MoveElementAction extends Action {
 
         treeElementSubject.next(editor.treeManager.toData())
 
+        editor.history.add(editor.makeSnapshot())
+
     }
 }

@@ -1,6 +1,6 @@
 import { Point } from "pixi.js";
 import { Editor } from "../editor";
-import { ElementOverOffEventData, ElementOverOnEventData, ElementPressDownEventData, ElementPressUpEventData, PointerBackgroundEventData, PointerMoveEventData } from "../eventManager";
+import { ElementOverOffEventData, ElementOverOnEventData, ElementPressDownEventData, ElementPressUpEventData, PointerBackgroundEventData, PointerMoveEventData } from "../event/eventManager";
 import { Tool } from "./tool";
 import { FreeSelectState } from "./selectStates/freeSelect";
 import { SelectToolState } from "./selectStates/abstractSelectState";
@@ -112,7 +112,7 @@ export class SelectTool extends Tool {
     }
 
     onElementHoverOn({ component }: ElementOverOnEventData) {
-        const topComponent = this.editor.selectionManager.getOriginComponentsChain(component)[0]
+        const topComponent = this.editor.selectionManager.getComponentsChainFromRoot(component)[0]
 
         if (topComponent instanceof TreeRect) {
             topComponent.setHover(true)
@@ -123,7 +123,7 @@ export class SelectTool extends Tool {
     }
 
     onElementHoverOff({ component }: ElementOverOffEventData) {
-        const topComponent = this.editor.selectionManager.getOriginComponentsChain(component)[0]
+        const topComponent = this.editor.selectionManager.getComponentsChainFromRoot(component)[0]
 
         if (topComponent instanceof TreeRect) {
             topComponent.setHover(false)

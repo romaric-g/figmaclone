@@ -1,9 +1,9 @@
-import { selectionChangeSubject, treeElementSubject } from "../../ui/subjects";
+import { treeElementSubject } from "../../ui/subjects";
 import { Editor } from "../editor";
 import { Selection } from "../selections/selection";
 import { Action } from "./action";
 
-export class DeleteSelectedElements extends Action {
+export class DeleteSelectedElementsAction extends Action {
 
     private selection: Selection;
 
@@ -17,10 +17,14 @@ export class DeleteSelectedElements extends Action {
         editor.selectionManager.setSelection(new Selection([]))
 
         for (const element of componentsToRemove) {
-            editor.treeManager.unregisterComponent(element)
+            element.destroy()
         }
 
+        editor.toolManager.resetSelection(editor.selectionManager.getSelection())
+
         treeElementSubject.next(editor.treeManager.toData())
+
+        editor.history.add(editor.makeSnapshot())
     }
 
 }

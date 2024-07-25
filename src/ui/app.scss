@@ -36,6 +36,8 @@
     }
 
     &__middle {
+        position: relative;
         flex: 1;
+        flex-shrink: 1;
     }
 }
