@@ -9,7 +9,7 @@ export class UndoItem extends MenuItem {
 
 
     constructor() {
-        super("Undo", "Ctrl+Z")
+        super("Annuler", "Ctrl+Z")
     }
 
     apply(): void {

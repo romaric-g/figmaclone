@@ -39,10 +39,15 @@ export interface SelectionData {
     borderWidth: number | "mixed"
 }
 
+export interface MenuItemData {
+    label: string,
+    command?: string,
+    onClick: () => void
+}
 
 
 export interface ContextMenuData {
     x: number;
     y: number;
-    items: { label: string; onClick: () => void }[];
+    items: MenuItemData[];
 }

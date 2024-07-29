@@ -23,6 +23,7 @@ export class Menu {
             y: this.y,
             items: this.items.map((item) => ({
                 label: item.name,
+                command: item.key,
                 onClick: () => {
                     console.log('clicked')
                     item.apply()

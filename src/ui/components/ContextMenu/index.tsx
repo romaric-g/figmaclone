@@ -1,33 +1,34 @@
 import React from 'react';
+import "./index.scss"
+import { MenuItemData } from '../../subjects';
 
-interface MenuItem {
-    label: string,
-    onClick: () => void
-}
 
 interface Props {
     x: number,
     y: number,
-    items: MenuItem[],
+    items: MenuItemData[],
     onClose: () => void
 }
 
 const ContextMenu: React.FC<Props> = ({ x, y, items, onClose }) => {
     return (
         <div
+            className='ContextMenu'
             style={{
                 position: 'absolute',
                 top: `${y}px`,
                 left: `${x}px`,
-                backgroundColor: 'white',
-                border: '1px solid black',
                 zIndex: 1000
             }}
             onClick={onClose}
         >
-            <ul style={{ listStyleType: 'none', margin: 0, padding: 0 }}>
+            <ul
+                className='ContextMenu__items'
+                style={{ listStyleType: 'none', margin: 0, padding: 0 }}
+            >
                 {items.map((item, index) => (
                     <li
+                        className='ContextMenu__items__item'
                         key={index}
                         style={{ padding: '8px 12px', cursor: 'pointer' }}
                         onClick={() => {
@@ -36,6 +37,7 @@ const ContextMenu: React.FC<Props> = ({ x, y, items, onClose }) => {
                         }}
                     >
                         {item.label}
+                        <span className='ContextMenu__items__item__command'>{item.command}</span>
                     </li>
                 ))}
             </ul>
