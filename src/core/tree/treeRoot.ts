@@ -41,7 +41,9 @@ export class TreeRoot extends TreeContainer {
 
         const editor = Editor.getEditor()
         const treeManager = editor.treeManager
-        const newGroupeComponent = new TreeContainer(`groupe ${treeManager.getNextName()}`)
+        const newGroupeComponent = new TreeContainer({
+            name: `groupe ${treeManager.getNextName()}`
+        })
 
         if (selection.isEmpty()) {
             return

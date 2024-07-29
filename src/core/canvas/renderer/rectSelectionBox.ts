@@ -51,7 +51,7 @@ export class RectSelectionRenderer {
             }
             commonContext.stroke(strokeStyle)
 
-            if (this.element.getContextEditor()?.selectionManager.getSelection().getFlatComponents().length == 1) {
+            if (editor.selectionManager.getSelection().getFlatComponents().length == 1) {
                 commonContext.rect(-4, -4, 8, 8).fill("white").stroke(strokeStyle)
                 commonContext.rect(-4, height - 4, 8, 8).fill("white").stroke(strokeStyle)
                 commonContext.rect(width - 4, -4, 8, 8).fill("white").stroke(strokeStyle)

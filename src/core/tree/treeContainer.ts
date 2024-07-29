@@ -1,12 +1,12 @@
 import { TreeRect } from "./treeRect"
-import { TreeComponent } from "./treeComponent"
+import { TreeComponent, TreeComponentProps } from "./treeComponent"
 import { ContainerSelectionBox } from "../canvas/renderer/containerSelectionBox";
 import { Editor } from "../editor";
 import { TreeContainerData } from "../../ui/subjects";
 import { Point } from "pixi.js";
 import { getDrawingCoveredRect } from "../utils/getDrawingCoveredRect";
-import { SerialisedTreeComponent } from "./serialized/serialisedTreeComponent";
 import { SerialisedTreeContainer } from "./serialized/serialisedTreeContainer";
+
 
 export class TreeContainer extends TreeComponent<TreeContainerData> {
 
@@ -16,8 +16,8 @@ export class TreeContainer extends TreeComponent<TreeContainerData> {
     private _hover: boolean = false;
     private _initialized: boolean = false;
 
-    constructor(name: string) {
-        super(name)
+    constructor(props: TreeComponentProps) {
+        super(props)
         this.selectionRenderer = new ContainerSelectionBox(this)
     }
 
@@ -218,7 +218,10 @@ export class TreeContainer extends TreeComponent<TreeContainerData> {
 
     public static deserialize(serialisedTreeContainer: SerialisedTreeContainer) {
 
-        const newContainer = new TreeContainer(serialisedTreeContainer.props.name)
+        const newContainer = new TreeContainer({
+            name: serialisedTreeContainer.props.name,
+            id: serialisedTreeContainer.props.id
+        })
 
         newContainer.components = serialisedTreeContainer.props.components.map((stc) => {
             const component = stc.deserialize()
@@ -227,8 +230,6 @@ export class TreeContainer extends TreeComponent<TreeContainerData> {
 
             return component;
         })
-
-        newContainer._id = serialisedTreeContainer.props.id;
 
         return newContainer;
 

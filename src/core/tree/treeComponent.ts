@@ -4,14 +4,21 @@ import { TreeContainer } from "./treeContainer"
 import { v4 as uuidv4 } from 'uuid';
 
 
+export interface TreeComponentProps {
+    name: string,
+    id?: string
+}
+
 export abstract class TreeComponent<T extends TreeComponentData = TreeComponentData> {
 
     private currentContainerParent?: TreeContainer;
-    private name: string;
-    protected _id?: string;
+    private _name: string;
+    private _id?: string;
+    private _initialised = false;
 
-    constructor(name: string) {
-        this.name = name
+    constructor({ name, id }: TreeComponentProps) {
+        this._name = name;
+        this._id = id;
     }
 
     updateParentContainerCache(treeContainer?: TreeContainer) {
@@ -27,20 +34,32 @@ export abstract class TreeComponent<T extends TreeComponentData = TreeComponentD
     }
 
     getName() {
-        return this.name;
+        return this._name;
+    }
+
+
+    isInit() {
+        return this._initialised;
     }
 
     init(resetId: boolean = true) {
-        if (resetId || !this._id) {
-            this._id = uuidv4();
+        if (!this._initialised) {
+            this._initialised = true;
+            if (resetId || !this._id) {
+                this._id = uuidv4();
+            }
         }
+
     }
 
     destroy() {
-        const parent = this.getParentContainer()
+        if (this.isInit()) {
+            this._initialised = false;
+            const parent = this.getParentContainer()
 
-        if (parent) {
-            parent.remove(this)
+            if (parent) {
+                parent.remove(this)
+            }
         }
     }
 

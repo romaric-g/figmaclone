@@ -8,89 +8,56 @@ import { HsvaColor, RgbColor } from "@uiw/react-color";
 import { SerialisedTreeComponent } from "./serialized/serialisedTreeComponent";
 import { SerialisedTreeRect } from "./serialized/serialisedTreeRect";
 import { hsvaToRgba, rgbaToHsva } from '@uiw/color-convert'
+import { TreeBox } from "./treeBox";
 
-interface ElementProps {
+export interface TreeRectProps {
+    name: string,
+    id?: string,
     x?: number,
     y?: number,
     width?: number,
     height?: number,
     fillColor?: HsvaColor,
-    borderColor?: HsvaColor
-    name?: string
+    borderColor?: HsvaColor,
+    borderWidth?: number
 }
 
-export class TreeRect extends TreeComponent<TreeRectData> {
-    // private graphics: Graphics;
-
-    private _contextEditor?: Editor;
-
-    private _selected: boolean = false;
+export class TreeRect extends TreeBox<TreeRectData> {
     private _movePositionOrigin?: Point;
 
     private _elementTreeRenderer: RectRenderer;
     private _elementSelectionRenderer: RectSelectionRenderer;
 
-    private _hover: boolean = false;
 
-    private _x!: number;
-    private _y!: number;
-    private _width!: number;
-    private _height!: number;
     private _fillColor!: HsvaColor;
     private _borderColor!: HsvaColor;
 
     private _borderWidth: number = 0;
 
     constructor({
-        name = "",
-        x = 0, y = 0, width = 100, height = 100,
+        name,
+        x = 0,
+        y = 0,
+        width = 100,
+        height = 100,
         borderColor = { h: 0, s: 0, v: 0, a: 1 },
         fillColor = { h: 0, s: 0, v: 0, a: 1 },
-    }: ElementProps) {
-        super(name)
+        borderWidth = 0
+    }: TreeRectProps) {
+        super({
+            name,
+            x,
+            y,
+            height,
+            width
+        })
 
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.height = height;
-        this.fillColor = fillColor;
-        this.borderColor = borderColor;
+        this._fillColor = fillColor;
+        this._borderColor = borderColor;
+        this._borderWidth = borderWidth;
 
         this._elementSelectionRenderer = new RectSelectionRenderer(this)
         this._elementTreeRenderer = new RectRenderer(this)
-    }
-
-
-    set x(value: number) {
-        this._x = Math.round((value) * 100) / 100
-    }
-
-    get x() {
-        return this._x
-    }
-
-    set y(value: number) {
-        this._y = Math.round((value) * 100) / 100
-    }
-
-    get y() {
-        return this._y
-    }
-
-    set width(value: number) {
-        this._width = Math.round((value) * 100) / 100
-    }
-
-    get width() {
-        return this._width
-    }
-
-    set height(value: number) {
-        this._height = Math.round((value) * 100) / 100
-    }
-
-    get height() {
-        return this._height
     }
 
 
@@ -168,15 +135,13 @@ export class TreeRect extends TreeComponent<TreeRectData> {
 
 
     init(resetId: boolean) {
-        if (this._contextEditor) {
+        if (this.isInit()) {
             return;
         }
 
         super.init(resetId)
 
         const editor = Editor.getEditor()
-
-        this._contextEditor = editor;
 
         this._elementSelectionRenderer.init(editor.canvasApp.getSelectionLayer())
         this._elementTreeRenderer.init(editor.canvasApp.getTreeLayer())
@@ -226,12 +191,13 @@ export class TreeRect extends TreeComponent<TreeRectData> {
     }
 
     destroy() {
-        if (this._contextEditor) {
+        if (this.isInit()) {
             super.destroy()
 
-            this._elementSelectionRenderer.destroy(this._contextEditor.canvasApp.getSelectionLayer())
-            this._elementTreeRenderer.destroy(this._contextEditor.canvasApp.getTreeLayer())
-            this._contextEditor = undefined;
+            const editor = Editor.getEditor()
+
+            this._elementSelectionRenderer.destroy(editor.canvasApp.getSelectionLayer())
+            this._elementTreeRenderer.destroy(editor.canvasApp.getTreeLayer())
         }
     }
 
@@ -255,39 +221,12 @@ export class TreeRect extends TreeComponent<TreeRectData> {
         this._movePositionOrigin = new Point(this.x, this.y);
     }
 
-    getContextEditor() {
-        return this._contextEditor;
-    }
-
     toData(index: number): TreeRectData {
         return {
             type: "rect",
             index: index,
             name: this.getName(),
             selected: this.isSelected()
-        }
-    }
-
-    getDrawingCoveredRect(): { minX: number; minY: number; maxX: number; maxY: number; } {
-        return {
-            minX: this.x,
-            minY: this.y,
-            maxX: this.x + this.width,
-            maxY: this.y + this.height
-        }
-    }
-
-    getCanvasCoveredRect(): { minX: number; minY: number; maxX: number; maxY: number; } {
-        const editor = Editor.getEditor()
-
-        const globalPoint = editor.getCanvasPosition(new Point(this.x, this.y))
-        const [globalWidth, globalHeight] = editor.getCanvasSize(this.width, this.height)
-
-        return {
-            minX: globalPoint.x,
-            minY: globalPoint.y,
-            maxX: globalPoint.x + globalWidth,
-            maxY: globalPoint.y + globalHeight
         }
     }
 
@@ -308,21 +247,18 @@ export class TreeRect extends TreeComponent<TreeRectData> {
     public static deserialize(serialisedTreeRect: SerialisedTreeRect) {
 
         const newRect = new TreeRect({
-            name: serialisedTreeRect.props.name
+            name: serialisedTreeRect.props.name,
+            id: serialisedTreeRect.props.id,
+            x: serialisedTreeRect.props.x,
+            y: serialisedTreeRect.props.y,
+            width: serialisedTreeRect.props.width,
+            height: serialisedTreeRect.props.height,
+            fillColor: serialisedTreeRect.props.fillColor,
+            borderColor: serialisedTreeRect.props.borderColor,
+            borderWidth: serialisedTreeRect.props.borderWidth || 0
         })
 
-        newRect._id = serialisedTreeRect.props.id;
-        newRect._x = serialisedTreeRect.props.x;
-        newRect._y = serialisedTreeRect.props.y;
-        newRect._width = serialisedTreeRect.props.width;
-        newRect._height = serialisedTreeRect.props.height;
-        newRect._fillColor = serialisedTreeRect.props.fillColor;
-        newRect._borderColor = serialisedTreeRect.props.borderColor;
-
-        newRect._borderWidth = serialisedTreeRect.props.borderWidth || 0
-
         return newRect;
-
     }
 
 }
