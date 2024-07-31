@@ -24,14 +24,14 @@ export class Selection {
             name: "coucou"
         })
 
-        new TreeOther({
-            id: "",
-            name: "",
-            height: 1,
-            width: 1,
-            x: 0,
-            y: 0
-        })
+        // new TreeOther({
+        //     id: "",
+        //     name: "",
+        //     height: 1,
+        //     width: 1,
+        //     x: 0,
+        //     y: 0
+        // })
 
 
         // new TreeText({
