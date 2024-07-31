@@ -7,6 +7,7 @@ import { cursorChangeSubject } from "../../../ui/subjects";
 import { DragSelectionState } from "./dragSelection";
 import { Selection } from "../../selections/selection";
 import { UpdatingSelectionAction } from "../../actions/updatingSelectionAction";
+import { Editor } from "../../editor";
 
 export class FreeSelectState extends SelectToolState {
     constructor(selectTool: SelectTool) {
@@ -14,7 +15,7 @@ export class FreeSelectState extends SelectToolState {
     }
 
     onClickDown(element: TreeRect, shift: boolean, pointerPosition: Point) {
-        const editor = this.selectTool.editor
+        const editor = Editor.getEditor()
         const selector = editor.selectionManager;
 
         const localPosition = editor.getDrawingPosition(pointerPosition).clone()

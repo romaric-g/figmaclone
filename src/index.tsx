@@ -8,8 +8,13 @@ import { TreeContainer } from './core/tree/treeContainer';
 import { TreeComponent } from './core/tree/treeComponent';
 import { Selection } from './core/selections/selection';
 import { treeElementSubject } from './ui/subjects';
+import { TreeOther } from './core/tree/treeOther';
 
 async function main() {
+
+
+
+
     // const editor = Editor.getEditor()
 
     // const a = new TreeRect({

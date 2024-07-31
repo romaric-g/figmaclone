@@ -9,7 +9,9 @@ export class TreeManager {
     private _lastNameIndex: number = 0;
 
     constructor() {
-        this._treeRoot = new TreeRoot("root")
+        this._treeRoot = new TreeRoot({
+            name: "root"
+        })
     }
 
     init() {
@@ -50,7 +52,9 @@ export class TreeManager {
             child.destroy()
         }
 
-        this._treeRoot = new TreeRoot("root")
+        this._treeRoot = new TreeRoot({
+            name: "root"
+        })
 
         for (const component of treeComponents) {
             component.init(false)

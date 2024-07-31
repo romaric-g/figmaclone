@@ -9,7 +9,7 @@ export interface TreeComponentProps {
     id?: string
 }
 
-export abstract class TreeComponent<T extends TreeComponentData = TreeComponentData> {
+export abstract class TreeComponent {
 
     private currentContainerParent?: TreeContainer;
     private _name: string;
@@ -86,7 +86,7 @@ export abstract class TreeComponent<T extends TreeComponentData = TreeComponentD
 
     abstract serialize(): SerialisedTreeComponent
 
-    abstract toData(index: number): T
+    abstract toData(index: number): TreeComponentData
 
     abstract getCanvasCoveredRect(): { minX: number, minY: number, maxX: number, maxY: number } | undefined
 

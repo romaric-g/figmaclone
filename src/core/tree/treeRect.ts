@@ -1,12 +1,8 @@
-import { Container, FillStyleInputs, Graphics, GraphicsContext, Point, Sprite } from "pixi.js";
 import { Editor } from "../editor";
 import { RectRenderer } from "../canvas/renderer/rect";
-import { RectSelectionRenderer } from "../canvas/renderer/rectSelectionBox";
-import { TreeComponent } from "./treeComponent";
 import { TreeRectData } from "../../ui/subjects";
-import { HsvaColor, RgbColor } from "@uiw/react-color";
-import { SerialisedTreeComponent } from "./serialized/serialisedTreeComponent";
 import { SerialisedTreeRect } from "./serialized/serialisedTreeRect";
+import { HsvaColor } from "@uiw/react-color";
 import { hsvaToRgba, rgbaToHsva } from '@uiw/color-convert'
 import { TreeBox } from "./treeBox";
 
@@ -22,12 +18,11 @@ export interface TreeRectProps {
     borderWidth?: number
 }
 
-export class TreeRect extends TreeBox<TreeRectData> {
-    private _movePositionOrigin?: Point;
+console.log("TreeBox of RECT", TreeBox)
+
+export class TreeRect extends TreeBox {
 
     private _elementTreeRenderer: RectRenderer;
-    private _elementSelectionRenderer: RectSelectionRenderer;
-
 
     private _fillColor!: HsvaColor;
     private _borderColor!: HsvaColor;
@@ -56,7 +51,6 @@ export class TreeRect extends TreeBox<TreeRectData> {
         this._borderColor = borderColor;
         this._borderWidth = borderWidth;
 
-        this._elementSelectionRenderer = new RectSelectionRenderer(this)
         this._elementTreeRenderer = new RectRenderer(this)
     }
 
@@ -101,7 +95,7 @@ export class TreeRect extends TreeBox<TreeRectData> {
     }
 
     render(zIndex: number) {
-        this._elementSelectionRenderer.render(zIndex)
+        super.render(zIndex)
         this._elementTreeRenderer.render(zIndex)
 
         return zIndex + 1
@@ -110,29 +104,6 @@ export class TreeRect extends TreeBox<TreeRectData> {
     getContainer() {
         return this._elementTreeRenderer.getContainer();
     }
-
-    onSelectionInit() {
-        this._selected = true;
-    }
-
-    onSelectionDestroy() {
-        this._selected = false;
-        this._hover = false;
-    }
-
-    isSelected() {
-        return this._selected;
-    }
-
-    isHover() {
-        return this._hover;
-    }
-
-    setHover(value: boolean) {
-        this._hover = value;
-    }
-
-
 
     init(resetId: boolean) {
         if (this.isInit()) {
@@ -143,7 +114,7 @@ export class TreeRect extends TreeBox<TreeRectData> {
 
         const editor = Editor.getEditor()
 
-        this._elementSelectionRenderer.init(editor.canvasApp.getSelectionLayer())
+
         this._elementTreeRenderer.init(editor.canvasApp.getTreeLayer())
 
         const graphics = this._elementTreeRenderer.getContainer()
@@ -196,7 +167,6 @@ export class TreeRect extends TreeBox<TreeRectData> {
 
             const editor = Editor.getEditor()
 
-            this._elementSelectionRenderer.destroy(editor.canvasApp.getSelectionLayer())
             this._elementTreeRenderer.destroy(editor.canvasApp.getTreeLayer())
         }
     }
@@ -206,20 +176,7 @@ export class TreeRect extends TreeBox<TreeRectData> {
         this.y = y;
     }
 
-    unfreezeOriginalPosition() {
-        this._movePositionOrigin = undefined;
-    }
 
-    getOriginalPosition() {
-        if (this._movePositionOrigin) {
-            return this._movePositionOrigin;
-        }
-        return new Point(this.x, this.y)
-    }
-
-    freezeOriginalPosition() {
-        this._movePositionOrigin = new Point(this.x, this.y);
-    }
 
     toData(index: number): TreeRectData {
         return {

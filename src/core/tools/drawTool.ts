@@ -1,27 +1,28 @@
 import { Point } from "pixi.js";
-import { Editor } from "../editor";
-import { ElementPressDownEventData, ElementPressUpEventData, PointerDownEventData, PointerMoveEventData, PointerUpEventData } from "../event/eventManager";
 import { Tool } from "./tool";
+import { TreeBox } from "../tree/treeBox";
+import { StickyLineDrawRenderer } from "../canvas/renderer/stickyLineDraw";
+import { ToolType } from "./toolManager";
+import { Editor } from "../editor";
+import { cursorChangeSubject } from "../../ui/subjects";
+import { PointerDownEventData, PointerMoveEventData, PointerUpEventData } from "../event/eventManager";
 import { TreeRect } from "../tree/treeRect";
+import { CreateRectStartAction } from "../actions/createElementStartAction";
 import { SelectTool } from "./selectTool";
-import { SelectToolState } from "./selectStates/abstractSelectState";
 import { SelectionState } from "./selectStates/selection";
 import { Selection } from "../selections/selection";
-import { cursorChangeSubject } from "../../ui/subjects";
-import { StickyLineDrawRenderer } from "../canvas/renderer/stickyLineDraw";
-import { CreateRectStartAction } from "../actions/createRectStartAction";
-import { UpdateSelectionPropertiesAction } from "../actions/updateSelectionPropertiesAction";
 import { SetSelectionAction } from "../actions/setSelectionAction";
+import { UpdateSelectionPropertiesAction } from "../actions/updateSelectionPropertiesAction";
 
 
-export class DrawTool extends Tool {
+export abstract class DrawTool extends Tool {
     private activate = false;
     private pressDownPosition?: Point;
-    private drawingRect?: TreeRect;
     private stickyLineDrawRenderer: StickyLineDrawRenderer;
+    private drawingBox?: TreeBox;
 
-    constructor(editor: Editor) {
-        super(editor, "draw")
+    constructor(toolType: ToolType) {
+        super(toolType)
 
         this.onPointerDown = this.onPointerDown.bind(this)
         this.onPointerUp = this.onPointerUp.bind(this)
@@ -32,26 +33,30 @@ export class DrawTool extends Tool {
 
     enable() {
         if (!this.activate) {
-            this.editor.eventsManager.onPointerDown.subscribe(this.onPointerDown)
-            this.editor.eventsManager.onPointerUp.subscribe(this.onPointerUp)
-            this.editor.eventsManager.onPointerMove.subscribe(this.onPointerMove)
+            const editor = Editor.getEditor()
+
+            editor.eventsManager.onPointerDown.subscribe(this.onPointerDown)
+            editor.eventsManager.onPointerUp.subscribe(this.onPointerUp)
+            editor.eventsManager.onPointerMove.subscribe(this.onPointerMove)
 
             cursorChangeSubject.next("crosshair")
 
-            this.stickyLineDrawRenderer.init(this.editor.canvasApp.getSelectionLayer())
+            this.stickyLineDrawRenderer.init(editor.canvasApp.getSelectionLayer())
             this.activate = true;
         }
     }
 
     disable() {
         if (this.activate) {
-            this.editor.eventsManager.onPointerDown.unsubscribe(this.onPointerDown)
-            this.editor.eventsManager.onPointerUp.unsubscribe(this.onPointerUp)
-            this.editor.eventsManager.onPointerMove.unsubscribe(this.onPointerMove)
+            const editor = Editor.getEditor()
+
+            editor.eventsManager.onPointerDown.unsubscribe(this.onPointerDown)
+            editor.eventsManager.onPointerUp.unsubscribe(this.onPointerUp)
+            editor.eventsManager.onPointerMove.unsubscribe(this.onPointerMove)
 
             cursorChangeSubject.next("default")
 
-            this.stickyLineDrawRenderer.destroy(this.editor.canvasApp.getSelectionLayer())
+            this.stickyLineDrawRenderer.destroy(editor.canvasApp.getSelectionLayer())
             this.activate = false;
         }
     }
@@ -61,26 +66,17 @@ export class DrawTool extends Tool {
             return;
         }
 
-        const localPostion = this.editor.getDrawingPosition(position).clone()
+        const editor = Editor.getEditor()
+
+        const localPostion = editor.getDrawingPosition(position).clone()
 
         this.pressDownPosition = localPostion.clone()
-        this.drawingRect = new TreeRect({
-            x: localPostion.x,
-            y: localPostion.y,
-            width: 0,
-            height: 0,
-            name: this.editor.treeManager.getNextName(),
-            fillColor: {
-                h: 0,
-                s: 0,
-                v: 80,
-                a: 1
-            }
-        })
-        this.drawingRect.onSelectionInit()
 
-        this.editor.actionManager.push(
-            new CreateRectStartAction(this.drawingRect)
+        this.drawingBox = this.getNewDrawingBox(localPostion.x, localPostion.y)
+        this.drawingBox.onSelectionInit()
+
+        editor.actionManager.push(
+            new CreateRectStartAction(this.drawingBox)
         )
     }
 
@@ -89,21 +85,23 @@ export class DrawTool extends Tool {
             return;
         }
 
-        if (this.drawingRect) {
-            this.editor.selectionManager.setSelection(new Selection([this.drawingRect]))
-            this.editor.toolManager.setCurrentTool("select")
+        const editor = Editor.getEditor()
 
-            this.editor.actionManager.push(
-                new SetSelectionAction(this.editor.selectionManager.getSelection())
+        if (this.drawingBox) {
+            editor.selectionManager.setSelection(new Selection([this.drawingBox]))
+            editor.toolManager.setCurrentTool("select")
+
+            editor.actionManager.push(
+                new SetSelectionAction(editor.selectionManager.getSelection())
             )
 
-            const currentTool = this.editor.toolManager.getCurrentTool()
+            const currentTool = editor.toolManager.getCurrentTool()
             if (currentTool instanceof SelectTool) {
                 currentTool.setState(new SelectionState(currentTool))
             }
         }
         this.pressDownPosition = undefined;
-        this.drawingRect = undefined;
+        this.drawingBox = undefined;
     }
 
     private stickyRight = false;
@@ -112,9 +110,10 @@ export class DrawTool extends Tool {
     private stickyBottom = false;
 
     onPointerMove({ position }: PointerMoveEventData) {
-        const localPostion = this.editor.getDrawingPosition(position).clone()
+        const editor = Editor.getEditor()
+        const localPostion = editor.getDrawingPosition(position).clone()
 
-        if (this.pressDownPosition && this.drawingRect) {
+        if (this.pressDownPosition && this.drawingBox) {
             const moveVectorX = localPostion.x - this.pressDownPosition.x
             const moveVectorY = localPostion.y - this.pressDownPosition.y
 
@@ -142,9 +141,9 @@ export class DrawTool extends Tool {
 
             const stickyReshape = this.getStickyReshape(newX, newY, newWidth, newHeight)
 
-            const selection = this.editor.selectionManager.getSelection()
+            const selection = editor.selectionManager.getSelection()
 
-            this.editor.actionManager.push(
+            editor.actionManager.push(
                 new UpdateSelectionPropertiesAction(selection, (selection) => {
                     selection.setX(stickyReshape.x)
                     selection.setY(stickyReshape.y)
@@ -159,7 +158,7 @@ export class DrawTool extends Tool {
 
         const editor = Editor.getEditor()
 
-        const allOtherRects = editor.treeManager.getTree().getAllRects().filter((r) => r !== this.drawingRect)
+        const allOtherRects = editor.treeManager.getTree().getAllRects().filter((r) => r !== this.drawingBox)
 
         const minX = x;
         const maxX = x + width;
@@ -229,4 +228,7 @@ export class DrawTool extends Tool {
     render() {
         this.stickyLineDrawRenderer.render()
     }
+
+    abstract getNewDrawingBox(x: number, y: number): TreeBox
+
 }

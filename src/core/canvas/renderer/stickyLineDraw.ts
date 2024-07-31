@@ -3,6 +3,7 @@ import { Editor } from "../../editor";
 import { SelectionLayer } from "../layers/selection";
 import { getDrawingCoveredRect } from "../../utils/getDrawingCoveredRect";
 import { drawCross } from "../../utils/drawCross";
+import { RectTool } from "../../tools/rectTool";
 import { DrawTool } from "../../tools/drawTool";
 
 export class StickyLineDrawRenderer {

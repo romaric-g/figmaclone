@@ -1,5 +1,6 @@
 import { Point } from "pixi.js";
 import { TreeRect } from "../tree/treeRect";
+import { TreeText } from "../tree/treeText";
 import { SelectionData } from "../../ui/subjects";
 import { SelectionBuilder } from "./selectionBuilder";
 import { Editor } from "../editor";
@@ -9,27 +10,48 @@ import { HsvaColor } from "@uiw/react-color";
 import { getDrawingCoveredRect } from "../utils/getDrawingCoveredRect";
 import { findMinimumDifference } from "../utils/findMinimumDifference";
 import { SerializedSelection } from "./serialized/serializedSelection";
+import { TreeBox } from "../tree/treeBox";
+import { TreeOther } from "../tree/treeOther";
+
 
 export class Selection {
     private _components: TreeComponent[]
 
     constructor(components: TreeComponent[]) {
         this._components = components;
+
+        new TreeRect({
+            name: "coucou"
+        })
+
+        new TreeOther({
+            id: "",
+            name: "",
+            height: 1,
+            width: 1,
+            x: 0,
+            y: 0
+        })
+
+
+        // new TreeText({
+        //     name: "coucou"
+        // })
     }
 
-    private applyToEachRect(apply: (rectComponent: TreeRect) => void) {
+    private applyToEachRect(apply: (boxComponent: TreeBox) => void) {
         for (const component of this.getFlatComponents()) {
-            if (component instanceof TreeRect) {
+            if (component instanceof TreeBox) {
                 apply(component)
             }
         }
     }
 
-    private getRectsValue<T>(apply: (rectComponent: TreeRect) => T) {
+    private getRectsValue<T>(apply: (boxComponent: TreeBox) => T) {
         const values: T[] = []
 
         for (const component of this.getFlatComponents()) {
-            if (component instanceof TreeRect) {
+            if (component instanceof TreeBox) {
                 values.push(apply(component))
             }
         }
@@ -48,14 +70,17 @@ export class Selection {
     }
 
 
-    private getRectsObjectValue<T>(apply: (rectComponent: TreeRect) => T) {
+    private getRectsObjectValue<T>(apply: (boxComponent: TreeBox) => T | undefined) {
         const values: T[] = []
 
         this.getAllRects()
 
         for (const component of this.getFlatComponents()) {
-            if (component instanceof TreeRect) {
-                values.push(apply(component))
+            if (component instanceof TreeBox) {
+                const value = apply(component)
+                if (value !== undefined) {
+                    values.push(value)
+                }
             }
         }
 
@@ -148,11 +173,20 @@ export class Selection {
     }
 
     setFillColor(fillColor: HsvaColor) {
-        this.applyToEachRect((c) => c.fillColor = fillColor)
+
+        this.applyToEachRect((c) => {
+            if (c instanceof TreeRect) {
+                c.fillColor = fillColor
+            }
+        })
     }
 
     getFillColor() {
-        return this.getRectsObjectValue((e) => e.fillColor)
+        return this.getRectsObjectValue((c) => {
+            if (c instanceof TreeRect) {
+                return c.fillColor
+            }
+        })
     }
 
     setHeight(value: number) {
@@ -197,19 +231,35 @@ export class Selection {
     }
 
     getBorderWidth() {
-        return this.getRectsValue((e) => e.borderWidth)
+        return this.getRectsValue((e) => {
+            if (e instanceof TreeRect) {
+                return e.borderWidth
+            }
+        })
     }
 
     setBorderWidth(newWidth: number) {
-        this.applyToEachRect((c) => c.borderWidth = newWidth)
+        this.applyToEachRect((c) => {
+            if (c instanceof TreeRect) {
+                c.borderWidth = newWidth
+            }
+        })
     }
 
     setBorderColor(newColor: HsvaColor) {
-        this.applyToEachRect((c) => c.borderColor = newColor)
+        this.applyToEachRect((c) => {
+            if (c instanceof TreeRect) {
+                c.borderColor = newColor
+            }
+        })
     }
 
     getBorderColor() {
-        return this.getRectsObjectValue((e) => e.borderColor)
+        return this.getRectsObjectValue((e) => {
+            if (e instanceof TreeRect) {
+                return e.borderColor
+            }
+        })
     }
 
 
@@ -311,13 +361,13 @@ export class Selection {
 
 
     move(moveVector: Point) {
-        const moveRect = (rect: TreeRect) => {
-            const movePositionOrigin = rect.getOriginalPosition()
+        const moveRect = (box: TreeBox) => {
+            const movePositionOrigin = box.getOriginalPosition()
 
             const newX = movePositionOrigin.x + moveVector.x
             const newY = movePositionOrigin.y + moveVector.y
 
-            rect.setPosition(newX, newY)
+            box.setPosition(newX, newY)
         }
 
         this.applyToEachRect(moveRect)

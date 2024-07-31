@@ -43,21 +43,21 @@ export class MovableSelectionState extends SelectToolState {
     }
 
     onInit() {
-        const editor = this.selectTool.editor;
+        const editor = Editor.getEditor()
 
         editor.selectionManager.getSelection().freezeMoveOrigin()
         this.stickyLineRenderer.init(editor.canvasApp.getSelectionLayer())
     }
 
     onDestroy() {
-        const editor = this.selectTool.editor;
+        const editor = Editor.getEditor()
 
         editor.selectionManager.getSelection().unfreezeMoveOrigin()
         this.stickyLineRenderer.destroy(editor.canvasApp.getSelectionLayer())
     }
 
     onClickUp(element: TreeRect, shift: boolean) {
-        const editor = this.selectTool.editor
+        const editor = Editor.getEditor()
         const selectionManager = editor.selectionManager;
         const selectionBuilder = selectionManager.getSelection().getBuilder(editor)
 
@@ -79,7 +79,7 @@ export class MovableSelectionState extends SelectToolState {
                 )
             }
         } else {
-            this.selectTool.editor.actionManager.push(
+            editor.actionManager.push(
                 new SetSelectionPropertiesAction(Editor.getEditor().selectionManager.getSelection())
             )
         }
@@ -88,9 +88,11 @@ export class MovableSelectionState extends SelectToolState {
     }
 
     onMove(newPosition: Point): void {
-        const localPostion = this.selectTool.editor.getDrawingPosition(newPosition).clone()
+        const editor = Editor.getEditor()
+
+        const localPostion = editor.getDrawingPosition(newPosition).clone()
         const movementVector = this.getMouvementVector(localPostion)
-        const selection = this.selectTool.editor.selectionManager.getSelection()
+        const selection = editor.selectionManager.getSelection()
 
         const {
             vector,
@@ -101,7 +103,7 @@ export class MovableSelectionState extends SelectToolState {
         this._stickyX = stickyX;
         this._stickyY = stickyY;
 
-        this.selectTool.editor.actionManager.push(
+        editor.actionManager.push(
             new UpdateSelectionPropertiesAction(selection, (selection) => {
                 selection.move(vector)
             })
@@ -117,7 +119,8 @@ export class MovableSelectionState extends SelectToolState {
     onBackgroundPointerUp(clickPosition: Point): void {
 
         if (this.haveMoov()) {
-            this.selectTool.editor.actionManager.push(
+            const editor = Editor.getEditor()
+            editor.actionManager.push(
                 new SetSelectionPropertiesAction(Editor.getEditor().selectionManager.getSelection())
             )
 

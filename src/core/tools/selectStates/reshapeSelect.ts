@@ -70,7 +70,7 @@ export class ReshapeSelectState extends SelectToolState {
 
 
     onInit(): void {
-        const editor = this.selectTool.editor;
+        const editor = Editor.getEditor()
 
         this.originalX = this.element.x;
         this.originalY = this.element.y;
@@ -79,7 +79,7 @@ export class ReshapeSelectState extends SelectToolState {
         this.stickyLineReshapeRenderer.init(editor.canvasApp.getSelectionLayer())
     }
     onDestroy(): void {
-        const editor = this.selectTool.editor;
+        const editor = Editor.getEditor()
 
         this.stickyLineReshapeRenderer.destroy(editor.canvasApp.getSelectionLayer())
     }
@@ -89,7 +89,8 @@ export class ReshapeSelectState extends SelectToolState {
         this.selectTool.setState(new SelectionState(this.selectTool))
     }
     onMove(newPosition: Point): void {
-        const localPosition = this.selectTool.editor.getDrawingPosition(newPosition).clone()
+        const editor = Editor.getEditor()
+        const localPosition = editor.getDrawingPosition(newPosition).clone()
 
         const moveVector = this.getMouvementVector(localPosition)
 
@@ -143,10 +144,9 @@ export class ReshapeSelectState extends SelectToolState {
         }
 
         const stickyShape = this.getStickyReshape(newX, newY, newWidth, newHeight)
+        const selection = editor.selectionManager.getSelection()
 
-        const selection = this.selectTool.editor.selectionManager.getSelection()
-
-        this.selectTool.editor.actionManager.push(
+        editor.actionManager.push(
             new UpdateSelectionPropertiesAction(
                 selection,
                 (selection) => {

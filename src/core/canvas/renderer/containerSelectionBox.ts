@@ -3,7 +3,7 @@ import { Editor } from "../../editor";
 import { SelectionLayer } from "../layers/selection";
 import { TreeContainer } from "../../tree/treeContainer";
 
-export class ContainerSelectionBox {
+export class ContainerSelectionBoxRenderer {
 
     private container: TreeContainer;
     private graphics: Graphics;

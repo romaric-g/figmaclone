@@ -12,8 +12,8 @@ export class SelectTool extends Tool {
 
     private _selectToolState: SelectToolState = new FreeSelectState(this);
 
-    constructor(editor: Editor) {
-        super(editor, "select")
+    constructor() {
+        super("select")
 
         this.onBackgroundPointerDown = this.onBackgroundPointerDown.bind(this)
         this.onBackgroundPointerUp = this.onBackgroundPointerUp.bind(this)
@@ -26,25 +26,27 @@ export class SelectTool extends Tool {
     }
 
     enable() {
-        this.editor.eventsManager.onBackgroundPressDown.subscribe(this.onBackgroundPointerDown)
-        this.editor.eventsManager.onBackgroundPressUp.subscribe(this.onBackgroundPointerUp)
-        this.editor.eventsManager.onElementPressDown.subscribe(this.onElementPressDown)
-        this.editor.eventsManager.onElementPressUp.subscribe(this.onElementPressUp)
-        this.editor.eventsManager.onPointerMove.subscribe(this.onPointerMove)
+        const editor = Editor.getEditor()
+        editor.eventsManager.onBackgroundPressDown.subscribe(this.onBackgroundPointerDown)
+        editor.eventsManager.onBackgroundPressUp.subscribe(this.onBackgroundPointerUp)
+        editor.eventsManager.onElementPressDown.subscribe(this.onElementPressDown)
+        editor.eventsManager.onElementPressUp.subscribe(this.onElementPressUp)
+        editor.eventsManager.onPointerMove.subscribe(this.onPointerMove)
 
-        this.editor.eventsManager.onElementHoverOn.subscribe(this.onElementHoverOn)
-        this.editor.eventsManager.onElementHoverOff.subscribe(this.onElementHoverOff)
+        editor.eventsManager.onElementHoverOn.subscribe(this.onElementHoverOn)
+        editor.eventsManager.onElementHoverOff.subscribe(this.onElementHoverOff)
     }
 
     disable() {
-        this.editor.eventsManager.onBackgroundPressDown.unsubscribe(this.onBackgroundPointerDown)
-        this.editor.eventsManager.onBackgroundPressUp.unsubscribe(this.onBackgroundPointerUp)
-        this.editor.eventsManager.onElementPressDown.unsubscribe(this.onElementPressDown)
-        this.editor.eventsManager.onElementPressUp.unsubscribe(this.onElementPressUp)
-        this.editor.eventsManager.onPointerMove.unsubscribe(this.onPointerMove)
+        const editor = Editor.getEditor()
+        editor.eventsManager.onBackgroundPressDown.unsubscribe(this.onBackgroundPointerDown)
+        editor.eventsManager.onBackgroundPressUp.unsubscribe(this.onBackgroundPointerUp)
+        editor.eventsManager.onElementPressDown.unsubscribe(this.onElementPressDown)
+        editor.eventsManager.onElementPressUp.unsubscribe(this.onElementPressUp)
+        editor.eventsManager.onPointerMove.unsubscribe(this.onPointerMove)
 
-        this.editor.eventsManager.onElementHoverOn.unsubscribe(this.onElementHoverOn)
-        this.editor.eventsManager.onElementHoverOff.unsubscribe(this.onElementHoverOff)
+        editor.eventsManager.onElementHoverOn.unsubscribe(this.onElementHoverOn)
+        editor.eventsManager.onElementHoverOff.unsubscribe(this.onElementHoverOff)
     }
 
     setState(selectToolState: SelectToolState) {
@@ -79,7 +81,8 @@ export class SelectTool extends Tool {
         if (button === 1) {
             return;
         }
-        const isShift = this.editor.keyboardManager.keyboardController.keys.shift.pressed;
+        const editor = Editor.getEditor()
+        const isShift = editor.keyboardManager.keyboardController.keys.shift.pressed;
         let isDouble = false
 
         const currentDate = new Date()
@@ -105,14 +108,17 @@ export class SelectTool extends Tool {
         if (button === 1) {
             return;
         }
-
-        const isShift = this.editor.keyboardManager.keyboardController.keys.shift.pressed;
+        const editor = Editor.getEditor()
+        const isShift = editor.keyboardManager.keyboardController.keys.shift.pressed;
 
         this._selectToolState.onClickUp(element, isShift)
     }
 
     onElementHoverOn({ component }: ElementOverOnEventData) {
-        const topComponent = this.editor.selectionManager.getComponentsChainFromRoot(component)[0]
+
+        const editor = Editor.getEditor()
+
+        const topComponent = editor.selectionManager.getComponentsChainFromRoot(component)[0]
 
         if (topComponent instanceof TreeRect) {
             topComponent.setHover(true)
@@ -123,7 +129,8 @@ export class SelectTool extends Tool {
     }
 
     onElementHoverOff({ component }: ElementOverOffEventData) {
-        const topComponent = this.editor.selectionManager.getComponentsChainFromRoot(component)[0]
+        const editor = Editor.getEditor()
+        const topComponent = editor.selectionManager.getComponentsChainFromRoot(component)[0]
 
         if (topComponent instanceof TreeRect) {
             topComponent.setHover(false)

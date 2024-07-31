@@ -1,6 +1,6 @@
 import { TreeRect } from "./treeRect"
 import { TreeComponent, TreeComponentProps } from "./treeComponent"
-import { ContainerSelectionBox } from "../canvas/renderer/containerSelectionBox";
+import { ContainerSelectionBoxRenderer } from "../canvas/renderer/containerSelectionBox";
 import { Editor } from "../editor";
 import { TreeContainerData } from "../../ui/subjects";
 import { Point } from "pixi.js";
@@ -8,17 +8,17 @@ import { getDrawingCoveredRect } from "../utils/getDrawingCoveredRect";
 import { SerialisedTreeContainer } from "./serialized/serialisedTreeContainer";
 
 
-export class TreeContainer extends TreeComponent<TreeContainerData> {
+export class TreeContainer extends TreeComponent {
 
     private components: TreeComponent[] = []
-    private selectionRenderer: ContainerSelectionBox;
+    private selectionRenderer: ContainerSelectionBoxRenderer;
     private _selected: boolean = false;
     private _hover: boolean = false;
     private _initialized: boolean = false;
 
     constructor(props: TreeComponentProps) {
         super(props)
-        this.selectionRenderer = new ContainerSelectionBox(this)
+        this.selectionRenderer = new ContainerSelectionBoxRenderer(this)
     }
 
     init(resetId: boolean) {

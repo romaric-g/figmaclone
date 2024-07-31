@@ -4,13 +4,14 @@ import { Editor } from "../../editor";
 import { SelectionLayer } from "../layers/selection";
 import { SelectTool } from "../../tools/selectTool";
 import { MovableSelectionState } from "../../tools/selectStates/movableSelection";
+import { TreeBox } from "../../tree/treeBox";
 
-export class RectSelectionRenderer {
+export class SelectionBoxRenderer {
 
     private graphics: Graphics;
-    private element: TreeRect;
+    private element: TreeBox;
 
-    constructor(element: TreeRect) {
+    constructor(element: TreeBox) {
         this.graphics = new Graphics()
         this.element = element;
     }

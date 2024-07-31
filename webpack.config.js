@@ -3,6 +3,7 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = {
   entry: "./src/index.tsx",
+  devtool: "source-map",
   mode: "development",
   module: {
     rules: [
@@ -29,6 +30,7 @@ module.exports = {
   output: {
     filename: "bundle.js",
     path: path.resolve(__dirname, "dist"),
+    devtoolModuleFilenameTemplate: "[absolute-resource-path]",
   },
   devServer: {
     static: "./dist",

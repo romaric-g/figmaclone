@@ -1,7 +1,7 @@
 import { Point } from "pixi.js";
-import { TreeComponentData, TreeRectData } from "../../ui/subjects";
 import { TreeComponent } from "./treeComponent";
 import { Editor } from "../editor";
+import { SelectionBoxRenderer } from "../canvas/renderer/selectionBox";
 
 export interface TreeBoxProps {
     name: string,
@@ -13,7 +13,10 @@ export interface TreeBoxProps {
 }
 
 
-export abstract class TreeBox<T extends TreeComponentData = TreeComponentData> extends TreeComponent<T> {
+export abstract class TreeBox extends TreeComponent {
+    private _movePositionOrigin?: Point;
+    private _elementSelectionRenderer: SelectionBoxRenderer;
+
 
     protected _hover: boolean = false;
     protected _selected: boolean = false;
@@ -24,11 +27,17 @@ export abstract class TreeBox<T extends TreeComponentData = TreeComponentData> e
     private _height!: number;
 
     constructor({ id, name, x, y, width, height }: TreeBoxProps) {
-        super({ id, name })
+        super({
+            name: name,
+            id: id
+        })
         this._x = x;
         this._y = y;
         this._width = width;
         this._height = height;
+
+        this._elementSelectionRenderer = new SelectionBoxRenderer(this)
+
     }
 
     set x(value: number) {
@@ -63,6 +72,21 @@ export abstract class TreeBox<T extends TreeComponentData = TreeComponentData> e
         return this._height
     }
 
+    unfreezeOriginalPosition() {
+        this._movePositionOrigin = undefined;
+    }
+
+    getOriginalPosition() {
+        if (this._movePositionOrigin) {
+            return this._movePositionOrigin;
+        }
+        return new Point(this.x, this.y)
+    }
+
+    freezeOriginalPosition() {
+        this._movePositionOrigin = new Point(this.x, this.y);
+    }
+
     getDrawingCoveredRect(): { minX: number; minY: number; maxX: number; maxY: number; } {
         return {
             minX: this.x,
@@ -84,5 +108,51 @@ export abstract class TreeBox<T extends TreeComponentData = TreeComponentData> e
             maxX: globalPoint.x + globalWidth,
             maxY: globalPoint.y + globalHeight
         }
+    }
+
+    isSelected() {
+        return this._selected;
+    }
+
+    isHover() {
+        return this._hover;
+    }
+
+    setHover(value: boolean) {
+        this._hover = value;
+    }
+
+    render(zIndex: number) {
+        this._elementSelectionRenderer.render(zIndex)
+
+        return zIndex + 1;
+    }
+
+
+    setPosition(x: number, y: number) {
+        this.x = x;
+        this.y = y;
+    }
+
+
+    onSelectionInit() {
+        this._selected = true;
+    }
+
+    onSelectionDestroy() {
+        this._selected = false;
+        this._hover = false;
+    }
+
+    init(resetId: boolean = true) {
+        super.init(resetId)
+
+        this._elementSelectionRenderer.init(Editor.getEditor().canvasApp.getSelectionLayer())
+    }
+
+    destroy(): void {
+        super.destroy()
+
+        this._elementSelectionRenderer.destroy(Editor.getEditor().canvasApp.getSelectionLayer())
     }
 }

@@ -1,25 +1,29 @@
 import { currentToolSubject } from "../../ui/subjects";
 import { Editor } from "../editor";
 import { Selection } from "../selections/selection";
-import { DrawTool } from "./drawTool";
+import { TreeText } from "../tree/treeText";
+import { RectTool } from "./rectTool";
 import { FreeSelectState } from "./selectStates/freeSelect";
 import { SelectionState } from "./selectStates/selection";
 import { SelectTool } from "./selectTool";
+import { TextTool } from "./textTool";
 import { Tool } from "./tool";
 
-export type ToolType = "select" | "draw"
+export type ToolType = "select" | "rect" | "text"
 
 export class ToolManager {
 
     private _selectTool: SelectTool;
-    private _drawTool: DrawTool;
+    private _rectTool: RectTool;
+    private _textTool: TextTool;
 
     private _currentTool?: Tool;
     private _freezed = false;
 
     constructor(editor: Editor) {
-        this._selectTool = new SelectTool(editor)
-        this._drawTool = new DrawTool(editor)
+        this._selectTool = new SelectTool()
+        this._rectTool = new RectTool()
+        this._textTool = new TextTool()
     }
 
     init() {
@@ -41,9 +45,12 @@ export class ToolManager {
             case "select":
                 newTool = this._selectTool;
                 break
-            case "draw":
-                newTool = this._drawTool;
-                break
+            case "rect":
+                newTool = this._rectTool;
+                break;
+            case "text":
+                newTool = this._textTool;
+                break;
         }
 
         if (newTool && newTool != this._currentTool) {

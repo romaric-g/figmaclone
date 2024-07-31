@@ -21,7 +21,8 @@ export class SelectionState extends SelectToolState {
     }
 
     private updateReshapeReference(localPostion: Point) {
-        const [threasholdX, threasholdY] = this.selectTool.editor.getDrawingSize(16, 16);
+        const editor = Editor.getEditor()
+        const [threasholdX, threasholdY] = editor.getDrawingSize(16, 16);
 
         if (this._singleElement) {
 
@@ -80,7 +81,7 @@ export class SelectionState extends SelectToolState {
     }
 
     onClickDown(element: TreeRect, shift: boolean, pointerPosition: Point, isDouble: boolean) {
-        const editor = this.selectTool.editor
+        const editor = Editor.getEditor()
         const selector = editor.selectionManager;
 
         const localPosition = editor.getDrawingPosition(pointerPosition).clone()
@@ -128,7 +129,8 @@ export class SelectionState extends SelectToolState {
     }
 
     onBackgroundPointerDown(clickPosition: Point): void {
-        const localPosition = this.selectTool.editor.getDrawingPosition(clickPosition).clone()
+        const editor = Editor.getEditor()
+        const localPosition = editor.getDrawingPosition(clickPosition).clone()
 
         this.updateReshapeReference(localPosition)
 
@@ -136,8 +138,8 @@ export class SelectionState extends SelectToolState {
             const newState = new ReshapeSelectState(this.selectTool, this._singleElement, this._reshapeReference, localPosition);
             this.selectTool.setState(newState)
         } else {
-            const isShift = this.selectTool.editor.keyboardManager.keyboardController.keys.shift.pressed
-            const selection = this.selectTool.editor.selectionManager.getSelection()
+            const isShift = editor.keyboardManager.keyboardController.keys.shift.pressed
+            const selection = editor.selectionManager.getSelection()
             const isInSelection = selection.mouseIsIn(clickPosition)
 
             if (selection.isEmpty()) {
@@ -148,7 +150,7 @@ export class SelectionState extends SelectToolState {
                 Editor.getEditor().actionManager.push(
                     new ClearSelection()
                 )
-                this.selectTool.setState(new DragSelectionState(this.selectTool, localPosition))
+                this.selectTool.setState(new DragSelectionState(this.selectTool, clickPosition))
             } else if (isInSelection) {
                 const topComponent = selection.getComponents()[0]
 
@@ -160,13 +162,15 @@ export class SelectionState extends SelectToolState {
     }
 
     onMove(newPosition: Point): void {
-        const localPostion = this.selectTool.editor.getDrawingPosition(newPosition).clone()
+        const editor = Editor.getEditor()
+        const localPostion = editor.getDrawingPosition(newPosition).clone()
 
         this.updateReshapeReference(localPostion)
     }
 
     onInit() {
-        const elements = this.selectTool.editor.selectionManager.getSelection().getFlatComponents()
+        const editor = Editor.getEditor()
+        const elements = editor.selectionManager.getSelection().getFlatComponents()
 
         if (elements.length === 1 && elements[0] instanceof TreeRect) {
             this._singleElement = elements[0]

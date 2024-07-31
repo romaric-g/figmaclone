@@ -1,12 +1,5 @@
 import React from "react";
-import { Editor } from "../../core/editor";
-import { Selection } from "../../core/selections/selection";
-import classNames from "classnames";
-import { SelectTool } from "../../core/tools/selectTool";
-import { SelectionState } from "../../core/tools/selectStates/selection";
-import { TreeRect } from "../../core/tree/treeRect";
 import "./treeRect.scss";
-import { TreeComponent } from "../../core/tree/treeComponent";
 import TreeComponentView from "./treeComponent";
 import { DragOrigin, DragTarget } from "./tree";
 

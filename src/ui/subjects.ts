@@ -13,7 +13,7 @@ export interface TreeData {
     tree: TreeComponentData[]
 }
 
-export type TreeComponentData = TreeRectData | TreeContainerData
+export type TreeComponentData = TreeRectData | TreeTextData | TreeContainerData
 
 export interface TreeComponentBaseData<T extends string> {
     type: T,
@@ -23,6 +23,8 @@ export interface TreeComponentBaseData<T extends string> {
 }
 
 export type TreeRectData = TreeComponentBaseData<"rect">
+
+export type TreeTextData = TreeComponentBaseData<"text">
 
 export interface TreeContainerData extends TreeComponentBaseData<"container"> {
     children: TreeComponentData[]
