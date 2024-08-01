@@ -11,6 +11,9 @@ import { ClearSelection } from "../../actions/clearSelection";
 import { FreeSelectState } from "./freeSelect";
 import { SetSelectionAction } from "../../actions/setSelectionAction";
 import { SetSelectionPropertiesAction } from "../../actions/setSelectionPropertiesAction";
+import { SelectedComponentsModifier } from "../../selections/selectedComponentsModifier";
+import { getSquaredCoveredZone } from "../../utils/squaredZone";
+import { findMinimumDifference } from "../../utils/findMinimumDifference";
 
 export class MovableSelectionState extends SelectToolState {
     private _sourceClickedPosition: Point;
@@ -18,8 +21,6 @@ export class MovableSelectionState extends SelectToolState {
     private _moveComponent: TreeComponent;
     private _haveMove: boolean = false;
 
-    private _stickyX?: number;
-    private _stickyY?: number;
 
     private stickyLineRenderer: StickyLineRenderer;
 
@@ -94,14 +95,7 @@ export class MovableSelectionState extends SelectToolState {
         const movementVector = this.getMouvementVector(localPostion)
         const selection = editor.selectionManager.getSelection()
 
-        const {
-            vector,
-            stickyX,
-            stickyY
-        } = selection.getStickyMoveVector(movementVector)
-
-        this._stickyX = stickyX;
-        this._stickyY = stickyY;
+        const vector = this.getStickyMoveVector(selection, movementVector)
 
         editor.actionManager.push(
             new UpdateSelectionPropertiesAction(selection, (selection) => {
@@ -112,6 +106,47 @@ export class MovableSelectionState extends SelectToolState {
         if (!this._haveMove) {
             this._haveMove = true;
         }
+    }
+
+    getStickyMoveVector(selection: SelectedComponentsModifier, moveVector: Point): Point {
+        const editor = Editor.getEditor()
+
+        const selectionRects = selection.getAllRectComponents()
+        const squaredZones = selectionRects.map(r => r.getSquaredZoneFromOrigin())
+        const squaredZone = getSquaredCoveredZone(squaredZones)
+
+        if (!squaredZone) {
+            return moveVector;
+        }
+
+        const rects = editor.treeManager.getAllRectComponents().filter((r) => !selectionRects.includes(r))
+
+        if (rects.length === 0) {
+            return moveVector;
+        }
+
+        squaredZone.minX += moveVector.x;
+        squaredZone.maxX += moveVector.x;
+        squaredZone.minY += moveVector.y;
+        squaredZone.maxY += moveVector.y;
+
+        const xs = rects.map((r) => [r.x, r.x + r.width]).flat()
+        const ys = rects.map((r) => [r.y, r.y + r.height]).flat()
+
+        const [x, sel_x, min_diff_x] = findMinimumDifference(xs, [squaredZone.minX, squaredZone.maxX]);
+        const [y, sel_y, min_diff_y] = findMinimumDifference(ys, [squaredZone.minY, squaredZone.maxY]);
+
+        const newMoveVector = moveVector.clone()
+
+        if (min_diff_x < 10) {
+            newMoveVector.x = x - (sel_x - moveVector.x)
+        }
+
+        if (min_diff_y < 10) {
+            newMoveVector.y = y - (sel_y - moveVector.y)
+        }
+
+        return newMoveVector;
     }
 
     onClickDown(element: TreeRect, shift: boolean, pointerPosition: Point): void { }
@@ -139,12 +174,7 @@ export class MovableSelectionState extends SelectToolState {
         this.stickyLineRenderer.render()
     }
 
-    getStickyInfo() {
-        return {
-            x: this._stickyX,
-            y: this._stickyY
-        }
-    }
+
 
     haveMove() {
         return this._haveMove;

@@ -1,16 +1,13 @@
 import { selectionChangeSubject, treeElementSubject } from "../../ui/subjects";
 import { Editor } from "../editor";
-import { Selection } from "../selections/selection";
+import { SelectedComponentsModifier } from "../selections/selectedComponentsModifier";
 import { Action } from "./action";
-
-
-
 
 export class SetSelectionAction extends Action {
 
-    private selection: Selection;
+    private selection: SelectedComponentsModifier;
 
-    constructor(newSelection: Selection) {
+    constructor(newSelection: SelectedComponentsModifier) {
         super("Set selection")
         this.selection = newSelection
     }

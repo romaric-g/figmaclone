@@ -1,16 +1,16 @@
-import { TreeRect } from "./treeRect"
 import { TreeComponent, TreeComponentProps } from "./treeComponent"
 import { ContainerSelectionBoxRenderer } from "../canvas/renderer/containerSelectionBox";
-import { Editor } from "../editor";
 import { TreeContainerData } from "../../ui/subjects";
-import { Point } from "pixi.js";
-import { getDrawingCoveredRect } from "../utils/getDrawingCoveredRect";
+import { getSquaredCoveredZone, SquaredZone } from "../utils/squaredZone";
 import { SerialisedTreeContainer } from "./serialized/serialisedTreeContainer";
-
+import { AnchorContainer } from "./anchors/anchorContainer";
 
 export class TreeContainer extends TreeComponent {
 
-    private components: TreeComponent[] = []
+    // private components: TreeComponent[] = []
+
+    private _anchorContainer: AnchorContainer<TreeComponent>;
+
     private selectionRenderer: ContainerSelectionBoxRenderer;
     private _selected: boolean = false;
     private _hover: boolean = false;
@@ -19,6 +19,7 @@ export class TreeContainer extends TreeComponent {
     constructor(props: TreeComponentProps) {
         super(props)
         this.selectionRenderer = new ContainerSelectionBoxRenderer(this)
+        this._anchorContainer = new AnchorContainer(this)
     }
 
     init(resetId: boolean) {
@@ -29,8 +30,7 @@ export class TreeContainer extends TreeComponent {
                 childComponent.init(resetId)
             }
 
-            const selectionLayer = Editor.getEditor().canvasApp.getSelectionLayer()
-            this.selectionRenderer.init(selectionLayer)
+            this.selectionRenderer.init()
             this._initialized = true
         }
     }
@@ -45,100 +45,25 @@ export class TreeContainer extends TreeComponent {
 
             super.destroy()
 
-            const selectionLayer = Editor.getEditor().canvasApp.getSelectionLayer()
-            this.selectionRenderer.destroy(selectionLayer)
+            this.selectionRenderer.destroy()
             this._initialized = false
         }
     }
 
-    add(element: TreeComponent): void {
-        this.components.push(element);
-        element.updateParentContainerCache(this);
-    }
-
-    addAtIndex(element: TreeComponent, index: number): void {
-        if (index >= 0 && index <= this.components.length) {
-            this.components.splice(index, 0, element);
-            element.updateParentContainerCache(this);
-        } else {
-            this.add(element)
-        }
-    }
-
-    remove(element: TreeComponent): void {
-        const index = this.components.indexOf(element);
-        if (index !== -1) {
-            this.components.splice(index, 1);
-            element.updateParentContainerCache(undefined)
-        }
-    }
-
     isEmpty() {
-        return this.components.length === 0
+        return this._anchorContainer.lenght === 0
     }
 
     getComponents(): TreeComponent[] {
-        return this.components;
+        return this._anchorContainer.anchors.map((a) => a.component);
     }
 
     getDepthComponents() {
-        const depthComponents: TreeComponent[] = []
-
-        for (const component of this.components) {
-            if (component instanceof TreeContainer) {
-                depthComponents.push(component, ...component.getDepthComponents())
-            } else {
-                depthComponents.push(component)
-            }
-        }
-
-        return depthComponents;
+        return this._anchorContainer.getDepthAnchors().map((a) => a.component);
     }
 
-    getAllRects() {
-        const depthRects: TreeRect[] = []
-
-        for (const component of this.components) {
-            if (component instanceof TreeContainer) {
-                depthRects.push(...component.getAllRects())
-            } else if (component instanceof TreeRect) {
-                depthRects.push(component)
-            }
-        }
-
-        return depthRects;
-    }
-
-    getContainer(depthIndex: number[]): TreeContainer | undefined {
-        if (depthIndex) {
-            const indexElement = this.getComponent(depthIndex)
-            if (indexElement instanceof TreeContainer) {
-                return indexElement
-            }
-            return undefined;
-        }
-        return this;
-    }
-
-    getComponent(depthIndex: number[]): TreeComponent | undefined {
-        let depthIndexShifted = [...depthIndex]
-        const currentIndex = depthIndexShifted.shift()
-
-        if (currentIndex === undefined) {
-            return this;
-        }
-
-        const element = this.components[currentIndex]
-
-        if (element instanceof TreeContainer) {
-            return element.getComponent(depthIndexShifted)
-        }
-
-        if (depthIndexShifted.length > 0) {
-            return undefined;
-        }
-
-        return element;
+    getChildComponent(depthIndex: number[]): TreeComponent | undefined {
+        return this._anchorContainer.getChildAnchor(depthIndex)?.component
     }
 
     render(nextIndex: number): number {
@@ -183,56 +108,28 @@ export class TreeContainer extends TreeComponent {
     }
 
     getIndexOfChild(treeComponent: TreeComponent) {
-        return this.components.findIndex((c) => c == treeComponent)
+        return this.getComponents().findIndex((c) => c == treeComponent)
     }
 
-    getCanvasCoveredRect(): { minX: number; minY: number; maxX: number; maxY: number; } | undefined {
+    getSquaredZone(): SquaredZone | undefined {
+        const squaredZones = this.getComponents().map(c => c.getSquaredZone()).filter(c => !!c)
 
-        const drawingCovered = getDrawingCoveredRect(this.getAllRects())
-
-        if (!drawingCovered) {
-            return undefined;
-        }
-
-        const editor = Editor.getEditor()
-
-        const minOrigin = editor.getCanvasPosition(new Point(drawingCovered.minX, drawingCovered.minY))
-        const maxOrigin = editor.getCanvasPosition(new Point(drawingCovered.maxX, drawingCovered.maxY))
-
-        return {
-            minX: minOrigin.x,
-            minY: minOrigin.y,
-            maxX: maxOrigin.x,
-            maxY: maxOrigin.y
-        }
+        return getSquaredCoveredZone(squaredZones)
     }
 
     serialize(): SerialisedTreeContainer {
-        return new SerialisedTreeContainer({
-            name: this.getName(),
-            id: this.getId(),
-            components: this.getComponents().map((c) => c.serialize())
-        })
+        return {
+            type: "container",
+            props: {
+                name: this.getName(),
+                id: this.getId(),
+                components: this.getComponents().map((c) => c.serialize())
+            }
+        }
     }
 
-
-    public static deserialize(serialisedTreeContainer: SerialisedTreeContainer) {
-
-        const newContainer = new TreeContainer({
-            name: serialisedTreeContainer.props.name,
-            id: serialisedTreeContainer.props.id
-        })
-
-        newContainer.components = serialisedTreeContainer.props.components.map((stc) => {
-            const component = stc.deserialize()
-
-            component.updateParentContainerCache(newContainer)
-
-            return component;
-        })
-
-        return newContainer;
-
+    getAnchor(): AnchorContainer<TreeComponent> {
+        return this._anchorContainer;
     }
 
 }

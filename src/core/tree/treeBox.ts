@@ -1,7 +1,7 @@
 import { Point } from "pixi.js";
 import { TreeComponent } from "./treeComponent";
-import { Editor } from "../editor";
 import { SelectionBoxRenderer } from "../canvas/renderer/selectionBox";
+import { SquaredZone } from "../utils/squaredZone";
 
 export interface TreeBoxProps {
     name: string,
@@ -11,7 +11,6 @@ export interface TreeBoxProps {
     width: number,
     height: number
 }
-
 
 export abstract class TreeBox extends TreeComponent {
     private _movePositionOrigin?: Point;
@@ -87,7 +86,7 @@ export abstract class TreeBox extends TreeComponent {
         this._movePositionOrigin = new Point(this.x, this.y);
     }
 
-    getDrawingCoveredRect(): { minX: number; minY: number; maxX: number; maxY: number; } {
+    getSquaredZone(): SquaredZone {
         return {
             minX: this.x,
             minY: this.y,
@@ -96,17 +95,15 @@ export abstract class TreeBox extends TreeComponent {
         }
     }
 
-    getCanvasCoveredRect(): { minX: number; minY: number; maxX: number; maxY: number; } {
-        const editor = Editor.getEditor()
-
-        const globalPoint = editor.getCanvasPosition(new Point(this.x, this.y))
-        const [globalWidth, globalHeight] = editor.getCanvasSize(this.width, this.height)
+    getSquaredZoneFromOrigin(): SquaredZone {
+        const x = this.getOriginalPosition().x;
+        const y = this.getOriginalPosition().y;
 
         return {
-            minX: globalPoint.x,
-            minY: globalPoint.y,
-            maxX: globalPoint.x + globalWidth,
-            maxY: globalPoint.y + globalHeight
+            minX: x,
+            minY: y,
+            maxX: x + this.width,
+            maxY: y + this.height
         }
     }
 
@@ -147,12 +144,12 @@ export abstract class TreeBox extends TreeComponent {
     init(resetId: boolean = true) {
         super.init(resetId)
 
-        this._elementSelectionRenderer.init(Editor.getEditor().canvasApp.getSelectionLayer())
+        this._elementSelectionRenderer.init()
     }
 
     destroy(): void {
         super.destroy()
 
-        this._elementSelectionRenderer.destroy(Editor.getEditor().canvasApp.getSelectionLayer())
+        this._elementSelectionRenderer.destroy()
     }
 }

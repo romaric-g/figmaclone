@@ -1,10 +1,10 @@
-import { Editor } from "../editor";
 import { RectRenderer } from "../canvas/renderer/rect";
 import { TreeRectData } from "../../ui/subjects";
 import { SerialisedTreeRect } from "./serialized/serialisedTreeRect";
 import { HsvaColor } from "@uiw/react-color";
 import { hsvaToRgba, rgbaToHsva } from '@uiw/color-convert'
 import { TreeBox } from "./treeBox";
+import { Editor } from "../editor";
 
 export interface TreeRectProps {
     name: string,
@@ -17,8 +17,6 @@ export interface TreeRectProps {
     borderColor?: HsvaColor,
     borderWidth?: number
 }
-
-console.log("TreeBox of RECT", TreeBox)
 
 export class TreeRect extends TreeBox {
 
@@ -112,13 +110,10 @@ export class TreeRect extends TreeBox {
 
         super.init(resetId)
 
-        const editor = Editor.getEditor()
-
-
-        this._elementTreeRenderer.init(editor.canvasApp.getTreeLayer())
+        this._elementTreeRenderer.init()
 
         const graphics = this._elementTreeRenderer.getContainer()
-        const eventsManager = editor.eventsManager;
+        const eventsManager = Editor.getEditor().eventsManager;
 
         graphics.on('pointerdown', (event) => {
             if (event.button === 2) return
@@ -165,9 +160,7 @@ export class TreeRect extends TreeBox {
         if (this.isInit()) {
             super.destroy()
 
-            const editor = Editor.getEditor()
-
-            this._elementTreeRenderer.destroy(editor.canvasApp.getTreeLayer())
+            this._elementTreeRenderer.destroy()
         }
     }
 
@@ -188,36 +181,21 @@ export class TreeRect extends TreeBox {
     }
 
     serialize(): SerialisedTreeRect {
-        return new SerialisedTreeRect({
-            name: this.getName(),
-            id: this.getId(),
-            x: this.x,
-            y: this.y,
-            width: this.width,
-            height: this.height,
-            fillColor: this.fillColor,
-            borderColor: this.borderColor,
-            borderWidth: this.borderWidth
-        })
+        return {
+            type: "rect",
+            props: {
+                name: this.getName(),
+                id: this.getId(),
+                x: this.x,
+                y: this.y,
+                width: this.width,
+                height: this.height,
+                fillColor: this.fillColor,
+                borderColor: this.borderColor,
+                borderWidth: this.borderWidth
+            }
+        }
     }
-
-    public static deserialize(serialisedTreeRect: SerialisedTreeRect) {
-
-        const newRect = new TreeRect({
-            name: serialisedTreeRect.props.name,
-            id: serialisedTreeRect.props.id,
-            x: serialisedTreeRect.props.x,
-            y: serialisedTreeRect.props.y,
-            width: serialisedTreeRect.props.width,
-            height: serialisedTreeRect.props.height,
-            fillColor: serialisedTreeRect.props.fillColor,
-            borderColor: serialisedTreeRect.props.borderColor,
-            borderWidth: serialisedTreeRect.props.borderWidth || 0
-        })
-
-        return newRect;
-    }
-
 }
 
 

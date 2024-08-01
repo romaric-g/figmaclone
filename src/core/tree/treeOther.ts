@@ -1,10 +1,6 @@
-import { TreeContainer } from "./treeContainer"
-import { TreeComponent } from "./treeComponent"
-import { TreeComponentData } from "../../ui/subjects";
-import { SerialisedTreeRect } from "./serialized/serialisedTreeRect";
 import { TreeBox } from "./treeBox";
-
-console.log("TreeBox of OTHER", TreeBox)
+import { TreeComponentData } from "../../ui/subjects";
+import { SerialisedTreeOther } from "./serialized/serialisedTreeOther";
 
 export class TreeOther extends TreeBox {
 
@@ -17,11 +13,20 @@ export class TreeOther extends TreeBox {
         }
     }
 
-
-
-    serialize(): SerialisedTreeRect {
+    serialize(): SerialisedTreeOther {
         console.log("coucou")
-        throw "not implemented"
+
+        return {
+            type: "other",
+            props: {
+                name: this.getName(),
+                id: this.getId(),
+                x: this.x,
+                y: this.y,
+                width: this.width,
+                height: this.height
+            }
+        }
     }
 
 }

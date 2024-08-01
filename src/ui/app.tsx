@@ -1,11 +1,9 @@
 import React, { MouseEvent } from "react";
 import TreeView from "./tree/tree";
 import ToolbarView from "./tool/toolbar";
-import { ToolType } from "../core/tools/toolManager";
 import Canvas from "./canvas/canvas";
-import SelectionEditor from "./selection/selectionEditor";
 import { Editor } from "../core/editor";
-import { contextMenuChangeSubject, ContextMenuData, currentToolSubject, TreeData, treeElementSubject } from "./subjects";
+import { contextMenuChangeSubject, ContextMenuData, currentToolSubject, ToolType, TreeData, treeElementSubject } from "./subjects";
 import "./app.scss";
 import "./reset.scss"
 import SelectionEditorBox from "./selection/selectionEditorBox";

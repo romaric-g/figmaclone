@@ -1,14 +1,14 @@
 import { GroupeSelectionAction } from "../../actions/groupeSelectionAction";
 import { Editor } from "../../editor";
-import { Selection } from "../../selections/selection";
+import { SelectedComponentsModifier } from "../../selections/selectedComponentsModifier";
 import { MenuItem } from "../menuItem";
 
 
 export class GroupeItem extends MenuItem {
 
-    private selection: Selection;
+    private selection: SelectedComponentsModifier;
 
-    constructor(selection: Selection) {
+    constructor(selection: SelectedComponentsModifier) {
         super("Grouper", "Ctrl+G")
         this.selection = selection;
     }

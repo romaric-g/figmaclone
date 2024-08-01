@@ -1,8 +1,7 @@
 import { selectionChangeSubject, treeElementSubject } from "../../ui/subjects";
 import { Editor } from "../editor";
-import { Selection } from "../selections/selection";
+import { SelectedComponentsModifier } from "../selections/selectedComponentsModifier";
 import { TreeBox } from "../tree/treeBox";
-import { TreeRect } from "../tree/treeRect";
 import { Action } from "./action";
 
 
@@ -18,11 +17,11 @@ export class CreateRectStartAction extends Action {
 
     apply(editor: Editor) {
 
-        const selection = new Selection([this.treeBox])
+        const selection = new SelectedComponentsModifier([this.treeBox])
 
         this.treeBox.init(true)
 
-        editor.treeManager.getTree().add(this.treeBox)
+        editor.treeManager.getTree().getAnchor().add(this.treeBox.getAnchor())
         editor.selectionManager.setSelection(selection)
 
         selectionChangeSubject.next(selection.toData())

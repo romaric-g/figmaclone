@@ -2,15 +2,14 @@ import { Point } from "pixi.js";
 import { Tool } from "./tool";
 import { TreeBox } from "../tree/treeBox";
 import { StickyLineDrawRenderer } from "../canvas/renderer/stickyLineDraw";
-import { ToolType } from "./toolManager";
 import { Editor } from "../editor";
-import { cursorChangeSubject } from "../../ui/subjects";
+import { cursorChangeSubject, ToolType } from "../../ui/subjects";
 import { PointerDownEventData, PointerMoveEventData, PointerUpEventData } from "../event/eventManager";
 import { TreeRect } from "../tree/treeRect";
 import { CreateRectStartAction } from "../actions/createElementStartAction";
 import { SelectTool } from "./selectTool";
 import { SelectionState } from "./selectStates/selection";
-import { Selection } from "../selections/selection";
+import { SelectedComponentsModifier } from "../selections/selectedComponentsModifier";
 import { SetSelectionAction } from "../actions/setSelectionAction";
 import { UpdateSelectionPropertiesAction } from "../actions/updateSelectionPropertiesAction";
 
@@ -88,7 +87,7 @@ export abstract class DrawTool extends Tool {
         const editor = Editor.getEditor()
 
         if (this.drawingBox) {
-            editor.selectionManager.setSelection(new Selection([this.drawingBox]))
+            editor.selectionManager.setSelection(new SelectedComponentsModifier([this.drawingBox]))
             editor.toolManager.setCurrentTool("select")
 
             editor.actionManager.push(
@@ -158,7 +157,9 @@ export abstract class DrawTool extends Tool {
 
         const editor = Editor.getEditor()
 
-        const allOtherRects = editor.treeManager.getTree().getAllRects().filter((r) => r !== this.drawingBox)
+        const allComponents = editor.treeManager.getTree().getComponents()
+        const allRects = allComponents.filter(r => r instanceof TreeRect)
+        const allOtherRects = allRects.filter((r) => r !== this.drawingBox)
 
         const minX = x;
         const maxX = x + width;

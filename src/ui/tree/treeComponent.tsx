@@ -6,7 +6,7 @@ import { SelectTool } from "../../core/tools/selectTool";
 import { SelectionState } from "../../core/tools/selectStates/selection";
 import "./treeComponent.scss";
 import { DragOrigin, DragTarget } from "./tree";
-import { Selection } from "../../core/selections/selection";
+import { SelectedComponentsModifier } from "../../core/selections/selectedComponentsModifier";
 import { SetSelectionAction } from "../../core/actions/setSelectionAction";
 
 interface Props {
@@ -33,7 +33,7 @@ const TreeComponentView: React.FC<Props> = ({
     const onMouseDown = (e: React.MouseEvent<HTMLLIElement, MouseEvent>) => {
 
         const editor = Editor.getEditor()
-        const container = editor.treeManager.getTree().getComponent(indexs)
+        const container = editor.treeManager.getTree().getChildComponent(indexs)
 
         if (container) {
             if (editor.keyboardManager.keyboardController.keys.control.pressed) {
@@ -48,7 +48,7 @@ const TreeComponentView: React.FC<Props> = ({
                 if (e.button === 0 || (e.button === 2 && !selection.getComponents().includes(container))) {
                     editor.actionManager.push(
                         new SetSelectionAction(
-                            new Selection([container])
+                            new SelectedComponentsModifier([container])
                         )
                     )
                 }

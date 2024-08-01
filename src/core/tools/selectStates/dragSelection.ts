@@ -6,10 +6,11 @@ import { FreeSelectState } from "./freeSelect";
 import { DragSelectionBoxRenderer } from "../../canvas/renderer/dragSelectorBox";
 import { Editor } from "../../editor";
 import { TreeComponent } from "../../tree/treeComponent";
-import { Selection } from "../../selections/selection";
+import { SelectedComponentsModifier } from "../../selections/selectedComponentsModifier";
 import { SelectionState } from "./selection";
 import { UpdatingSelectionAction } from "../../actions/updatingSelectionAction";
 import { SetSelectionAction } from "../../actions/setSelectionAction";
+import { SquaredZone } from "../../utils/squaredZone";
 
 // Quand l'utilisateur presse le bouton gauche de sa souris et alors peut bouger 
 // sa souris pour selectionner un ensemble d'elements
@@ -33,7 +34,7 @@ export class DragSelectionState extends SelectToolState {
         return this._lastDragPosition;
     }
 
-    getCoveredRect() {
+    getCanvasCoveredZone(): SquaredZone | undefined {
 
         const fromPoint = this.getFromClickedPosition()
         const toPoint = this.getDragPosition()
@@ -55,34 +56,37 @@ export class DragSelectionState extends SelectToolState {
 
         this._lastDragPosition = newPosition.clone()
 
-        const selectionCoveredRect = this.getCoveredRect()
+        const selectionCanvasCoveredZone = this.getCanvasCoveredZone()
 
-        if (!selectionCoveredRect) {
+        if (!selectionCanvasCoveredZone) {
             return
         }
-
 
         const toSelectComponents: TreeComponent[] = []
 
         const rootComponents = editor.treeManager.getTree().getComponents()
 
         for (const rootComponent of rootComponents) {
-            const componentCoveredRect = rootComponent.getCanvasCoveredRect()
-            if (componentCoveredRect) {
+            const componentDrawingCoveredZone = rootComponent.getSquaredZone()
 
-                const isLeft = componentCoveredRect.maxX < selectionCoveredRect.minX;
-                const isRight = componentCoveredRect.minX > selectionCoveredRect.maxX;
-                const isAbove = componentCoveredRect.maxY < selectionCoveredRect.minY;
-                const isBelow = componentCoveredRect.minY > selectionCoveredRect.maxY;
+            if (!componentDrawingCoveredZone) {
+                continue;
+            }
 
-                if (!isLeft && !isRight && !isAbove && !isBelow) {
-                    toSelectComponents.push(rootComponent)
-                }
+            const componentCanvasCoveredZone = editor.getCanvasSquaredZone(componentDrawingCoveredZone)
+
+            const isLeft = componentCanvasCoveredZone.maxX < selectionCanvasCoveredZone.minX;
+            const isRight = componentCanvasCoveredZone.minX > selectionCanvasCoveredZone.maxX;
+            const isAbove = componentCanvasCoveredZone.maxY < selectionCanvasCoveredZone.minY;
+            const isBelow = componentCanvasCoveredZone.minY > selectionCanvasCoveredZone.maxY;
+
+            if (!isLeft && !isRight && !isAbove && !isBelow) {
+                toSelectComponents.push(rootComponent)
             }
         }
 
         editor.actionManager.push(
-            new UpdatingSelectionAction(new Selection(toSelectComponents))
+            new UpdatingSelectionAction(new SelectedComponentsModifier(toSelectComponents))
         )
     }
 

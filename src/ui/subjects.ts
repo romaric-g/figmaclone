@@ -1,6 +1,8 @@
 import { Subject } from 'rxjs';
-import { ToolType } from '../core/tools/toolManager';
 import { HsvaColor } from '@uiw/react-color';
+
+
+export type ToolType = "select" | "rect" | "text"
 
 export const treeElementSubject = new Subject<TreeData>();
 export const currentToolSubject = new Subject<ToolType>();

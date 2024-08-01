@@ -170,7 +170,7 @@ export class SelectionState extends SelectToolState {
 
     onInit() {
         const editor = Editor.getEditor()
-        const elements = editor.selectionManager.getSelection().getFlatComponents()
+        const elements = editor.selectionManager.getSelection().getDepthComponents()
 
         if (elements.length === 1 && elements[0] instanceof TreeRect) {
             this._singleElement = elements[0]

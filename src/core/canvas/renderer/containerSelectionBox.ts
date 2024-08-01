@@ -1,6 +1,5 @@
 import { Graphics, GraphicsContext, Point } from "pixi.js";
 import { Editor } from "../../editor";
-import { SelectionLayer } from "../layers/selection";
 import { TreeContainer } from "../../tree/treeContainer";
 
 export class ContainerSelectionBoxRenderer {
@@ -21,16 +20,16 @@ export class ContainerSelectionBoxRenderer {
             return
         }
 
-        const coveredRect = this.container.getCanvasCoveredRect()
+        const drawingCoveredZone = this.container.getSquaredZone()
 
-        if (!coveredRect) {
+        if (!drawingCoveredZone) {
             this.graphics.context = new GraphicsContext();
             return
         }
 
-        const { minX, minY, maxX, maxY } = coveredRect
+        const coveredRect = editor.getCanvasSquaredZone(drawingCoveredZone)
 
-        const boxOrigin = new Point(minX, minY)
+        const { minX, minY, maxX, maxY } = coveredRect
 
         let boxWidth = maxX - minX;
         let boxHeight = maxY - minY;
@@ -46,17 +45,17 @@ export class ContainerSelectionBoxRenderer {
 
         this.graphics.zIndex = 10000;
         this.graphics.context = commonContext;
-        this.graphics.x = boxOrigin.x;
-        this.graphics.y = boxOrigin.y;
+        this.graphics.x = minX;
+        this.graphics.y = minY;
 
     }
 
-    init(selectionLayer: SelectionLayer) {
-        selectionLayer.getContainer().addChild(this.graphics)
+    init() {
+        Editor.getEditor().canvasApp.getSelectionLayer().getContainer().addChild(this.graphics)
     }
 
-    destroy(selectionLayer: SelectionLayer) {
-        selectionLayer.getContainer().removeChild(this.graphics)
+    destroy() {
+        Editor.getEditor().canvasApp.getSelectionLayer().getContainer().removeChild(this.graphics)
     }
 
     getContainer() {

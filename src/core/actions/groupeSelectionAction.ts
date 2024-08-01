@@ -1,19 +1,46 @@
 import { selectionChangeSubject, treeElementSubject } from "../../ui/subjects";
 import { Editor } from "../editor";
-import { Selection } from "../selections/selection";
+import { SelectedComponentsModifier } from "../selections/selectedComponentsModifier";
+import { TreeContainer } from "../tree/treeContainer";
 import { Action } from "./action";
 
 export class GroupeSelectionAction extends Action {
 
-    private selection: Selection;
+    private selection: SelectedComponentsModifier;
 
-    constructor(selection: Selection) {
+    constructor(selection: SelectedComponentsModifier) {
         super("Groupe selection")
         this.selection = selection
     }
 
     apply(editor: Editor) {
-        editor.selectionManager.getRootContainer().groupeSelection(this.selection)
+
+
+        if (this.selection.isEmpty()) {
+            return
+        }
+
+        const newGroupeComponent = new TreeContainer({
+            name: `groupe ${editor.treeManager.getNextName()}`
+        })
+
+        const targetParent = this.selection.getFirstIndexComponent().getAnchor().getAnchorContainer()
+
+        if (!targetParent) {
+            return
+        }
+
+        editor.selectionManager.unselectAll()
+
+        for (const component of this.selection.getComponents()) {
+            component.getAnchor().getAnchorContainer()?.remove(component.getAnchor())
+            newGroupeComponent.getAnchor().add(component.getAnchor())
+        }
+
+        newGroupeComponent.init(true)
+        targetParent.add(newGroupeComponent.getAnchor())
+
+        editor.selectionManager.setSelection(new SelectedComponentsModifier([newGroupeComponent]))
 
         const selection = editor.selectionManager.getSelection()
 

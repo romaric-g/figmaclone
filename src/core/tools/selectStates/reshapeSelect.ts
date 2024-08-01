@@ -163,7 +163,9 @@ export class ReshapeSelectState extends SelectToolState {
 
         const editor = Editor.getEditor()
 
-        const allOtherRects = editor.treeManager.getTree().getAllRects().filter((r) => r !== this.element)
+        const allComponents = editor.treeManager.getTree().getComponents()
+        const allRects = allComponents.filter(r => r instanceof TreeRect)
+        const allOtherRects = allRects.filter((r) => r !== this.element)
 
         const minX = x;
         const maxX = x + width;

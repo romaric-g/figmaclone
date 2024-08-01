@@ -13,7 +13,7 @@ export class GlobalSelectionBoxRenderer {
 
     render() {
         const editor = Editor.getEditor()
-        const components = editor.selectionManager.getSelection().getFlatComponents()
+        const components = editor.selectionManager.getSelection().getDepthComponents()
 
         let minX = undefined
         let minY = undefined
@@ -69,11 +69,11 @@ export class GlobalSelectionBoxRenderer {
     }
 
     init(selectionLayer: SelectionLayer) {
-        selectionLayer.getContainer().addChild(this.graphics)
+        Editor.getEditor().canvasApp.getSelectionLayer().getContainer().addChild(this.graphics)
     }
 
     destroy(selectionLayer: SelectionLayer) {
-        selectionLayer.getContainer().removeChild(this.graphics)
+        Editor.getEditor().canvasApp.getSelectionLayer().getContainer().removeChild(this.graphics)
     }
 
     getContainer() {

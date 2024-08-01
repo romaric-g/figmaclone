@@ -1,5 +1,5 @@
 import React from "react"
-import { TreeComponentData, TreeContainerData } from "../subjects"
+import { TreeComponentData } from "../subjects"
 import TreeRectView from "./treeRect"
 import TreeContainerHeadView from "./treeContainerHead"
 import { DragOrigin, DragTarget } from "./tree"

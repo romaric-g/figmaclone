@@ -1,7 +1,6 @@
-import { currentToolSubject } from "../../ui/subjects";
+import { currentToolSubject, ToolType } from "../../ui/subjects";
 import { Editor } from "../editor";
-import { Selection } from "../selections/selection";
-import { TreeText } from "../tree/treeText";
+import { SelectedComponentsModifier } from "../selections/selectedComponentsModifier";
 import { RectTool } from "./rectTool";
 import { FreeSelectState } from "./selectStates/freeSelect";
 import { SelectionState } from "./selectStates/selection";
@@ -9,7 +8,6 @@ import { SelectTool } from "./selectTool";
 import { TextTool } from "./textTool";
 import { Tool } from "./tool";
 
-export type ToolType = "select" | "rect" | "text"
 
 export class ToolManager {
 
@@ -94,7 +92,7 @@ export class ToolManager {
         this.getCurrentTool()?.render()
     }
 
-    resetSelection(selection: Selection) {
+    resetSelection(selection: SelectedComponentsModifier) {
         if (selection.isEmpty()) {
             this._selectTool.setState(
                 new FreeSelectState(this._selectTool)

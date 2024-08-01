@@ -128,7 +128,7 @@ const SelectionEditor: React.FC<Props> = (props) => {
         )
     }, [])
 
-    if (selection.getFlatComponents().length == 0) {
+    if (selection.getDepthComponents().length == 0) {
         return <div className="SelectionEditor">
 
         </div>

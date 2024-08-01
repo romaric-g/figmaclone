@@ -1,18 +1,19 @@
 import { GlobalSelectionBoxRenderer } from "../canvas/renderer/globalSelectionBox";
 import { Editor } from "../editor";
-import { Selection } from "./selection";
+import { SelectedComponentsModifier } from "./selectedComponentsModifier";
 import { TreeComponent } from "../tree/treeComponent";
-import { SerializedSelection } from "./serialized/serializedSelection";
+import { TreeContainer } from "../tree/treeContainer";
+import { SerialisedTreeComponentList } from "../tree/serialized/serialisedTreeComponentList";
 
 
 export class SelectionManager {
 
-    private _selection: Selection;
+    private _selection: SelectedComponentsModifier;
     private _globalSelectionBoxRenderer: GlobalSelectionBoxRenderer;
-    private _copiedSelection?: SerializedSelection;
+    private _copiedComponents?: SerialisedTreeComponentList;
 
     constructor() {
-        this._selection = new Selection([])
+        this._selection = new SelectedComponentsModifier([])
         this._globalSelectionBoxRenderer = new GlobalSelectionBoxRenderer()
     }
 
@@ -20,7 +21,7 @@ export class SelectionManager {
         this._globalSelectionBoxRenderer.init(Editor.getEditor().canvasApp.getSelectionLayer())
     }
 
-    setSelection(selection: Selection) {
+    setSelection(selection: SelectedComponentsModifier) {
         if (this._selection.isSameSelection(selection)) {
             return;
         }
@@ -35,7 +36,7 @@ export class SelectionManager {
     }
 
     unselectAll() {
-        this.setSelection(new Selection([]))
+        this.setSelection(new SelectedComponentsModifier([]))
     }
 
     getRootContainer() {
@@ -44,15 +45,16 @@ export class SelectionManager {
 
     getComponentsChainFromRoot(component: TreeComponent, componentsChain: TreeComponent[] = []): TreeComponent[] {
 
-        const parentContainer = component.getParentContainer()
+        const parentContainer = component.getAnchor().getAnchorContainer()
 
         const newComponentsChain = [component].concat(componentsChain)
 
-        if (!parentContainer) {
+        if (!parentContainer || !(parentContainer.component instanceof TreeContainer)) {
             return newComponentsChain;
         }
 
-        const parentDepthComponents = parentContainer.getDepthComponents()
+
+        const parentDepthComponents = parentContainer.component.getDepthComponents()
 
         for (const selectedComponent of this.getSelection().getComponents()) {
             if (parentDepthComponents.includes(selectedComponent)) {
@@ -60,11 +62,11 @@ export class SelectionManager {
             }
         }
 
-        if (parentContainer === this.getRootContainer()) {
+        if (parentContainer.component === this.getRootContainer()) {
             return newComponentsChain;
         }
 
-        return this.getComponentsChainFromRoot(parentContainer, newComponentsChain)
+        return this.getComponentsChainFromRoot(parentContainer.component, newComponentsChain)
     }
 
     render() {
@@ -73,11 +75,11 @@ export class SelectionManager {
 
 
     copySelection() {
-        this._copiedSelection = this._selection.serialize()
+        this._copiedComponents = this._selection.serializeComponents()
     }
 
-    getCopiedSelection(): SerializedSelection | undefined {
-        return this._copiedSelection;
+    getCopiedSelection(): SerialisedTreeComponentList | undefined {
+        return this._copiedComponents;
     }
 
 }

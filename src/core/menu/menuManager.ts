@@ -1,6 +1,5 @@
-import { FederatedPointerEvent } from "pixi.js";
 import { contextMenuChangeSubject } from "../../ui/subjects";
-import { Selection } from "../selections/selection";
+import { SelectedComponentsModifier } from "../selections/selectedComponentsModifier";
 import { CopyItem } from "./items/copyItem";
 import { DelItem } from "./items/delItem";
 import { GroupeItem } from "./items/groupeItem";
@@ -35,7 +34,7 @@ export class MenuManager {
             const selection = selectionManager.getSelection()
             const originalEvent = event.originalEvent
 
-            const isIncludeInSelection = selection.getAllRects().includes(event.element)
+            const isIncludeInSelection = selection.getAllRectComponents().includes(event.element)
 
             if (isIncludeInSelection) {
                 editor.menuManager.requestSelectionMenu(selection, originalEvent.clientX, originalEvent.clientY)
@@ -44,7 +43,7 @@ export class MenuManager {
                 const componentToSelect = selectionManager.getComponentsChainFromRoot(event.element)[0]
 
                 Editor.getEditor().actionManager.push(
-                    new SetSelectionAction(new Selection([componentToSelect]))
+                    new SetSelectionAction(new SelectedComponentsModifier([componentToSelect]))
                 )
 
                 const newSelection = Editor.getEditor().selectionManager.getSelection()
@@ -57,7 +56,7 @@ export class MenuManager {
 
     }
 
-    requestSelectionMenu(selection: Selection, x: number, y: number) {
+    requestSelectionMenu(selection: SelectedComponentsModifier, x: number, y: number) {
 
         const menu = new Menu(x, y)
 

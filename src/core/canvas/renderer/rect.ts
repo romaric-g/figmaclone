@@ -1,6 +1,6 @@
 import { Graphics, GraphicsContext } from "pixi.js";
 import { TreeRect } from "../../tree/treeRect";
-import { TreeLayer } from "../layers/tree";
+import { Editor } from "../../editor";
 
 export class RectRenderer {
 
@@ -12,12 +12,12 @@ export class RectRenderer {
         this.element = element;
     }
 
-    init(treeLayer: TreeLayer) {
-        treeLayer.getContainer().addChild(this.graphics)
+    init() {
+        Editor.getEditor().canvasApp.getTreeLayer().getContainer().addChild(this.graphics)
     }
 
-    destroy(treeLayer: TreeLayer) {
-        treeLayer.getContainer().removeChild(this.graphics)
+    destroy() {
+        Editor.getEditor().canvasApp.getTreeLayer().getContainer().removeChild(this.graphics)
     }
 
     render(zIndex: number) {

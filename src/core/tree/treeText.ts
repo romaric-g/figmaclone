@@ -1,4 +1,3 @@
-import { Editor } from "../editor";
 import { TreeTextData } from "../../ui/subjects";
 import { SerialisedTreeText } from "./serialized/serialisedTreeText";
 import { HsvaColor } from "@uiw/react-color";
@@ -57,17 +56,19 @@ export class TreeText extends TreeBox {
         this._fillColor = rgbaToHsva(hsvaToRgba(roundOpacityValue))
     }
 
-
     serialize(): SerialisedTreeText {
-        return new SerialisedTreeText({
-            id: this.getId(),
-            name: this.getName(),
-            x: this.x,
-            y: this.y,
-            width: this.width,
-            height: this.height,
-            fillColor: this._fillColor
-        })
+        return {
+            type: "text",
+            props: {
+                id: this.getId(),
+                name: this.getName(),
+                x: this.x,
+                y: this.y,
+                width: this.width,
+                height: this.height,
+                fillColor: this._fillColor
+            }
+        }
     }
 
     toData(index: number): TreeTextData {
@@ -78,4 +79,6 @@ export class TreeText extends TreeBox {
             selected: this.isSelected()
         }
     }
+
+
 }

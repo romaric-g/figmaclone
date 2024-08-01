@@ -5,7 +5,7 @@ import { MovableSelectionState } from "./movableSelection";
 import { SelectToolState } from "./abstractSelectState";
 import { cursorChangeSubject } from "../../../ui/subjects";
 import { DragSelectionState } from "./dragSelection";
-import { Selection } from "../../selections/selection";
+import { SelectedComponentsModifier } from "../../selections/selectedComponentsModifier";
 import { UpdatingSelectionAction } from "../../actions/updatingSelectionAction";
 import { Editor } from "../../editor";
 
@@ -23,7 +23,7 @@ export class FreeSelectState extends SelectToolState {
 
         editor.actionManager.push(
             new UpdatingSelectionAction(
-                new Selection([topComponent])
+                new SelectedComponentsModifier([topComponent])
             )
         )
 

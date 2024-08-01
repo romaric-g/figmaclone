@@ -1,4 +1,3 @@
-import { Point } from "pixi.js";
 import { Editor } from "../editor";
 import { ElementOverOffEventData, ElementOverOnEventData, ElementPressDownEventData, ElementPressUpEventData, PointerBackgroundEventData, PointerMoveEventData } from "../event/eventManager";
 import { Tool } from "./tool";

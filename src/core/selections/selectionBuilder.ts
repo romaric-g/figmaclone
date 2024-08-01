@@ -1,6 +1,6 @@
 import { Editor } from "../editor";
 import { SelectionManager } from "./selectionManager";
-import { Selection } from "./selection";
+import { SelectedComponentsModifier } from "./selectedComponentsModifier";
 import { TreeComponent } from "../tree/treeComponent";
 import { TreeContainer } from "../tree/treeContainer";
 
@@ -20,7 +20,7 @@ export class SelectionBuilder {
     }
 
     selectAll() {
-        this._components = this._editor.treeManager.getTree().getAllRects()
+        this._components = this._editor.treeManager.getAllRectComponents()
         return this;
     }
 
@@ -64,6 +64,6 @@ export class SelectionBuilder {
     }
 
     build() {
-        return new Selection(this._components)
+        return new SelectedComponentsModifier(this._components)
     }
 }

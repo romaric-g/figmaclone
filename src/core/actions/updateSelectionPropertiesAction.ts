@@ -1,19 +1,19 @@
 import { selectionChangeSubject } from "../../ui/subjects";
 import { Editor } from "../editor";
-import { Selection } from "../selections/selection";
+import { SelectedComponentsModifier } from "../selections/selectedComponentsModifier";
 import { Action } from "./action";
 
 
-type UpdatePropertiesCallback = (selection: Selection) => void
+type UpdatePropertiesCallback = (selection: SelectedComponentsModifier) => void
 
 export class UpdateSelectionPropertiesAction extends Action {
 
     public static lastActions: UpdateSelectionPropertiesAction;
 
-    private selection: Selection;
+    private selection: SelectedComponentsModifier;
     private updateProperties: UpdatePropertiesCallback;
 
-    constructor(newSelection: Selection, updateProperties: UpdatePropertiesCallback) {
+    constructor(newSelection: SelectedComponentsModifier, updateProperties: UpdatePropertiesCallback) {
         super("Update selection properties")
         this.selection = newSelection
         this.updateProperties = updateProperties

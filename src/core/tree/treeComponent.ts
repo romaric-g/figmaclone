@@ -1,8 +1,8 @@
-import { TreeComponentData } from "../../ui/subjects";
 import { SerialisedTreeComponent } from "./serialized/serialisedTreeComponent";
-import { TreeContainer } from "./treeContainer"
+import { Anchor } from "./anchors/anchor";
 import { v4 as uuidv4 } from 'uuid';
-
+import { TreeComponentData } from "../../ui/subjects";
+import { SquaredZone } from "../utils/squaredZone";
 
 export interface TreeComponentProps {
     name: string,
@@ -11,7 +11,7 @@ export interface TreeComponentProps {
 
 export abstract class TreeComponent {
 
-    private currentContainerParent?: TreeContainer;
+    private _anchor: Anchor<TreeComponent>;
     private _name: string;
     private _id?: string;
     private _initialised = false;
@@ -19,14 +19,8 @@ export abstract class TreeComponent {
     constructor({ name, id }: TreeComponentProps) {
         this._name = name;
         this._id = id;
-    }
+        this._anchor = new Anchor(this)
 
-    updateParentContainerCache(treeContainer?: TreeContainer) {
-        this.currentContainerParent = treeContainer
-    }
-
-    getParentContainer() {
-        return this.currentContainerParent;
     }
 
     render(zIndex: number): number {
@@ -55,29 +49,12 @@ export abstract class TreeComponent {
     destroy() {
         if (this.isInit()) {
             this._initialised = false;
-            const parent = this.getParentContainer()
-
-            if (parent) {
-                parent.remove(this)
-            }
+            this.getAnchor().getAnchorContainer()?.remove(this.getAnchor())
         }
     }
 
-    getIndexsChain(): number[] {
-        if (this.currentContainerParent) {
-            const childIndex = this.currentContainerParent.getIndexOfChild(this)
-
-            if (childIndex == -1) {
-                return []
-            }
-
-            return [
-                ...this.currentContainerParent.getIndexsChain(),
-                childIndex
-            ]
-        }
-
-        return []
+    getAnchor(): Anchor<TreeComponent> {
+        return this._anchor;
     }
 
     getId() {
@@ -88,6 +65,8 @@ export abstract class TreeComponent {
 
     abstract toData(index: number): TreeComponentData
 
-    abstract getCanvasCoveredRect(): { minX: number, minY: number, maxX: number, maxY: number } | undefined
+    abstract getSquaredZone(): SquaredZone | undefined
+
 
 }
+

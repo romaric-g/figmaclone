@@ -16,7 +16,7 @@ export class DragSelectionBoxRenderer {
     render() {
         const editor = Editor.getEditor()
 
-        const coveredRect = this.dragSelectionState.getCoveredRect()
+        const coveredRect = this.dragSelectionState.getCanvasCoveredZone()
 
         if (!coveredRect) {
             return
@@ -52,15 +52,11 @@ export class DragSelectionBoxRenderer {
     }
 
     init() {
-        const selectionLayer = Editor.getEditor().canvasApp.getSelectionLayer()
-
-        selectionLayer.getContainer().addChild(this.graphics)
+        Editor.getEditor().canvasApp.getSelectionLayer().getContainer().addChild(this.graphics)
     }
 
     destroy() {
-        const selectionLayer = Editor.getEditor().canvasApp.getSelectionLayer()
-
-        selectionLayer.getContainer().removeChild(this.graphics)
+        Editor.getEditor().canvasApp.getSelectionLayer().getContainer().removeChild(this.graphics)
     }
 
 }

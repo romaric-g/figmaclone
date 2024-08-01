@@ -1,20 +1,20 @@
 import { treeElementSubject } from "../../ui/subjects";
 import { Editor } from "../editor";
-import { Selection } from "../selections/selection";
+import { SelectedComponentsModifier } from "../selections/selectedComponentsModifier";
 import { Action } from "./action";
 
 export class DeleteSelectedElementsAction extends Action {
 
-    private selection: Selection;
+    private selection: SelectedComponentsModifier;
 
-    constructor(selection: Selection) {
+    constructor(selection: SelectedComponentsModifier) {
         super("Delete selected elements")
         this.selection = selection
     }
 
     apply(editor: Editor) {
         const componentsToRemove = this.selection.getComponents()
-        editor.selectionManager.setSelection(new Selection([]))
+        editor.selectionManager.setSelection(new SelectedComponentsModifier([]))
 
         for (const element of componentsToRemove) {
             element.destroy()

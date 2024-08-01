@@ -1,15 +1,13 @@
-import { HsvaColor } from "@uiw/react-color";
 import { SerialisedTreeComponent } from "./serialisedTreeComponent";
 
-export interface SerialisedTreeText extends SerialisedTreeComponent {
-    type: "text",
+export interface SerialisedTreeOther extends SerialisedTreeComponent {
+    type: "other",
     props: {
         name: string,
         id?: string,
         x: number,
         y: number,
         width: number,
-        height: number,
-        fillColor: HsvaColor
+        height: number
     }
 }

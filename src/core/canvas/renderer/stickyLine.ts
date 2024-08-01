@@ -2,8 +2,9 @@ import { Graphics, GraphicsContext, Point } from "pixi.js";
 import { Editor } from "../../editor";
 import { SelectionLayer } from "../layers/selection";
 import { MovableSelectionState } from "../../tools/selectStates/movableSelection";
-import { getDrawingCoveredRect } from "../../utils/getDrawingCoveredRect";
+import { getSquaredCoveredZone } from "../../utils/squaredZone";
 import { drawCross } from "../../utils/drawCross";
+import { TreeRect } from "../../tree/treeRect";
 
 export class StickyLineRenderer {
 
@@ -18,11 +19,14 @@ export class StickyLineRenderer {
     render() {
         const editor = Editor.getEditor()
 
-        const rects = editor.treeManager.getTree().getAllRects()
-        const selectionRects = editor.selectionManager.getSelection().getAllRects()
+        const treeComponents = editor.treeManager.getTree().getDepthComponents()
+        const selectionComponents = editor.selectionManager.getSelection().getDepthComponents()
+
+        const rects = treeComponents.filter(c => c instanceof TreeRect)
+        const selectionRects = selectionComponents.filter(c => c instanceof TreeRect)
         const otherRects = rects.filter((r) => !selectionRects.includes(r))
 
-        const drawingCovered = getDrawingCoveredRect(editor.selectionManager.getSelection().getAllRects())
+        const drawingCovered = getSquaredCoveredZone(selectionRects.map(c => c.getSquaredZone()))
 
         if (drawingCovered === undefined) {
             return;
@@ -91,11 +95,11 @@ export class StickyLineRenderer {
     }
 
     init(selectionLayer: SelectionLayer) {
-        selectionLayer.getContainer().addChild(this.graphics)
+        Editor.getEditor().canvasApp.getSelectionLayer().getContainer().addChild(this.graphics)
     }
 
     destroy(selectionLayer: SelectionLayer) {
-        selectionLayer.getContainer().removeChild(this.graphics)
+        Editor.getEditor().canvasApp.getSelectionLayer().getContainer().removeChild(this.graphics)
     }
 
     getContainer() {

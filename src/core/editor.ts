@@ -10,9 +10,12 @@ import { CanvasAttach } from './keyboard/canvas/canvasAttach';
 import { ActionManager } from './actions/actionManger';
 import { MenuManager } from './menu/menuManager';
 import { Snapshot } from './history/snapshot';
-import { SerialisedTreeComponent } from './tree/serialized/serialisedTreeComponent';
 import { History } from './history/history';
-import { Selection } from './selections/selection';
+import { SelectedComponentsModifier } from './selections/selectedComponentsModifier';
+import { SquaredZone } from './utils/squaredZone';
+import { deserializeTreeComponent } from './tree/serialized/deserializeComponent';
+
+console.log("log Editor")
 
 export class Editor {
     private static editor: Editor = new Editor()
@@ -81,6 +84,30 @@ export class Editor {
         return this.canvasApp.getTreeContainer().toGlobal(drawingPosition)
     }
 
+    getDrawingSquaredZone(canvasZone: SquaredZone): SquaredZone {
+        const minPoint = this.getDrawingPosition(new Point(canvasZone.minX, canvasZone.maxX))
+        const maxPoint = this.getDrawingPosition(new Point(canvasZone.minY, canvasZone.maxY))
+
+        return {
+            minX: minPoint.x,
+            minY: minPoint.y,
+            maxX: maxPoint.x,
+            maxY: maxPoint.y
+        }
+    }
+
+    getCanvasSquaredZone(drawingZone: SquaredZone): SquaredZone {
+        const minPoint = this.getCanvasPosition(new Point(drawingZone.minX, drawingZone.minY))
+        const maxPoint = this.getCanvasPosition(new Point(drawingZone.maxX, drawingZone.maxY))
+
+        return {
+            minX: minPoint.x,
+            minY: minPoint.y,
+            maxX: maxPoint.x,
+            maxY: maxPoint.y
+        }
+    }
+
     getCanvas() {
         return this.canvasApp.getCanvas();
     }
@@ -103,7 +130,7 @@ export class Editor {
     }
 
     restore(snapshot: Snapshot) {
-        const components = snapshot.treeComponents.map((c) => c.deserialize())
+        const components = snapshot.treeComponents.map((c) => deserializeTreeComponent(c)).filter(c => !!c)
         this.treeManager.restoreTree(components)
 
         const newComponentsSelection = this.treeManager.getTree().getComponents().filter((c) => {
@@ -115,7 +142,7 @@ export class Editor {
             return false;
         })
 
-        this.selectionManager.setSelection(new Selection(newComponentsSelection))
+        this.selectionManager.setSelection(new SelectedComponentsModifier(newComponentsSelection))
         this.toolManager.resetSelection(this.selectionManager.getSelection())
     }
 
