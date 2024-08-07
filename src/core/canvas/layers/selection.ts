@@ -1,12 +1,12 @@
 import { Graphics, GraphicsContext } from "pixi.js";
-import { CanvasApp } from "../app";
+import { CanvasManager } from "../canvasManager";
 
 
 export class SelectionLayer {
-    private _canvasApp: CanvasApp;
+    private _canvasApp: CanvasManager;
     private _backgroundContainer: Graphics;
 
-    constructor(canvasApp: CanvasApp) {
+    constructor(canvasApp: CanvasManager) {
         this._canvasApp = canvasApp;
         this._backgroundContainer = new Graphics()
         this._backgroundContainer.eventMode = "none"

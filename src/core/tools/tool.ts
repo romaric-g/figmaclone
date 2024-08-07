@@ -1,4 +1,4 @@
-import { ToolType } from "./toolManager";
+import { ToolType } from "../../ui/subjects";
 
 export abstract class Tool {
     readonly toolType: ToolType;
@@ -10,7 +10,5 @@ export abstract class Tool {
     abstract enable(): void;
 
     abstract disable(): void;
-
-    abstract render(): void
 
 }

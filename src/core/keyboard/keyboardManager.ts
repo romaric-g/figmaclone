@@ -1,4 +1,3 @@
-import { Editor } from "../editor";
 import { KeyboardAttach } from "./keyboardAttach";
 import { KeyboardController } from "./keyboardController";
 

@@ -1,7 +1,6 @@
 import { Point } from "pixi.js";
 import { Tool } from "./tool";
 import { TreeBox } from "../tree/treeBox";
-import { StickyLineDrawRenderer } from "../canvas/renderer/stickyLineDraw";
 import { Editor } from "../editor";
 import { cursorChangeSubject, ToolType } from "../../ui/subjects";
 import { PointerDownEventData, PointerMoveEventData, PointerUpEventData } from "../event/eventManager";
@@ -14,11 +13,10 @@ import { SetSelectionAction } from "../actions/setSelectionAction";
 import { UpdateSelectionPropertiesAction } from "../actions/updateSelectionPropertiesAction";
 
 
-export abstract class DrawTool extends Tool {
+export abstract class DrawTool<T extends TreeBox> extends Tool {
     private activate = false;
     private pressDownPosition?: Point;
-    private stickyLineDrawRenderer: StickyLineDrawRenderer;
-    private drawingBox?: TreeBox;
+    private drawingBox?: T;
 
     constructor(toolType: ToolType) {
         super(toolType)
@@ -26,8 +24,6 @@ export abstract class DrawTool extends Tool {
         this.onPointerDown = this.onPointerDown.bind(this)
         this.onPointerUp = this.onPointerUp.bind(this)
         this.onPointerMove = this.onPointerMove.bind(this)
-
-        this.stickyLineDrawRenderer = new StickyLineDrawRenderer(this)
     }
 
     enable() {
@@ -40,7 +36,6 @@ export abstract class DrawTool extends Tool {
 
             cursorChangeSubject.next("crosshair")
 
-            this.stickyLineDrawRenderer.init(editor.canvasApp.getSelectionLayer())
             this.activate = true;
         }
     }
@@ -55,7 +50,6 @@ export abstract class DrawTool extends Tool {
 
             cursorChangeSubject.next("default")
 
-            this.stickyLineDrawRenderer.destroy(editor.canvasApp.getSelectionLayer())
             this.activate = false;
         }
     }
@@ -67,7 +61,7 @@ export abstract class DrawTool extends Tool {
 
         const editor = Editor.getEditor()
 
-        const localPostion = editor.getDrawingPosition(position).clone()
+        const localPostion = editor.positionConverter.getDrawingPosition(position).clone()
 
         this.pressDownPosition = localPostion.clone()
 
@@ -84,20 +78,8 @@ export abstract class DrawTool extends Tool {
             return;
         }
 
-        const editor = Editor.getEditor()
-
         if (this.drawingBox) {
-            editor.selectionManager.setSelection(new SelectedComponentsModifier([this.drawingBox]))
-            editor.toolManager.setCurrentTool("select")
-
-            editor.actionManager.push(
-                new SetSelectionAction(editor.selectionManager.getSelection())
-            )
-
-            const currentTool = editor.toolManager.getCurrentTool()
-            if (currentTool instanceof SelectTool) {
-                currentTool.setState(new SelectionState(currentTool))
-            }
+            this.validateDrawingBox(this.drawingBox)
         }
         this.pressDownPosition = undefined;
         this.drawingBox = undefined;
@@ -110,7 +92,7 @@ export abstract class DrawTool extends Tool {
 
     onPointerMove({ position }: PointerMoveEventData) {
         const editor = Editor.getEditor()
-        const localPostion = editor.getDrawingPosition(position).clone()
+        const localPostion = editor.positionConverter.getDrawingPosition(position).clone()
 
         if (this.pressDownPosition && this.drawingBox) {
             const moveVectorX = localPostion.x - this.pressDownPosition.x
@@ -140,7 +122,7 @@ export abstract class DrawTool extends Tool {
 
             const stickyReshape = this.getStickyReshape(newX, newY, newWidth, newHeight)
 
-            const selection = editor.selectionManager.getSelection()
+            const selection = editor.selectionManager.getSelectionModifier()
 
             editor.actionManager.push(
                 new UpdateSelectionPropertiesAction(selection, (selection) => {
@@ -157,17 +139,16 @@ export abstract class DrawTool extends Tool {
 
         const editor = Editor.getEditor()
 
-        const allComponents = editor.treeManager.getTree().getComponents()
-        const allRects = allComponents.filter(r => r instanceof TreeRect)
-        const allOtherRects = allRects.filter((r) => r !== this.drawingBox)
+        const allBoxs = editor.treeManager.getAllBoxComponents()
+        const allOtherBoxs = allBoxs.filter((r) => r !== this.drawingBox)
 
         const minX = x;
         const maxX = x + width;
         const minY = y;
         const maxY = y + height;
 
-        const othersX = allOtherRects.map((e) => [e.x, e.x + e.width]).flat()
-        const othersY = allOtherRects.map((e) => [e.y, e.y + e.height]).flat()
+        const othersX = allOtherBoxs.map((e) => [e.x, e.x + e.width]).flat()
+        const othersY = allOtherBoxs.map((e) => [e.y, e.y + e.height]).flat()
 
         let newX = x;
         let newY = y;
@@ -226,10 +207,8 @@ export abstract class DrawTool extends Tool {
         }
     }
 
-    render() {
-        this.stickyLineDrawRenderer.render()
-    }
+    abstract getNewDrawingBox(x: number, y: number): T
 
-    abstract getNewDrawingBox(x: number, y: number): TreeBox
+    abstract validateDrawingBox(drawingBox: T): void;
 
 }

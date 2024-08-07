@@ -1,11 +1,10 @@
 import { Point } from "pixi.js";
-import { TreeRect } from "../../tree/treeRect";
 import { SelectTool } from "../selectTool";
 import { SelectToolState } from "./abstractSelectState";
 import { SelectionState } from "./selection";
 import { Editor } from "../../editor";
-import { StickyLineReshapeRenderer } from "../../canvas/renderer/stickyLineReshape";
 import { UpdateSelectionPropertiesAction } from "../../actions/updateSelectionPropertiesAction";
+import { TreeBox } from "../../tree/treeBox";
 
 
 export type ReshapeReference = "none" | "top" | "left" | "bottom" | "right" | "top-left" | "top-right" | "bottom-left" | "bottom-right"
@@ -36,11 +35,8 @@ export function getCursorType(reshapeReference: ReshapeReference): CursorType {
 }
 
 export class ReshapeSelectState extends SelectToolState {
-
-    private stickyLineReshapeRenderer: StickyLineReshapeRenderer;
-
     private reshapeReference: ReshapeReference;
-    private element: TreeRect;
+    private element: TreeBox;
     private sourceClickedPosition: Point;
 
     private originalX: number = 0;
@@ -53,12 +49,11 @@ export class ReshapeSelectState extends SelectToolState {
     private stickyTop = false;
     private stickyBottom = false;
 
-    constructor(selectTool: SelectTool, element: TreeRect, reshapeReference: ReshapeReference, sourceClickedPosition: Point) {
+    constructor(selectTool: SelectTool, element: TreeBox, reshapeReference: ReshapeReference, sourceClickedPosition: Point) {
         super(selectTool)
         this.reshapeReference = reshapeReference;
         this.element = element;
         this.sourceClickedPosition = sourceClickedPosition.clone();
-        this.stickyLineReshapeRenderer = new StickyLineReshapeRenderer(this)
     }
 
     private getMouvementVector(currentPointerPosition: Point) {
@@ -70,27 +65,21 @@ export class ReshapeSelectState extends SelectToolState {
 
 
     onInit(): void {
-        const editor = Editor.getEditor()
-
         this.originalX = this.element.x;
         this.originalY = this.element.y;
         this.originalWidth = this.element.width;
         this.originalHeight = this.element.height;
-        this.stickyLineReshapeRenderer.init(editor.canvasApp.getSelectionLayer())
     }
     onDestroy(): void {
-        const editor = Editor.getEditor()
-
-        this.stickyLineReshapeRenderer.destroy(editor.canvasApp.getSelectionLayer())
     }
-    onClickDown(element: TreeRect, shift: boolean, pointerPosition: Point): void {
+    onClickDown(element: TreeBox, shift: boolean, pointerPosition: Point): void {
     }
-    onClickUp(element: TreeRect, shift: boolean): void {
+    onClickUp(element: TreeBox, shift: boolean): void {
         this.selectTool.setState(new SelectionState(this.selectTool))
     }
     onMove(newPosition: Point): void {
         const editor = Editor.getEditor()
-        const localPosition = editor.getDrawingPosition(newPosition).clone()
+        const localPosition = editor.positionConverter.getDrawingPosition(newPosition).clone()
 
         const moveVector = this.getMouvementVector(localPosition)
 
@@ -144,7 +133,7 @@ export class ReshapeSelectState extends SelectToolState {
         }
 
         const stickyShape = this.getStickyReshape(newX, newY, newWidth, newHeight)
-        const selection = editor.selectionManager.getSelection()
+        const selection = editor.selectionManager.getSelectionModifier()
 
         editor.actionManager.push(
             new UpdateSelectionPropertiesAction(
@@ -164,8 +153,8 @@ export class ReshapeSelectState extends SelectToolState {
         const editor = Editor.getEditor()
 
         const allComponents = editor.treeManager.getTree().getComponents()
-        const allRects = allComponents.filter(r => r instanceof TreeRect)
-        const allOtherRects = allRects.filter((r) => r !== this.element)
+        const allBoxs = allComponents.filter(r => r instanceof TreeBox)
+        const allOtherRects = allBoxs.filter((r) => r !== this.element)
 
         const minX = x;
         const maxX = x + width;
@@ -236,10 +225,6 @@ export class ReshapeSelectState extends SelectToolState {
     }
     onBackgroundPointerUp(clickPosition: Point): void {
         this.selectTool.setState(new SelectionState(this.selectTool))
-    }
-
-    render() {
-        this.stickyLineReshapeRenderer.render()
     }
 
 }

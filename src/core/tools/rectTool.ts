@@ -1,9 +1,15 @@
+import { SetSelectionAction } from "../actions/setSelectionAction";
 import { Editor } from "../editor";
+import { SelectedComponentsModifier } from "../selections/selectedComponentsModifier";
+import { TreeBox } from "../tree/treeBox";
 import { TreeRect } from "../tree/treeRect";
 import { DrawTool } from "./drawTool";
+import { SelectionState } from "./selectStates/selection";
+import { SelectTool } from "./selectTool";
 
 
-export class RectTool extends DrawTool {
+export class RectTool extends DrawTool<TreeRect> {
+
 
     constructor() {
         super("rect")
@@ -23,5 +29,22 @@ export class RectTool extends DrawTool {
                 a: 1
             }
         })
+    }
+
+    validateDrawingBox(drawingBox: TreeRect): void {
+
+        const editor = Editor.getEditor()
+
+        editor.selectionManager.setSelectionModifier(new SelectedComponentsModifier([drawingBox]))
+        editor.toolManager.setCurrentTool("select")
+
+        editor.actionManager.push(
+            new SetSelectionAction(editor.selectionManager.getSelectionModifier())
+        )
+
+        const currentTool = editor.toolManager.getCurrentTool()
+        if (currentTool instanceof SelectTool) {
+            currentTool.setState(new SelectionState(currentTool))
+        }
     }
 }

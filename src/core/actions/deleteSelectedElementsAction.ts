@@ -14,13 +14,13 @@ export class DeleteSelectedElementsAction extends Action {
 
     apply(editor: Editor) {
         const componentsToRemove = this.selection.getComponents()
-        editor.selectionManager.setSelection(new SelectedComponentsModifier([]))
+        editor.selectionManager.setSelectionModifier(new SelectedComponentsModifier([]))
 
         for (const element of componentsToRemove) {
             element.destroy()
         }
 
-        editor.toolManager.resetSelection(editor.selectionManager.getSelection())
+        editor.toolManager.resetSelection(editor.selectionManager.getSelectionModifier())
 
         treeElementSubject.next(editor.treeManager.toData())
 

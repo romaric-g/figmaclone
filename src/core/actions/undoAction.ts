@@ -12,7 +12,7 @@ export class UndoAction extends Action {
     apply(editor: Editor) {
         editor.history.restoreLastSnapshot()
 
-        selectionChangeSubject.next(editor.selectionManager.getSelection().toData())
+        selectionChangeSubject.next(editor.selectionManager.getSelectionModifier().toData())
         treeElementSubject.next(editor.treeManager.toData())
     }
 

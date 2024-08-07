@@ -1,10 +1,9 @@
-import { RectRenderer } from "../canvas/renderer/rect";
 import { TreeRectData } from "../../ui/subjects";
 import { SerialisedTreeRect } from "./serialized/serialisedTreeRect";
 import { HsvaColor } from "@uiw/react-color";
 import { hsvaToRgba, rgbaToHsva } from '@uiw/color-convert'
 import { TreeBox } from "./treeBox";
-import { Editor } from "../editor";
+import { TreeComponentVisitor } from "./treeComponentVisitor";
 
 export interface TreeRectProps {
     name: string,
@@ -19,8 +18,6 @@ export interface TreeRectProps {
 }
 
 export class TreeRect extends TreeBox {
-
-    private _elementTreeRenderer: RectRenderer;
 
     private _fillColor!: HsvaColor;
     private _borderColor!: HsvaColor;
@@ -48,8 +45,6 @@ export class TreeRect extends TreeBox {
         this._fillColor = fillColor;
         this._borderColor = borderColor;
         this._borderWidth = borderWidth;
-
-        this._elementTreeRenderer = new RectRenderer(this)
     }
 
 
@@ -92,84 +87,10 @@ export class TreeRect extends TreeBox {
         this._borderWidth = Math.round((value) * 100) / 100
     }
 
-    render(zIndex: number) {
-        super.render(zIndex)
-        this._elementTreeRenderer.render(zIndex)
-
-        return zIndex + 1
-    }
-
-    getContainer() {
-        return this._elementTreeRenderer.getContainer();
-    }
-
-    init(resetId: boolean) {
-        if (this.isInit()) {
-            return;
-        }
-
-        super.init(resetId)
-
-        this._elementTreeRenderer.init()
-
-        const graphics = this._elementTreeRenderer.getContainer()
-        const eventsManager = Editor.getEditor().eventsManager;
-
-        graphics.on('pointerdown', (event) => {
-            if (event.button === 2) return
-            eventsManager.onElementPressDown.emit({
-                element: this,
-                pointerPosition: event.global,
-                button: event.button
-            })
-
-        });
-        graphics.on('pointerup', (event) => {
-            if (event.button === 2) return
-            eventsManager.onElementPressUp.emit({ element: this, button: event.button })
-        })
-        graphics.on('pointerupoutside', (event) => {
-            if (event.button === 2) return
-            eventsManager.onElementPressUp.emit({ element: this, button: event.button })
-        })
-
-        graphics.on('rightdown', (event) => {
-            eventsManager.onElementRightDown.emit({
-                element: this,
-                pointerPosition: event.global,
-                originalEvent: event
-            })
-        })
-
-        graphics.on('pointerenter', (event) => {
-            if ((event.nativeEvent.target as HTMLElement).tagName === "CANVAS") {
-                eventsManager.onElementHoverOn.emit({ component: this })
-            }
-        });
-
-        graphics.on('pointerleave', (event) => {
-            if ((event.nativeEvent.target as HTMLElement).tagName === "CANVAS") {
-                eventsManager.onElementHoverOff.emit({ component: this })
-            }
-        });
-
-        graphics.eventMode = "static"
-    }
-
-    destroy() {
-        if (this.isInit()) {
-            super.destroy()
-
-            this._elementTreeRenderer.destroy()
-        }
-    }
-
     setPosition(x: number, y: number) {
         this.x = x;
         this.y = y;
     }
-
-
 
     toData(index: number): TreeRectData {
         return {
@@ -196,6 +117,11 @@ export class TreeRect extends TreeBox {
             }
         }
     }
+
+    accept(visitor: TreeComponentVisitor): void {
+        visitor.doForRect(this)
+    }
+
 }
 
 

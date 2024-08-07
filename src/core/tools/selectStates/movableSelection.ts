@@ -1,10 +1,8 @@
 import { Point } from "pixi.js";
-import { TreeRect } from "../../tree/treeRect";
 import { SelectTool } from "../selectTool";
 import { SelectionState } from "./selection";
 import { SelectToolState } from "./abstractSelectState";
 import { TreeComponent } from "../../tree/treeComponent";
-import { StickyLineRenderer } from "../../canvas/renderer/stickyLine";
 import { UpdateSelectionPropertiesAction } from "../../actions/updateSelectionPropertiesAction";
 import { Editor } from "../../editor";
 import { ClearSelection } from "../../actions/clearSelection";
@@ -14,6 +12,7 @@ import { SetSelectionPropertiesAction } from "../../actions/setSelectionProperti
 import { SelectedComponentsModifier } from "../../selections/selectedComponentsModifier";
 import { getSquaredCoveredZone } from "../../utils/squaredZone";
 import { findMinimumDifference } from "../../utils/findMinimumDifference";
+import { TreeBox } from "../../tree/treeBox";
 
 export class MovableSelectionState extends SelectToolState {
     private _sourceClickedPosition: Point;
@@ -21,15 +20,11 @@ export class MovableSelectionState extends SelectToolState {
     private _moveComponent: TreeComponent;
     private _haveMove: boolean = false;
 
-
-    private stickyLineRenderer: StickyLineRenderer;
-
     constructor(selectTool: SelectTool, sourceClickedPostion: Point, moveComponent: TreeComponent, componentAddedBefore: boolean) {
         super(selectTool)
         this._sourceClickedPosition = sourceClickedPostion.clone();
         this._moveComponent = moveComponent;
         this._componentAddedBefore = componentAddedBefore;
-        this.stickyLineRenderer = new StickyLineRenderer(this)
     }
 
     private getMouvementVector(currentPointerPosition: Point) {
@@ -46,21 +41,19 @@ export class MovableSelectionState extends SelectToolState {
     onInit() {
         const editor = Editor.getEditor()
 
-        editor.selectionManager.getSelection().freezeMoveOrigin()
-        this.stickyLineRenderer.init(editor.canvasApp.getSelectionLayer())
+        editor.selectionManager.getSelectionModifier().freezeMoveOrigin()
     }
 
     onDestroy() {
         const editor = Editor.getEditor()
 
-        editor.selectionManager.getSelection().unfreezeMoveOrigin()
-        this.stickyLineRenderer.destroy(editor.canvasApp.getSelectionLayer())
+        editor.selectionManager.getSelectionModifier().unfreezeMoveOrigin()
     }
 
-    onClickUp(element: TreeRect, shift: boolean) {
+    onClickUp(element: TreeBox, shift: boolean) {
         const editor = Editor.getEditor()
         const selectionManager = editor.selectionManager;
-        const selectionBuilder = selectionManager.getSelection().getBuilder(editor)
+        const selectionBuilder = selectionManager.getSelectionModifier().getBuilder(editor)
 
         if (!this.haveMoov()) {
             if (shift) {
@@ -81,7 +74,7 @@ export class MovableSelectionState extends SelectToolState {
             }
         } else {
             editor.actionManager.push(
-                new SetSelectionPropertiesAction(Editor.getEditor().selectionManager.getSelection())
+                new SetSelectionPropertiesAction(Editor.getEditor().selectionManager.getSelectionModifier())
             )
         }
 
@@ -91,9 +84,9 @@ export class MovableSelectionState extends SelectToolState {
     onMove(newPosition: Point): void {
         const editor = Editor.getEditor()
 
-        const localPostion = editor.getDrawingPosition(newPosition).clone()
+        const localPostion = editor.positionConverter.getDrawingPosition(newPosition).clone()
         const movementVector = this.getMouvementVector(localPostion)
-        const selection = editor.selectionManager.getSelection()
+        const selection = editor.selectionManager.getSelectionModifier()
 
         const vector = this.getStickyMoveVector(selection, movementVector)
 
@@ -111,7 +104,7 @@ export class MovableSelectionState extends SelectToolState {
     getStickyMoveVector(selection: SelectedComponentsModifier, moveVector: Point): Point {
         const editor = Editor.getEditor()
 
-        const selectionRects = selection.getAllRectComponents()
+        const selectionRects = selection.getAllBoxComponents()
         const squaredZones = selectionRects.map(r => r.getSquaredZoneFromOrigin())
         const squaredZone = getSquaredCoveredZone(squaredZones)
 
@@ -119,9 +112,9 @@ export class MovableSelectionState extends SelectToolState {
             return moveVector;
         }
 
-        const rects = editor.treeManager.getAllRectComponents().filter((r) => !selectionRects.includes(r))
+        const boxs = editor.treeManager.getAllBoxComponents().filter((r) => !selectionRects.includes(r))
 
-        if (rects.length === 0) {
+        if (boxs.length === 0) {
             return moveVector;
         }
 
@@ -130,8 +123,8 @@ export class MovableSelectionState extends SelectToolState {
         squaredZone.minY += moveVector.y;
         squaredZone.maxY += moveVector.y;
 
-        const xs = rects.map((r) => [r.x, r.x + r.width]).flat()
-        const ys = rects.map((r) => [r.y, r.y + r.height]).flat()
+        const xs = boxs.map((r) => [r.x, r.x + r.width]).flat()
+        const ys = boxs.map((r) => [r.y, r.y + r.height]).flat()
 
         const [x, sel_x, min_diff_x] = findMinimumDifference(xs, [squaredZone.minX, squaredZone.maxX]);
         const [y, sel_y, min_diff_y] = findMinimumDifference(ys, [squaredZone.minY, squaredZone.maxY]);
@@ -149,14 +142,14 @@ export class MovableSelectionState extends SelectToolState {
         return newMoveVector;
     }
 
-    onClickDown(element: TreeRect, shift: boolean, pointerPosition: Point): void { }
+    onClickDown(element: TreeBox, shift: boolean, pointerPosition: Point): void { }
     onBackgroundPointerDown(clickPosition: Point): void { }
     onBackgroundPointerUp(clickPosition: Point): void {
 
         if (this.haveMoov()) {
             const editor = Editor.getEditor()
             editor.actionManager.push(
-                new SetSelectionPropertiesAction(Editor.getEditor().selectionManager.getSelection())
+                new SetSelectionPropertiesAction(Editor.getEditor().selectionManager.getSelectionModifier())
             )
 
             this.selectTool.setState(new SelectionState(this.selectTool))
@@ -169,12 +162,6 @@ export class MovableSelectionState extends SelectToolState {
         }
 
     }
-
-    render() {
-        this.stickyLineRenderer.render()
-    }
-
-
 
     haveMove() {
         return this._haveMove;

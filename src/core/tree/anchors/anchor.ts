@@ -21,6 +21,30 @@ export class Anchor<T> {
         return this._anchorContainer;
     }
 
+    getParentIndex() {
+        if (this._anchorContainer) {
+            const index = this._anchorContainer.anchors.indexOf(this)
+
+            if (index === -1) {
+                throw "inconsitent possition in parent anchor"
+            }
+
+            return index
+        }
+        return undefined;
+    }
+
+    getRootIndexs(leafIndexs: number[] = []): number[] {
+        const index = this.getParentIndex()
+        const parent = this.getAnchorContainer()
+
+        if (index == undefined || !parent) {
+            return leafIndexs;
+        }
+
+        return parent.getRootIndexs([index, ...leafIndexs])
+    }
+
     get component() {
         return this._component;
     }

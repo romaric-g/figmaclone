@@ -37,12 +37,11 @@ export class GroupeSelectionAction extends Action {
             newGroupeComponent.getAnchor().add(component.getAnchor())
         }
 
-        newGroupeComponent.init(true)
         targetParent.add(newGroupeComponent.getAnchor())
 
-        editor.selectionManager.setSelection(new SelectedComponentsModifier([newGroupeComponent]))
+        editor.selectionManager.setSelectionModifier(new SelectedComponentsModifier([newGroupeComponent]))
 
-        const selection = editor.selectionManager.getSelection()
+        const selection = editor.selectionManager.getSelectionModifier()
 
         selectionChangeSubject.next(selection.toData())
         treeElementSubject.next(editor.treeManager.toData())

@@ -1,6 +1,5 @@
 import { Point } from "pixi.js";
 import { TreeComponent } from "./treeComponent";
-import { SelectionBoxRenderer } from "../canvas/renderer/selectionBox";
 import { SquaredZone } from "../utils/squaredZone";
 
 export interface TreeBoxProps {
@@ -14,8 +13,6 @@ export interface TreeBoxProps {
 
 export abstract class TreeBox extends TreeComponent {
     private _movePositionOrigin?: Point;
-    private _elementSelectionRenderer: SelectionBoxRenderer;
-
 
     protected _hover: boolean = false;
     protected _selected: boolean = false;
@@ -34,9 +31,6 @@ export abstract class TreeBox extends TreeComponent {
         this._y = y;
         this._width = width;
         this._height = height;
-
-        this._elementSelectionRenderer = new SelectionBoxRenderer(this)
-
     }
 
     set x(value: number) {
@@ -71,6 +65,10 @@ export abstract class TreeBox extends TreeComponent {
         return this._height
     }
 
+    get position() {
+        return new Point(this.x, this.y)
+    }
+
     unfreezeOriginalPosition() {
         this._movePositionOrigin = undefined;
     }
@@ -90,8 +88,8 @@ export abstract class TreeBox extends TreeComponent {
         return {
             minX: this.x,
             minY: this.y,
-            maxX: this.x + this.width,
-            maxY: this.y + this.height
+            maxX: Math.round((this.x + this.width) * 100) / 100,
+            maxY: Math.round((this.y + this.height) * 100) / 100
         }
     }
 
@@ -120,8 +118,6 @@ export abstract class TreeBox extends TreeComponent {
     }
 
     render(zIndex: number) {
-        this._elementSelectionRenderer.render(zIndex)
-
         return zIndex + 1;
     }
 
@@ -141,15 +137,7 @@ export abstract class TreeBox extends TreeComponent {
         this._hover = false;
     }
 
-    init(resetId: boolean = true) {
-        super.init(resetId)
-
-        this._elementSelectionRenderer.init()
-    }
-
     destroy(): void {
         super.destroy()
-
-        this._elementSelectionRenderer.destroy()
     }
 }

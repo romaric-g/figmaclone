@@ -1,9 +1,9 @@
 import { TreeComponent, TreeComponentProps } from "./treeComponent"
-import { ContainerSelectionBoxRenderer } from "../canvas/renderer/containerSelectionBox";
 import { TreeContainerData } from "../../ui/subjects";
 import { getSquaredCoveredZone, SquaredZone } from "../utils/squaredZone";
 import { SerialisedTreeContainer } from "./serialized/serialisedTreeContainer";
 import { AnchorContainer } from "./anchors/anchorContainer";
+import { TreeComponentVisitor } from "./treeComponentVisitor";
 
 export class TreeContainer extends TreeComponent {
 
@@ -11,43 +11,22 @@ export class TreeContainer extends TreeComponent {
 
     private _anchorContainer: AnchorContainer<TreeComponent>;
 
-    private selectionRenderer: ContainerSelectionBoxRenderer;
     private _selected: boolean = false;
     private _hover: boolean = false;
-    private _initialized: boolean = false;
 
     constructor(props: TreeComponentProps) {
         super(props)
-        this.selectionRenderer = new ContainerSelectionBoxRenderer(this)
         this._anchorContainer = new AnchorContainer(this)
     }
 
-    init(resetId: boolean) {
-        if (!this._initialized) {
-            super.init(resetId)
-
-            for (const childComponent of this.getComponents()) {
-                childComponent.init(resetId)
-            }
-
-            this.selectionRenderer.init()
-            this._initialized = true
-        }
-    }
-
     destroy() {
-        if (this._initialized) {
-            const children = [...this.getComponents()]
+        const children = [...this.getComponents()]
 
-            for (const child of children) {
-                child.destroy()
-            }
-
-            super.destroy()
-
-            this.selectionRenderer.destroy()
-            this._initialized = false
+        for (const child of children) {
+            child.destroy()
         }
+
+        super.destroy()
     }
 
     isEmpty() {
@@ -64,16 +43,6 @@ export class TreeContainer extends TreeComponent {
 
     getChildComponent(depthIndex: number[]): TreeComponent | undefined {
         return this._anchorContainer.getChildAnchor(depthIndex)?.component
-    }
-
-    render(nextIndex: number): number {
-        for (const component of this.getComponents()) {
-            nextIndex = component.render(nextIndex)
-        }
-
-        this.selectionRenderer.render()
-
-        return nextIndex
     }
 
     onSelectionInit() {
@@ -130,6 +99,10 @@ export class TreeContainer extends TreeComponent {
 
     getAnchor(): AnchorContainer<TreeComponent> {
         return this._anchorContainer;
+    }
+
+    accept(visitor: TreeComponentVisitor): void {
+        visitor.doForContainer(this)
     }
 
 }

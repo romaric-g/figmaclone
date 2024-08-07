@@ -19,13 +19,13 @@ export class PasteCopiedSelectionAction extends Action {
     apply(editor: Editor) {
 
         for (const component of this.components) {
-            component.init(true)
+            component.resetId()
             editor.treeManager.getTree().getAnchor().add(component.getAnchor())
         }
 
         const selection = new SelectedComponentsModifier(this.components)
 
-        editor.selectionManager.setSelection(selection)
+        editor.selectionManager.setSelectionModifier(selection)
 
         selectionChangeSubject.next(selection.toData())
         treeElementSubject.next(editor.treeManager.toData())

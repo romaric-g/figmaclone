@@ -13,7 +13,7 @@ import { SetSelectionPropertiesAction } from "../../core/actions/setSelectionPro
 
 
 const getSelection = () => {
-    return Editor.getEditor().selectionManager.getSelection()
+    return Editor.getEditor().selectionManager.getSelectionModifier()
 }
 
 const getActionManager = () => {

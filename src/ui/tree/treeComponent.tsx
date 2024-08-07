@@ -39,11 +39,11 @@ const TreeComponentView: React.FC<Props> = ({
             if (editor.keyboardManager.keyboardController.keys.control.pressed) {
                 editor.actionManager.push(
                     new SetSelectionAction(
-                        editor.selectionManager.getSelection().getBuilder(editor).add(container).build()
+                        editor.selectionManager.getSelectionModifier().getBuilder(editor).add(container).build()
                     )
                 )
             } else {
-                const selection = editor.selectionManager.getSelection()
+                const selection = editor.selectionManager.getSelectionModifier()
 
                 if (e.button === 0 || (e.button === 2 && !selection.getComponents().includes(container))) {
                     editor.actionManager.push(
@@ -55,7 +55,7 @@ const TreeComponentView: React.FC<Props> = ({
             }
 
             if (e.button === 2) {
-                const newSelection = editor.selectionManager.getSelection()
+                const newSelection = editor.selectionManager.getSelectionModifier()
                 Editor.getEditor().menuManager.requestSelectionMenu(newSelection, e.clientX, e.clientY)
             }
         }

@@ -142,8 +142,4 @@ export class SelectTool extends Tool {
     getCurrentState() {
         return this._selectToolState;
     }
-
-    render() {
-        this._selectToolState.render()
-    }
 }

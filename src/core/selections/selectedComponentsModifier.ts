@@ -51,7 +51,7 @@ export class SelectedComponentsModifier {
     private getBoxsObjectValue<T>(apply: (boxComponent: TreeBox) => T | undefined) {
         const values: T[] = []
 
-        this.getAllRectComponents()
+        this.getAllBoxComponents()
 
         for (const component of this.getDepthComponents()) {
             if (component instanceof TreeBox) {
@@ -89,7 +89,7 @@ export class SelectedComponentsModifier {
 
     init() {
         for (const component of this._components) {
-            if (component instanceof TreeRect) {
+            if (component instanceof TreeBox) {
                 component.onSelectionInit()
             }
             if (component instanceof TreeContainer) {
@@ -100,7 +100,7 @@ export class SelectedComponentsModifier {
 
     destroy() {
         for (const component of this._components) {
-            if (component instanceof TreeRect) {
+            if (component instanceof TreeBox) {
                 component.onSelectionDestroy()
             }
             if (component instanceof TreeContainer) {
@@ -241,15 +241,15 @@ export class SelectedComponentsModifier {
     }
 
 
-    getAllRectComponents() {
-        return this.getDepthComponents().filter(c => c instanceof TreeRect)
+    getAllBoxComponents() {
+        return this.getDepthComponents().filter(c => c instanceof TreeBox)
     }
 
     mouseIsIn(canvasPosition: Point) {
-        const selectionRects = this.getAllRectComponents()
+        const selectionRects = this.getAllBoxComponents()
         const drawingCovered = getSquaredCoveredZone(selectionRects.map(c => c.getSquaredZone()))
 
-        const drawingPoint = Editor.getEditor().getDrawingPosition(canvasPosition)
+        const drawingPoint = Editor.getEditor().positionConverter.getDrawingPosition(canvasPosition)
 
         if (!drawingCovered) return false;
 

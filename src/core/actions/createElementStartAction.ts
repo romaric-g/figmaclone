@@ -19,10 +19,8 @@ export class CreateRectStartAction extends Action {
 
         const selection = new SelectedComponentsModifier([this.treeBox])
 
-        this.treeBox.init(true)
-
         editor.treeManager.getTree().getAnchor().add(this.treeBox.getAnchor())
-        editor.selectionManager.setSelection(selection)
+        editor.selectionManager.setSelectionModifier(selection)
 
         selectionChangeSubject.next(selection.toData())
         treeElementSubject.next(editor.treeManager.toData())

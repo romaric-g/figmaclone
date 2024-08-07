@@ -1,9 +1,7 @@
 import { Point } from "pixi.js";
-import { TreeRect } from "../../tree/treeRect";
 import { SelectTool } from "../selectTool";
 import { SelectToolState } from "./abstractSelectState";
 import { FreeSelectState } from "./freeSelect";
-import { DragSelectionBoxRenderer } from "../../canvas/renderer/dragSelectorBox";
 import { Editor } from "../../editor";
 import { TreeComponent } from "../../tree/treeComponent";
 import { SelectedComponentsModifier } from "../../selections/selectedComponentsModifier";
@@ -11,18 +9,17 @@ import { SelectionState } from "./selection";
 import { UpdatingSelectionAction } from "../../actions/updatingSelectionAction";
 import { SetSelectionAction } from "../../actions/setSelectionAction";
 import { SquaredZone } from "../../utils/squaredZone";
+import { TreeBox } from "../../tree/treeBox";
 
 // Quand l'utilisateur presse le bouton gauche de sa souris et alors peut bouger 
 // sa souris pour selectionner un ensemble d'elements
 export class DragSelectionState extends SelectToolState {
 
-    private _renderer: DragSelectionBoxRenderer;
     private _sourceClickedPosition: Point;
     private _lastDragPosition?: Point;
 
     constructor(selectTool: SelectTool, sourceClickedPosition: Point) {
         super(selectTool)
-        this._renderer = new DragSelectionBoxRenderer(this)
         this._sourceClickedPosition = sourceClickedPosition.clone()
     }
 
@@ -73,7 +70,7 @@ export class DragSelectionState extends SelectToolState {
                 continue;
             }
 
-            const componentCanvasCoveredZone = editor.getCanvasSquaredZone(componentDrawingCoveredZone)
+            const componentCanvasCoveredZone = editor.positionConverter.getCanvasSquaredZone(componentDrawingCoveredZone)
 
             const isLeft = componentCanvasCoveredZone.maxX < selectionCanvasCoveredZone.minX;
             const isRight = componentCanvasCoveredZone.minX > selectionCanvasCoveredZone.maxX;
@@ -91,16 +88,14 @@ export class DragSelectionState extends SelectToolState {
     }
 
     onInit(): void {
-        this._renderer.init()
     }
 
     onDestroy(): void {
-        this._renderer.destroy()
     }
 
-    onClickDown(element: TreeRect, shift: boolean, pointerPosition: Point, double: boolean): void { }
+    onClickDown(element: TreeBox, shift: boolean, pointerPosition: Point, double: boolean): void { }
 
-    onClickUp(element: TreeRect, shift: boolean): void {
+    onClickUp(element: TreeBox, shift: boolean): void {
         this.exit()
     }
 
@@ -110,13 +105,9 @@ export class DragSelectionState extends SelectToolState {
         this.exit()
     }
 
-    render() {
-        this._renderer.render()
-    }
-
     exit() {
         const editor = Editor.getEditor()
-        const selection = editor.selectionManager.getSelection()
+        const selection = editor.selectionManager.getSelectionModifier()
 
         if (selection.isEmpty()) {
             this.selectTool.setState(new FreeSelectState(this.selectTool))

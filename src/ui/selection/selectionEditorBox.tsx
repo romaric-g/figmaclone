@@ -5,7 +5,7 @@ import SelectionEditor from "./selectionEditor"
 
 
 const SelectionEditorBox: React.FC = () => {
-    const selection = Editor.getEditor().selectionManager.getSelection()
+    const selection = Editor.getEditor().selectionManager.getSelectionModifier()
     const data = selection.toData()
 
     if (!data) {

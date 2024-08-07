@@ -5,6 +5,7 @@ export interface SerialisedTreeText extends SerialisedTreeComponent {
     type: "text",
     props: {
         name: string,
+        text: string,
         id?: string,
         x: number,
         y: number,

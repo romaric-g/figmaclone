@@ -1,10 +1,10 @@
-import { Point, ApplicationOptions } from 'pixi.js';
+import { ApplicationOptions } from 'pixi.js';
 import { SelectionManager } from './selections/selectionManager';
 import { EventsManger } from './event/eventManager';
 import { TreeManager } from './tree/treeManager';
 import { ToolManager } from './tools/toolManager';
 import { Zoom } from './zoom';
-import { CanvasApp } from './canvas/app';
+import { CanvasManager } from './canvas/canvasManager';
 import { KeyboardManager } from './keyboard/keyboardManager';
 import { CanvasAttach } from './keyboard/canvas/canvasAttach';
 import { ActionManager } from './actions/actionManger';
@@ -12,8 +12,8 @@ import { MenuManager } from './menu/menuManager';
 import { Snapshot } from './history/snapshot';
 import { History } from './history/history';
 import { SelectedComponentsModifier } from './selections/selectedComponentsModifier';
-import { SquaredZone } from './utils/squaredZone';
 import { deserializeTreeComponent } from './tree/serialized/deserializeComponent';
+import { PositionConverter } from './canvas/conversion/PositionConverter';
 
 console.log("log Editor")
 
@@ -34,12 +34,13 @@ export class Editor {
     readonly zoom: Zoom;
     readonly history: History;
 
-    readonly canvasApp: CanvasApp;
+    readonly canvasManager: CanvasManager;
+
+    readonly positionConverter: PositionConverter;
 
 
     constructor() {
-        this.canvasApp = new CanvasApp(this)
-
+        this.canvasManager = new CanvasManager(this)
         this.selectionManager = new SelectionManager()
         this.eventsManager = new EventsManger()
         this.treeManager = new TreeManager()
@@ -48,11 +49,13 @@ export class Editor {
         this.actionManager = new ActionManager()
         this.menuManager = new MenuManager()
         this.zoom = new Zoom(this)
-        this.history = new History()
+        this.history = new History(150)
+
+        this.positionConverter = new PositionConverter(this.canvasManager.getTreeContainer())
     }
 
     async init(options?: Partial<ApplicationOptions>) {
-        await this.canvasApp.init(options)
+        await this.canvasManager.init(options)
 
         this.menuManager.init()
         this.treeManager.init()
@@ -64,66 +67,21 @@ export class Editor {
         this.history.add(this.makeSnapshot())
     }
 
-    getDrawingSize(width: number, height: number) {
-        const scale = this.canvasApp.getTreeContainer().scale
-
-        return [width / scale.x, height / scale.y]
-    }
-
-    getCanvasSize(width: number, height: number) {
-        const scale = this.canvasApp.getTreeContainer().scale
-
-        return [scale.x * width, scale.y * height]
-    }
-
-    getDrawingPosition(canvasPosition: Point) {
-        return this.canvasApp.getTreeContainer().toLocal(canvasPosition)
-    }
-
-    getCanvasPosition(drawingPosition: Point) {
-        return this.canvasApp.getTreeContainer().toGlobal(drawingPosition)
-    }
-
-    getDrawingSquaredZone(canvasZone: SquaredZone): SquaredZone {
-        const minPoint = this.getDrawingPosition(new Point(canvasZone.minX, canvasZone.maxX))
-        const maxPoint = this.getDrawingPosition(new Point(canvasZone.minY, canvasZone.maxY))
-
-        return {
-            minX: minPoint.x,
-            minY: minPoint.y,
-            maxX: maxPoint.x,
-            maxY: maxPoint.y
-        }
-    }
-
-    getCanvasSquaredZone(drawingZone: SquaredZone): SquaredZone {
-        const minPoint = this.getCanvasPosition(new Point(drawingZone.minX, drawingZone.minY))
-        const maxPoint = this.getCanvasPosition(new Point(drawingZone.maxX, drawingZone.maxY))
-
-        return {
-            minX: minPoint.x,
-            minY: minPoint.y,
-            maxX: maxPoint.x,
-            maxY: maxPoint.y
-        }
-    }
-
     getCanvas() {
-        return this.canvasApp.getCanvas();
+        return this.canvasManager.getCanvas();
     }
-
 
     getBackgroundContainer() {
-        return this.canvasApp.getBackgroundContainer();
+        return this.canvasManager.getBackgroundContainer();
     }
 
     getTreeContainer() {
-        return this.canvasApp.getTreeContainer();
+        return this.canvasManager.getTreeContainer();
     }
 
     makeSnapshot(): Snapshot {
 
-        let selectedIds = this.selectionManager.getSelection().getSelectedIds()
+        let selectedIds = this.selectionManager.getSelectionModifier().getSelectedIds()
         let treeComponents = this.treeManager.getTree().serialize().props.components
         return new Snapshot(selectedIds, treeComponents)
 
@@ -142,8 +100,8 @@ export class Editor {
             return false;
         })
 
-        this.selectionManager.setSelection(new SelectedComponentsModifier(newComponentsSelection))
-        this.toolManager.resetSelection(this.selectionManager.getSelection())
+        this.selectionManager.setSelectionModifier(new SelectedComponentsModifier(newComponentsSelection))
+        this.toolManager.resetSelection(this.selectionManager.getSelectionModifier())
     }
 
 

@@ -1,5 +1,4 @@
 import { Point } from "pixi.js";
-import { TreeRect } from "../../tree/treeRect";
 import { SelectTool } from "../selectTool";
 import { MovableSelectionState } from "./movableSelection";
 import { SelectToolState } from "./abstractSelectState";
@@ -10,10 +9,14 @@ import { Editor } from "../../editor";
 import { ClearSelection } from "../../actions/clearSelection";
 import { DragSelectionState } from "./dragSelection";
 import { UpdatingSelectionAction } from "../../actions/updatingSelectionAction";
+import { TreeBox } from "../../tree/treeBox";
+import { TreeText } from "../../tree/treeText";
+import { SelectedComponentsModifier } from "../../selections/selectedComponentsModifier";
+import { TextEditState } from "./textEditState";
 
 export class SelectionState extends SelectToolState {
 
-    private _singleElement?: TreeRect;
+    private _singleElement?: TreeBox;
     private _reshapeReference: ReshapeReference = "none";
 
     constructor(selectTool: SelectTool) {
@@ -22,7 +25,7 @@ export class SelectionState extends SelectToolState {
 
     private updateReshapeReference(localPostion: Point) {
         const editor = Editor.getEditor()
-        const [threasholdX, threasholdY] = editor.getDrawingSize(16, 16);
+        const [threasholdX, threasholdY] = editor.positionConverter.getDrawingSize(16, 16);
 
         if (this._singleElement) {
 
@@ -80,19 +83,30 @@ export class SelectionState extends SelectToolState {
         }
     }
 
-    onClickDown(element: TreeRect, shift: boolean, pointerPosition: Point, isDouble: boolean) {
+    onClickDown(element: TreeBox, shift: boolean, pointerPosition: Point, isDouble: boolean) {
         const editor = Editor.getEditor()
         const selector = editor.selectionManager;
 
-        const localPosition = editor.getDrawingPosition(pointerPosition).clone()
+        const localPosition = editor.positionConverter.getDrawingPosition(pointerPosition).clone()
 
         const topComponentChain = selector.getComponentsChainFromRoot(element)
 
         const chainIdx = isDouble && topComponentChain.length > 1 ? 1 : 0
         const topComponent = topComponentChain[chainIdx]
 
-        if (topComponent instanceof TreeContainer || topComponent instanceof TreeRect) {
-            const selectionBuilder = selector.getSelection().getBuilder(editor)
+        if (topComponent instanceof TreeText && isDouble) {
+
+            editor.actionManager.push(
+                new UpdatingSelectionAction(
+                    new SelectedComponentsModifier([topComponent])
+                )
+            )
+
+            this.selectTool.setState(new TextEditState(this.selectTool, topComponent))
+
+        } else if (topComponent instanceof TreeContainer || topComponent instanceof TreeBox) {
+
+            const selectionBuilder = selector.getSelectionModifier().getBuilder(editor)
 
             this.updateReshapeReference(localPosition)
 
@@ -130,7 +144,7 @@ export class SelectionState extends SelectToolState {
 
     onBackgroundPointerDown(clickPosition: Point): void {
         const editor = Editor.getEditor()
-        const localPosition = editor.getDrawingPosition(clickPosition).clone()
+        const localPosition = editor.positionConverter.getDrawingPosition(clickPosition).clone()
 
         this.updateReshapeReference(localPosition)
 
@@ -139,7 +153,7 @@ export class SelectionState extends SelectToolState {
             this.selectTool.setState(newState)
         } else {
             const isShift = editor.keyboardManager.keyboardController.keys.shift.pressed
-            const selection = editor.selectionManager.getSelection()
+            const selection = editor.selectionManager.getSelectionModifier()
             const isInSelection = selection.mouseIsIn(clickPosition)
 
             if (selection.isEmpty()) {
@@ -163,22 +177,21 @@ export class SelectionState extends SelectToolState {
 
     onMove(newPosition: Point): void {
         const editor = Editor.getEditor()
-        const localPostion = editor.getDrawingPosition(newPosition).clone()
+        const localPostion = editor.positionConverter.getDrawingPosition(newPosition).clone()
 
         this.updateReshapeReference(localPostion)
     }
 
     onInit() {
         const editor = Editor.getEditor()
-        const elements = editor.selectionManager.getSelection().getDepthComponents()
+        const elements = editor.selectionManager.getSelectionModifier().getDepthComponents()
 
-        if (elements.length === 1 && elements[0] instanceof TreeRect) {
+        if (elements.length === 1 && elements[0] instanceof TreeBox) {
             this._singleElement = elements[0]
         }
     }
 
-    onClickUp(element: TreeRect, shift: boolean): void { }
+    onClickUp(element: TreeBox, shift: boolean): void { }
     onDestroy() { }
     onBackgroundPointerUp(clickPosition: Point): void { }
-    render() { }
 }

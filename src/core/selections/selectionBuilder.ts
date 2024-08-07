@@ -20,7 +20,7 @@ export class SelectionBuilder {
     }
 
     selectAll() {
-        this._components = this._editor.treeManager.getAllRectComponents()
+        this._components = this._editor.treeManager.getAllBoxComponents()
         return this;
     }
 

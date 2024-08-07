@@ -13,7 +13,7 @@ export class SetSelectionAction extends Action {
     }
 
     apply(editor: Editor) {
-        editor.selectionManager.setSelection(this.selection)
+        editor.selectionManager.setSelectionModifier(this.selection)
 
         selectionChangeSubject.next(this.selection.toData())
         treeElementSubject.next(editor.treeManager.toData())

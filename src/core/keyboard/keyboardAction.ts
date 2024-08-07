@@ -1,23 +1,22 @@
-import { Editor } from "../editor";
-import { KeyboardController, KeyboardListener as KeyboardListener, ValidKey } from "./keyboardController";
+import { KeyboardController, KeyboardKeyListener as KeyboardKeyListener, ValidKey } from "./keyboardController";
 
 
 export class KeyboardAction {
 
     private key: ValidKey;
-    private listener: KeyboardListener;
+    private listener: KeyboardKeyListener;
 
-    constructor(key: ValidKey, listener: KeyboardListener) {
+    constructor(key: ValidKey, listener: KeyboardKeyListener) {
         this.key = key;
         this.listener = listener;
     }
 
     register(keyboardController: KeyboardController) {
-        keyboardController.addListener(this.key, this.listener)
+        keyboardController.addKeyListener(this.key, this.listener)
     }
 
     unregister(keyboardController: KeyboardController) {
-        keyboardController.removeListener(this.key, this.listener)
+        keyboardController.removeKeyListener(this.key, this.listener)
     }
 
 }

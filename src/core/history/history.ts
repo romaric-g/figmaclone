@@ -5,10 +5,15 @@ import { Snapshot } from "./snapshot";
 
 export class History {
 
+    private maxSize: number;
     private stack: Snapshot[] = []
 
+    constructor(maxSize: number) {
+        this.maxSize = maxSize;
+    }
+
     add(snapshot: Snapshot) {
-        if (this.stack.length >= 50) {
+        if (this.stack.length >= this.maxSize) {
             this.stack.shift();
         }
         this.stack.push(snapshot)

@@ -1,13 +1,13 @@
 import { Container } from "pixi.js";
-import { CanvasApp } from "../app";
+import { CanvasManager } from "../canvasManager";
 
 
 export class TreeLayer {
 
-    private _canvasApp: CanvasApp;
+    private _canvasApp: CanvasManager;
     private _treeContainer: Container;
 
-    constructor(canvasApp: CanvasApp) {
+    constructor(canvasApp: CanvasManager) {
         this._canvasApp = canvasApp;
         this._treeContainer = new Container()
         this._treeContainer.eventMode = "static"

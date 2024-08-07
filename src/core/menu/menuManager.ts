@@ -16,7 +16,7 @@ export class MenuManager {
 
         editor.eventsManager.onPointerRightDown.subscribe((event) => {
             const editor = Editor.getEditor()
-            const selection = editor.selectionManager.getSelection()
+            const selection = editor.selectionManager.getSelectionModifier()
             const position = event.pointerPosition.clone();
             const originalEvent = event.originalEvent;
 
@@ -31,10 +31,10 @@ export class MenuManager {
 
         editor.eventsManager.onElementRightDown.subscribe((event) => {
             const selectionManager = editor.selectionManager;
-            const selection = selectionManager.getSelection()
+            const selection = selectionManager.getSelectionModifier()
             const originalEvent = event.originalEvent
 
-            const isIncludeInSelection = selection.getAllRectComponents().includes(event.element)
+            const isIncludeInSelection = selection.getAllBoxComponents().includes(event.element)
 
             if (isIncludeInSelection) {
                 editor.menuManager.requestSelectionMenu(selection, originalEvent.clientX, originalEvent.clientY)
@@ -46,7 +46,7 @@ export class MenuManager {
                     new SetSelectionAction(new SelectedComponentsModifier([componentToSelect]))
                 )
 
-                const newSelection = Editor.getEditor().selectionManager.getSelection()
+                const newSelection = Editor.getEditor().selectionManager.getSelectionModifier()
 
                 editor.menuManager.requestSelectionMenu(newSelection, originalEvent.clientX, originalEvent.clientY)
 

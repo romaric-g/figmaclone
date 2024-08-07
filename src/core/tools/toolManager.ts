@@ -7,7 +7,7 @@ import { SelectionState } from "./selectStates/selection";
 import { SelectTool } from "./selectTool";
 import { TextTool } from "./textTool";
 import { Tool } from "./tool";
-
+import { ToolUtils } from "./toolUtils";
 
 export class ToolManager {
 
@@ -88,10 +88,6 @@ export class ToolManager {
         return this._freezed;
     }
 
-    render() {
-        this.getCurrentTool()?.render()
-    }
-
     resetSelection(selection: SelectedComponentsModifier) {
         if (selection.isEmpty()) {
             this._selectTool.setState(
@@ -102,7 +98,9 @@ export class ToolManager {
                 new SelectionState(this._selectTool)
             )
         }
+    }
 
-
+    get utils() {
+        return new ToolUtils(this)
     }
 }

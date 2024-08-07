@@ -1,20 +1,23 @@
-import { Graphics, GraphicsContext, Point } from "pixi.js";
-import { Editor } from "../../editor";
-import { TreeContainer } from "../../tree/treeContainer";
+import { Container, Graphics, GraphicsContext, Point } from "pixi.js";
+import { TreeContainer } from "../../../tree/treeContainer";
+import { CachableRenderer } from "../cachableRenderer";
+import { PositionConverter } from "../../conversion/PositionConverter";
 
-export class ContainerSelectionBoxRenderer {
+export class ContainerSelectionRenderer implements CachableRenderer {
 
+    private graphicsContainer: Container;
     private container: TreeContainer;
     private graphics: Graphics;
+    private positionConverter: PositionConverter;
 
-    constructor(container: TreeContainer) {
+    constructor(container: TreeContainer, graphicsContainer: Container, positionConverter: PositionConverter) {
         this.graphics = new Graphics()
-        this.container = container
+        this.graphicsContainer = graphicsContainer;
+        this.container = container;
+        this.positionConverter = positionConverter;
     }
 
-    render() {
-        const editor = Editor.getEditor()
-
+    render(startIndex: number) {
         if (!this.container.isSelected() && !this.container.isHover()) {
             this.graphics.context = new GraphicsContext();
             return
@@ -27,7 +30,7 @@ export class ContainerSelectionBoxRenderer {
             return
         }
 
-        const coveredRect = editor.getCanvasSquaredZone(drawingCoveredZone)
+        const coveredRect = this.positionConverter.getCanvasSquaredZone(drawingCoveredZone)
 
         const { minX, minY, maxX, maxY } = coveredRect
 
@@ -50,12 +53,12 @@ export class ContainerSelectionBoxRenderer {
 
     }
 
-    init() {
-        Editor.getEditor().canvasApp.getSelectionLayer().getContainer().addChild(this.graphics)
+    onInit() {
+        this.graphicsContainer.addChild(this.graphics)
     }
 
-    destroy() {
-        Editor.getEditor().canvasApp.getSelectionLayer().getContainer().removeChild(this.graphics)
+    onDestroy() {
+        this.graphicsContainer.removeChild(this.graphics)
     }
 
     getContainer() {

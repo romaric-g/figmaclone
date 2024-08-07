@@ -1,19 +1,21 @@
-import { Graphics, GraphicsContext, Point } from "pixi.js";
+import { Container, Graphics, GraphicsContext, Point } from "pixi.js";
 import { TreeRect } from "../../tree/treeRect";
 import { Editor } from "../../editor";
 import { SelectionLayer } from "../layers/selection";
 
 export class GlobalSelectionBoxRenderer {
 
+    private graphicsContainer: Container;
     private graphics: Graphics;
 
-    constructor() {
+    constructor(graphicsContainer: Container) {
         this.graphics = new Graphics()
+        this.graphicsContainer = graphicsContainer;
     }
 
     render() {
         const editor = Editor.getEditor()
-        const components = editor.selectionManager.getSelection().getDepthComponents()
+        const components = editor.selectionManager.getSelectionModifier().getDepthComponents()
 
         let minX = undefined
         let minY = undefined
@@ -47,8 +49,8 @@ export class GlobalSelectionBoxRenderer {
         let width = maxX - minX;
         let height = maxY - minY;
 
-        const boxOrigin = editor.getCanvasPosition(new Point(minX, minY))
-        const [boxWidth, boxHeight] = editor.getCanvasSize(width, height)
+        const boxOrigin = editor.positionConverter.getCanvasPosition(new Point(minX, minY))
+        const [boxWidth, boxHeight] = editor.positionConverter.getCanvasSize(width, height)
 
         const strokeStyle = {
             width: 1,
@@ -68,12 +70,12 @@ export class GlobalSelectionBoxRenderer {
 
     }
 
-    init(selectionLayer: SelectionLayer) {
-        Editor.getEditor().canvasApp.getSelectionLayer().getContainer().addChild(this.graphics)
+    init() {
+        this.graphicsContainer.addChild(this.graphics)
     }
 
-    destroy(selectionLayer: SelectionLayer) {
-        Editor.getEditor().canvasApp.getSelectionLayer().getContainer().removeChild(this.graphics)
+    destroy() {
+        this.graphicsContainer.removeChild(this.graphics)
     }
 
     getContainer() {

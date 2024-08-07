@@ -78,6 +78,7 @@ function deserializeTreeRect(serialisedTreeRect: SerialisedTreeRect) {
 function deserializeTreeText(serialisedTreeRect: SerialisedTreeText) {
     const newRect = new TreeText({
         name: serialisedTreeRect.props.name,
+        text: serialisedTreeRect.props.text,
         id: serialisedTreeRect.props.id,
         x: serialisedTreeRect.props.x,
         y: serialisedTreeRect.props.y,
