@@ -3,7 +3,7 @@ import React from "react";
 import classNames from "classnames";
 import { Editor } from "../../core/editor";
 import { SelectTool } from "../../core/tools/selectTool";
-import { SelectionState } from "../../core/tools/selectStates/selection";
+import { SelectionState } from "../../core/tools/selectStates/selectionState";
 import "./treeComponent.scss";
 import { DragOrigin, DragTarget } from "./tree";
 import { SelectedComponentsModifier } from "../../core/selections/selectedComponentsModifier";
@@ -12,7 +12,7 @@ import { SetSelectionAction } from "../../core/actions/setSelectionAction";
 interface Props {
     indexs: number[],
     name: string,
-    type: "rect" | "container" | "other",
+    type: "rect" | "container" | "other" | "text",
     isSelected: boolean,
     isDragging: boolean,
     setDragOrigin: (dragOrigin: DragOrigin) => void,

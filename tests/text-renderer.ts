@@ -1,6 +1,6 @@
 
 import { expect } from 'chai';
-import { getFullLines, sliceFullLines } from '../src/core/canvas/renderer/selection/textEditUtils';
+import { getFullLines, sliceFullLines } from '../src/core/utils/textEditUtils';
 
 describe('Text renderer tests', () => {
 

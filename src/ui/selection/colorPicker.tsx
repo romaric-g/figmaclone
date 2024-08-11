@@ -1,10 +1,8 @@
 import React from 'react';
-import { Slider, Sketch, Material, Colorful, Compact, Circle, Wheel, Block, Github, Chrome, RgbColor } from '@uiw/react-color';
-import { Alpha, Hue, ShadeSlider, Saturation, hsvaToHslaString, RgbaColor, HsvaColor } from '@uiw/react-color';
-import { EditableInput, EditableInputRGBA, EditableInputHSLA } from '@uiw/react-color';
-import { hsvaToHsla, rgbStringToHsva, hsvaToHex, hsvaToHexa, hexToRgba, rgbaToHex, validHex, hexToHsva } from '@uiw/color-convert'
-import "./colorPicker.scss"
+import { Alpha, Hue, Saturation, HsvaColor } from '@uiw/react-color';
+import { hsvaToHex, hsvaToHexa, validHex, hexToHsva } from '@uiw/color-convert'
 import FocusInput from '../components/FocusInput';
+import "./colorPicker.scss"
 
 interface Props {
     color: HsvaColor,

@@ -1,7 +1,7 @@
 import { DrawTool } from "./drawTool";
-import { DragSelectionState } from "./selectStates/dragSelection";
-import { MovableSelectionState } from "./selectStates/movableSelection";
-import { ReshapeSelectState } from "./selectStates/reshapeSelect";
+import { DragSelectionState } from "./selectStates/dragSelectionState";
+import { MovableSelectionState } from "./selectStates/movableSelectionState";
+import { ReshapeSelectState } from "./selectStates/reshapeSelectState";
 import { TextEditState } from "./selectStates/textEditState";
 import { SelectTool } from "./selectTool";
 import { ToolManager } from "./toolManager";

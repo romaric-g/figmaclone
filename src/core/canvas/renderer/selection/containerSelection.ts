@@ -39,7 +39,7 @@ export class ContainerSelectionRenderer implements CachableRenderer {
 
         const strokeStyle = {
             width: this.container.isSelected() ? 2 : 1,
-            color: "blue"
+            color: "#0C8CE9"
         }
 
         const commonContext = new GraphicsContext()

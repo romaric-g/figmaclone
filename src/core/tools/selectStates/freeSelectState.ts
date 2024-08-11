@@ -1,9 +1,9 @@
 import { Point } from "pixi.js";
 import { SelectTool } from "../selectTool";
-import { MovableSelectionState } from "./movableSelection";
+import { MovableSelectionState } from "./movableSelectionState";
 import { SelectToolState } from "./abstractSelectState";
 import { cursorChangeSubject } from "../../../ui/subjects";
-import { DragSelectionState } from "./dragSelection";
+import { DragSelectionState } from "./dragSelectionState";
 import { SelectedComponentsModifier } from "../../selections/selectedComponentsModifier";
 import { UpdatingSelectionAction } from "../../actions/updatingSelectionAction";
 import { Editor } from "../../editor";

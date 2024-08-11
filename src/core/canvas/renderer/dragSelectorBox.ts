@@ -1,5 +1,5 @@
 import { Container, Graphics, GraphicsContext, Point } from "pixi.js";
-import { DragSelectionState } from "../../tools/selectStates/dragSelection";
+import { DragSelectionState } from "../../tools/selectStates/dragSelectionState";
 
 export class DragSelectionBoxRenderer {
 
@@ -32,7 +32,7 @@ export class DragSelectionBoxRenderer {
 
         const strokeStyle = {
             width: 1,
-            color: "blue"
+            color: "#0C8CE9"
         }
 
         const commonContext = new GraphicsContext()

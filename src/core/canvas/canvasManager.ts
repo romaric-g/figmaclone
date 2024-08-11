@@ -132,12 +132,11 @@ export class CanvasManager {
         // Rendu de la vue de text editing
 
         const textEditingState = this._editor.toolManager.utils.getTextEditingState()
-        const textComponent = textEditingState?.getTextComponent()
 
-        if (textComponent) {
+        if (textEditingState) {
             if (!this.textEditRenderer) {
                 const selectionContainer = this._selectionLayer.getContainer()
-                this.textEditRenderer = new TextEditRenderer(selectionContainer, Editor.getEditor(), textComponent)
+                this.textEditRenderer = new TextEditRenderer(selectionContainer, Editor.getEditor(), textEditingState)
                 this.textEditRenderer.onInit()
             }
             this.textEditRenderer.render()

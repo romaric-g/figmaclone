@@ -20,7 +20,7 @@ export class CanvasAttach extends KeyboardAttach {
 
         const editor = Editor.getEditor()
 
-        this.addAction(
+        this.addActions(
             new KeyboardAction("backspace", (type) => {
                 const selection = editor.selectionManager.getSelectionModifier()
 

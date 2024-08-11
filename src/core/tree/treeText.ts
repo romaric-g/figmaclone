@@ -14,14 +14,14 @@ export interface TreeTextProps {
     width?: number,
     height?: number,
     fillColor?: HsvaColor,
-    borderColor?: HsvaColor,
-    borderWidth?: number
+    fontSize?: number
 }
 
 export class TreeText extends TreeBox {
 
     private _text: string;
     private _fillColor!: HsvaColor;
+    private _fontSize!: number
 
     constructor({
         name,
@@ -30,6 +30,7 @@ export class TreeText extends TreeBox {
         y = 0,
         width = 100,
         height = 100,
+        fontSize = 22,
         fillColor = { h: 0, s: 0, v: 0, a: 1 },
     }: TreeTextProps) {
         super({
@@ -41,6 +42,7 @@ export class TreeText extends TreeBox {
         })
         this._text = text;
         this._fillColor = fillColor;
+        this._fontSize = fontSize;
     }
 
 
@@ -56,6 +58,10 @@ export class TreeText extends TreeBox {
         return this._fillColor
     }
 
+    public get fontSize() {
+        return this._fontSize;
+    }
+
     public set fillColor(value: HsvaColor) {
 
         const roundOpacityValue = {
@@ -66,6 +72,18 @@ export class TreeText extends TreeBox {
         }
 
         this._fillColor = rgbaToHsva(hsvaToRgba(roundOpacityValue))
+    }
+
+    public set fontSize(value: number) {
+
+        if (value < 6) {
+            this.fontSize = 6;
+        }
+        if (value > 128) {
+            this.fontSize = 128;
+        }
+
+        this._fontSize = Math.ceil(value);
     }
 
     serialize(): SerialisedTreeText {

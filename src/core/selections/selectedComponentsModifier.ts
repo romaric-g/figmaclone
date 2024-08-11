@@ -9,6 +9,7 @@ import { HsvaColor } from "@uiw/react-color";
 import { getSquaredCoveredZone } from "../utils/squaredZone";
 import { TreeBox } from "../tree/treeBox";
 import { SerialisedTreeComponentList } from "../tree/serialized/serialisedTreeComponentList";
+import { TreeText } from "../tree/treeText";
 
 export class SelectedComponentsModifier {
     private _components: TreeComponent[]
@@ -153,7 +154,7 @@ export class SelectedComponentsModifier {
     setFillColor(fillColor: HsvaColor) {
 
         this.applyToEachBox((c) => {
-            if (c instanceof TreeRect) {
+            if (c instanceof TreeRect || c instanceof TreeText) {
                 c.fillColor = fillColor
             }
         })
@@ -161,7 +162,7 @@ export class SelectedComponentsModifier {
 
     getFillColor() {
         return this.getBoxsObjectValue((c) => {
-            if (c instanceof TreeRect) {
+            if (c instanceof TreeRect || c instanceof TreeText) {
                 return c.fillColor
             }
         })
@@ -240,6 +241,21 @@ export class SelectedComponentsModifier {
         })
     }
 
+    getFontSize() {
+        return this.getBoxsValue((e) => {
+            if (e instanceof TreeText) {
+                return e.fontSize;
+            }
+        })
+    }
+
+    setFontSize(value: number) {
+        this.applyToEachBox((c) => {
+            if (c instanceof TreeText) {
+                c.fontSize = value
+            }
+        })
+    }
 
     getAllBoxComponents() {
         return this.getDepthComponents().filter(c => c instanceof TreeBox)
@@ -312,19 +328,8 @@ export class SelectedComponentsModifier {
         const color = this.getFillColor()
         const borderColor = this.getBorderColor()
         const borderWidth = this.getBorderWidth()
+        const fontSize = this.getFontSize()
 
-        if (
-            lenght == 0 ||
-            x === undefined ||
-            y === undefined ||
-            width === undefined ||
-            height === undefined ||
-            color === undefined ||
-            borderColor === undefined ||
-            borderWidth === undefined
-        ) {
-            return undefined
-        }
 
         return {
             lenght,
@@ -334,7 +339,8 @@ export class SelectedComponentsModifier {
             height,
             color,
             borderColor,
-            borderWidth
+            borderWidth,
+            fontSize
         }
     }
 

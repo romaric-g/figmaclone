@@ -33,10 +33,6 @@ export class TreeRenderVisitor extends CachedRenderVisitor {
     }
 
     doForContainer(container: TreeContainer): void {
-
-        console.log("components")
-        console.log(container.getComponents())
-
         for (const component of container.getComponents()) {
             component.accept(this)
         }

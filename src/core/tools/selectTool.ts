@@ -1,11 +1,12 @@
 import { Editor } from "../editor";
 import { ElementOverOffEventData, ElementOverOnEventData, ElementPressDownEventData, ElementPressUpEventData, PointerBackgroundEventData, PointerMoveEventData } from "../event/eventManager";
 import { Tool } from "./tool";
-import { FreeSelectState } from "./selectStates/freeSelect";
+import { FreeSelectState } from "./selectStates/freeSelectState";
 import { SelectToolState } from "./selectStates/abstractSelectState";
 import { TreeRect } from "../tree/treeRect";
 import { TreeContainer } from "../tree/treeContainer";
 import { TreeComponent } from "../tree/treeComponent";
+import { TreeBox } from "../tree/treeBox";
 
 export class SelectTool extends Tool {
 
@@ -92,7 +93,7 @@ export class SelectTool extends Tool {
             if (lastClickElement == element) {
                 const timeDiff = currentDate.valueOf() - lastClickDate.valueOf()
 
-                if (timeDiff < 300) {
+                if (timeDiff < 450) {
                     isDouble = true
                 }
             }
@@ -119,7 +120,7 @@ export class SelectTool extends Tool {
 
         const topComponent = editor.selectionManager.getComponentsChainFromRoot(component)[0]
 
-        if (topComponent instanceof TreeRect) {
+        if (topComponent instanceof TreeBox) {
             topComponent.setHover(true)
         }
         if (topComponent instanceof TreeContainer) {
@@ -131,7 +132,7 @@ export class SelectTool extends Tool {
         const editor = Editor.getEditor()
         const topComponent = editor.selectionManager.getComponentsChainFromRoot(component)[0]
 
-        if (topComponent instanceof TreeRect) {
+        if (topComponent instanceof TreeBox) {
             topComponent.setHover(false)
         }
         if (topComponent instanceof TreeContainer) {

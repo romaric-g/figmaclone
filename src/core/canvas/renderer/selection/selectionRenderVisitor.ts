@@ -1,14 +1,12 @@
 import { Container } from "pixi.js";
-import { TreeBox } from "../../../tree/treeBox";
 import { TreeContainer } from "../../../tree/treeContainer";
 import { TreeRect } from "../../../tree/treeRect";
 import { TreeText } from "../../../tree/treeText";
 import { CachedRenderVisitor } from "../cachedRenderVisitor";
 import { BoxSelectionRenderer } from "./boxSelection";
 import { Editor } from "../../../editor";
-import { SelectTool } from "../../../tools/selectTool";
-import { MovableSelectionState } from "../../../tools/selectStates/movableSelection";
 import { ContainerSelectionRenderer } from "./containerSelection";
+import { TextBoxSelectionRenderer } from "./textBoxSelection";
 
 export class SelectionRenderVisitor extends CachedRenderVisitor {
 
@@ -19,37 +17,42 @@ export class SelectionRenderVisitor extends CachedRenderVisitor {
         this.editor = editor;
     }
 
-    doForBox(box: TreeBox) {
-        const isSingleSelected = () => {
-            return this.editor.selectionManager.getSelectionModifier().getDepthComponents().length == 1;
-        }
+    isSingleSelected() {
+        return this.editor.selectionManager.getSelectionModifier().getDepthComponents().length == 1;
+    }
 
-        const isHidden = () => {
+    isHidden() {
+        const utils = this.editor.toolManager.utils;
 
-            const utils = this.editor.toolManager.utils;
-
-            return utils.getMovableState() != undefined || utils.getTextEditingState() != undefined;
-        }
-
-        const newInstance = () => {
-            return new BoxSelectionRenderer(
-                box,
-                this.graphicsContainer,
-                this.editor.positionConverter,
-                isSingleSelected,
-                isHidden
-            )
-        }
-
-        this.restoreCache(box, newInstance).render(this.nextIndex())
+        return utils.getMovableState() != undefined || utils.getTextEditingState() != undefined;
     }
 
     doForRect(rect: TreeRect): void {
-        this.doForBox(rect)
+        const newInstance = () => {
+            return new BoxSelectionRenderer(
+                rect,
+                this.graphicsContainer,
+                this.editor.positionConverter,
+                this.isSingleSelected.bind(this),
+                this.isHidden.bind(this)
+            )
+        }
+
+        this.restoreCache(rect, newInstance).render(this.nextIndex())
     }
 
     doForText(text: TreeText): void {
-        this.doForBox(text)
+        const newInstance = () => {
+            return new TextBoxSelectionRenderer(
+                text,
+                this.graphicsContainer,
+                this.editor.positionConverter,
+                this.isSingleSelected.bind(this),
+                this.isHidden.bind(this)
+            )
+        }
+
+        this.restoreCache(text, newInstance).render(this.nextIndex())
     }
 
     doForContainer(container: TreeContainer): void {

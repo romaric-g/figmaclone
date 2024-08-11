@@ -34,13 +34,14 @@ export interface TreeContainerData extends TreeComponentBaseData<"container"> {
 
 export interface SelectionData {
     lenght: number
-    x: number | "mixed",
-    y: number | "mixed",
-    width: number | "mixed",
-    height: number | "mixed",
-    color: HsvaColor | "mixed",
-    borderColor: HsvaColor | "mixed",
-    borderWidth: number | "mixed"
+    x: number | "mixed" | undefined,
+    y: number | "mixed" | undefined,
+    width: number | "mixed" | undefined,
+    height: number | "mixed" | undefined,
+    color: HsvaColor | "mixed" | undefined,
+    borderColor: HsvaColor | "mixed" | undefined,
+    borderWidth: number | "mixed" | undefined,
+    fontSize: number | "mixed" | undefined
 }
 
 export interface MenuItemData {

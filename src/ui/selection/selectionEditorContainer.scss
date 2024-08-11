@@ -1,0 +1,16 @@
+.SelectionEditorContainer {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    &--no-element {
+        height: 100%;
+        align-items: center;
+        justify-content: center;
+    }
+
+    &__text {
+        font-size: 14px;
+    }
+}

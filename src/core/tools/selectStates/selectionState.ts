@@ -1,13 +1,13 @@
 import { Point } from "pixi.js";
 import { SelectTool } from "../selectTool";
-import { MovableSelectionState } from "./movableSelection";
+import { MovableSelectionState } from "./movableSelectionState";
 import { SelectToolState } from "./abstractSelectState";
 import { cursorChangeSubject } from "../../../ui/subjects";
-import { getCursorType, ReshapeReference, ReshapeSelectState } from "./reshapeSelect";
+import { getCursorType, ReshapeReference, ReshapeSelectState } from "./reshapeSelectState";
 import { TreeContainer } from "../../tree/treeContainer";
 import { Editor } from "../../editor";
 import { ClearSelection } from "../../actions/clearSelection";
-import { DragSelectionState } from "./dragSelection";
+import { DragSelectionState } from "./dragSelectionState";
 import { UpdatingSelectionAction } from "../../actions/updatingSelectionAction";
 import { TreeBox } from "../../tree/treeBox";
 import { TreeText } from "../../tree/treeText";
@@ -25,7 +25,7 @@ export class SelectionState extends SelectToolState {
 
     private updateReshapeReference(localPostion: Point) {
         const editor = Editor.getEditor()
-        const [threasholdX, threasholdY] = editor.positionConverter.getDrawingSize(16, 16);
+        const [threasholdX, threasholdY] = editor.positionConverter.getDrawingSize(8, 8);
 
         if (this._singleElement) {
 
@@ -102,7 +102,10 @@ export class SelectionState extends SelectToolState {
                 )
             )
 
-            this.selectTool.setState(new TextEditState(this.selectTool, topComponent))
+            const newState = new TextEditState(this.selectTool, topComponent)
+            newState.selectAll()
+
+            this.selectTool.setState(newState)
 
         } else if (topComponent instanceof TreeContainer || topComponent instanceof TreeBox) {
 

@@ -1,5 +1,5 @@
 
-export type ValidKey = "shift" | "control" | 'backspace' | 'left' | 'right' | 'up' | 'down' | 'enter' | 'g' | 'c' | 'v' | 'y' | 'z'
+export type ValidKey = "shift" | "control" | 'backspace' | 'left' | 'right' | 'up' | 'down' | 'enter' | 'g' | 'c' | 'v' | 'y' | 'z' | 'a'
 
 const keyMap: { [key: string]: ValidKey } = {
     'ShiftLeft': 'shift',
@@ -14,7 +14,8 @@ const keyMap: { [key: string]: ValidKey } = {
     'KeyC': 'c',
     'KeyV': 'v',
     'KeyY': 'y',
-    'KeyW': 'z'
+    'KeyW': 'z',
+    'KeyQ': 'a'
 };
 
 type KeyState = {
@@ -41,7 +42,7 @@ export class KeyboardController {
 
     constructor() {
         const defaultKeyState: KeyState = { pressed: false, doubleTap: false, timestamp: 0 };
-        const validKeys: ValidKey[] = ["shift", "control", "backspace", "left", "right", "up", "down", "enter", "g", "c", "v", "y", "z"];
+        const validKeys: ValidKey[] = ["shift", "control", "backspace", "left", "right", "up", "down", "enter", "g", "c", "v", "y", "z", 'a'];
 
         this.keys = Object.fromEntries(
             validKeys.map(key => [key, { ...defaultKeyState }])

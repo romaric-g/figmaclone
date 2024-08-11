@@ -54,7 +54,7 @@ export class GlobalSelectionBoxRenderer {
 
         const strokeStyle = {
             width: 1,
-            color: "blue"
+            color: "#0C8CE9"
         }
 
 

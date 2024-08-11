@@ -1,12 +1,12 @@
 import { Point } from "pixi.js";
 import { SelectTool } from "../selectTool";
-import { SelectionState } from "./selection";
+import { SelectionState } from "./selectionState";
 import { SelectToolState } from "./abstractSelectState";
 import { TreeComponent } from "../../tree/treeComponent";
 import { UpdateSelectionPropertiesAction } from "../../actions/updateSelectionPropertiesAction";
 import { Editor } from "../../editor";
 import { ClearSelection } from "../../actions/clearSelection";
-import { FreeSelectState } from "./freeSelect";
+import { FreeSelectState } from "./freeSelectState";
 import { SetSelectionAction } from "../../actions/setSelectionAction";
 import { SetSelectionPropertiesAction } from "../../actions/setSelectionPropertiesAction";
 import { SelectedComponentsModifier } from "../../selections/selectedComponentsModifier";

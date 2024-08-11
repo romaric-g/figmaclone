@@ -4,12 +4,7 @@ import { TreeBox } from "../tree/treeBox";
 import { Editor } from "../editor";
 import { cursorChangeSubject, ToolType } from "../../ui/subjects";
 import { PointerDownEventData, PointerMoveEventData, PointerUpEventData } from "../event/eventManager";
-import { TreeRect } from "../tree/treeRect";
 import { CreateRectStartAction } from "../actions/createElementStartAction";
-import { SelectTool } from "./selectTool";
-import { SelectionState } from "./selectStates/selection";
-import { SelectedComponentsModifier } from "../selections/selectedComponentsModifier";
-import { SetSelectionAction } from "../actions/setSelectionAction";
 import { UpdateSelectionPropertiesAction } from "../actions/updateSelectionPropertiesAction";
 
 

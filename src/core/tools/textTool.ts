@@ -15,22 +15,31 @@ export class TextTool extends DrawTool<TreeText> {
 
     getNewDrawingBox(x: number, y: number) {
         return new TreeText({
-            text: "Bonjour à tous", // \u00A0
+            text: "",
             x,
             y,
             width: 0,
             height: 0,
             name: Editor.getEditor().treeManager.getNextName(),
             fillColor: {
-                h: 100,
-                s: 20,
-                v: 80,
+                h: 0,
+                s: 0,
+                v: 0,
                 a: 1
             }
         })
     }
 
     validateDrawingBox(drawingBox: TreeText): void {
+
+        if (drawingBox.width < 1) {
+            drawingBox.width = 200;
+        }
+
+        if (drawingBox.height < 1) {
+            drawingBox.height = 30;
+        }
+
         const editor = Editor.getEditor()
 
         editor.selectionManager.setSelectionModifier(new SelectedComponentsModifier([drawingBox]))

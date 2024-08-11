@@ -11,23 +11,25 @@ interface Props {
     setDragOrigin: (dragOrigin: DragOrigin) => void,
     dragTarget: DragTarget | undefined,
     setDragTarget: (dragTarget: DragTarget) => void,
+    type: "rect" | "text"
 }
 
-const TreeRectView: React.FC<Props> = ({
+const TreeBoxView: React.FC<Props> = ({
     indexs,
     name,
     isSelected,
     dragTarget,
     isDragging,
     setDragOrigin,
-    setDragTarget
+    setDragTarget,
+    type
 }) => {
 
     return (
         <TreeComponentView
             indexs={indexs}
             name={name}
-            type={"rect"}
+            type={type}
             isSelected={isSelected}
             isDragging={isDragging}
             dragTarget={dragTarget}
@@ -37,4 +39,4 @@ const TreeRectView: React.FC<Props> = ({
     )
 }
 
-export default TreeRectView;
+export default TreeBoxView;

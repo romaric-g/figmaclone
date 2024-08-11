@@ -4,7 +4,7 @@ import { SelectedComponentsModifier } from "../selections/selectedComponentsModi
 import { TreeBox } from "../tree/treeBox";
 import { TreeRect } from "../tree/treeRect";
 import { DrawTool } from "./drawTool";
-import { SelectionState } from "./selectStates/selection";
+import { SelectionState } from "./selectStates/selectionState";
 import { SelectTool } from "./selectTool";
 
 

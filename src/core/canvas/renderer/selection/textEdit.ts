@@ -1,79 +1,84 @@
-import { CanvasTextMetrics, Container, Graphics, GraphicsContext, TextStyle } from "pixi.js";
+import { Container, Graphics, GraphicsContext, TextStyle } from "pixi.js";
 import { TreeText } from "../../../tree/treeText";
 import { Editor } from "../../../editor";
 import { KeyboardAttach } from "../../../keyboard/keyboardAttach";
 import { KeyboardAction } from "../../../keyboard/keyboardAction";
-import { TextRenderer } from "../tree/textRenderer";
-import * as TextEditUtils from "./textEditUtils"
+import { TextEditUtils } from "../../../utils/textEditUtils"
+import { TextEditState } from "../../../tools/selectStates/textEditState";
 
 export class TextEditRenderer {
 
     private graphicsContainer: Container;
     private graphics: Graphics;
-    private element: TreeText;
+    private state: TextEditState;
 
     private editor: Editor;
-    private editIndex: number = 0;
-    private prevAttach?: KeyboardAttach;
 
-    private lineIndicatorIsShow = true;
-    private indicatorIntervalId: NodeJS.Timeout | null = null;
 
     constructor(
         graphicsContainer: Container,
         editor: Editor,
-        element: TreeText
+        state: TextEditState
     ) {
         this.graphics = new Graphics()
         this.graphicsContainer = graphicsContainer;
         this.editor = editor;
-        this.element = element;
-    }
-
-    stopLineIndicator() {
-        if (this.indicatorIntervalId != null) {
-            clearInterval(this.indicatorIntervalId);
-            this.indicatorIntervalId = null;
-        }
-    }
-
-    startLineIndicator() {
-        this.stopLineIndicator()
-
-        this.lineIndicatorIsShow = true;
-
-        this.indicatorIntervalId = setInterval(() => {
-            this.lineIndicatorIsShow = !this.lineIndicatorIsShow;
-        }, 500);
+        this.state = state;
     }
 
     render() {
-        const style = TextRenderer.getTextStyle(this.element.width)
+        const element = this.state.element;
+        const style = TextEditUtils.getTextStyle({
+            wordWrapWidth: element.width,
+            fontSize: element.fontSize,
+            color: element.fillColor
+        })
         const positionConverter = this.editor.positionConverter
 
-        const startPoint = positionConverter.getCanvasPosition(this.element.position)
-        const [width, height] = positionConverter.getCanvasSize(this.element.width, this.element.height)
+        const startPoint = positionConverter.getCanvasPosition(element.position)
+        const [width, height] = positionConverter.getCanvasSize(element.width, element.height)
 
         const context = new GraphicsContext()
             .rect(0, 0, width, height)
             .stroke({
                 width: 1,
-                color: "blue"
+                color: "#0C8CE9"
             })
 
-        if (this.lineIndicatorIsShow) {
+        if (this.state.selectedIndexs) {
 
-            const text = this.element.text;
-            const position = TextEditUtils.getIndexPosition(this.editIndex, text, style)
+            const localLinesPositions = TextEditUtils.getLinesLocalPositions(element.text, style, this.state.selectedIndexs.start, this.state.selectedIndexs.end)
 
-            if (position) {
+            for (const { start, end } of localLinesPositions) {
 
+                const height = element.fontSize
+
+                const [canvasStartX, canvasStartY] = this.editor.positionConverter.getCanvasSize(start.x, start.y);
+                const [canvasEndX, canvasEndY] = this.editor.positionConverter.getCanvasSize(end.x, end.y + height);
+
+                const canvasWidth = canvasEndX - canvasStartX
+                const canvasHeight = canvasEndY - canvasStartY
+
+                context.rect(canvasStartX, canvasStartY, canvasWidth, canvasHeight)
+                context.fill({
+                    r: 12,
+                    g: 140,
+                    b: 233,
+                    a: 0.4
+                })
+            }
+        } else if (this.state.lineIndicatorIsShow) {
+
+            const text = element.text;
+            const localPosition = TextEditUtils.getIndexPointerLocalPosition(this.state.editIndex, text, style)
+
+            if (localPosition) {
                 const [
                     canvasWidth,
                     canvasHeight
-                ] = positionConverter.getCanvasSize(position.x, position.y);
+                ] = positionConverter.getCanvasSize(localPosition.x + 1, localPosition.y);
 
-                const [_, barHeight] = positionConverter.getCanvasSize(0, 25)
+                const [_, barHeight] = positionConverter.getCanvasSize(0, element.fontSize)
 
                 context.moveTo(canvasWidth, canvasHeight)
                     .lineTo(canvasWidth, canvasHeight + barHeight)
@@ -95,95 +100,13 @@ export class TextEditRenderer {
         this.graphics.y = startPoint.y;
     }
 
-
-    getMaxIndex() {
-        return this.element.text.length;
-    }
-
-    attachEvents() {
-        const keyAttach = new KeyboardAttach()
-
-        this.editIndex = this.element.text.length
-        this.prevAttach = Editor.getEditor().keyboardManager.getAttach()
-
-        keyAttach.addAction(
-            new KeyboardAction("left", (type) => {
-                if (this.editIndex > 0 && type == "down") {
-                    this.startLineIndicator()
-                    this.editIndex--;
-                }
-            })
-        )
-
-        keyAttach.addAction(
-            new KeyboardAction("right", (type) => {
-                const style = TextRenderer.getTextStyle(this.element.width)
-                if (this.editIndex < this.getMaxIndex() && type == "down") {
-                    this.startLineIndicator()
-                    this.editIndex++;
-                }
-            })
-        )
-
-        keyAttach.addAction(
-            new KeyboardAction("backspace", (type) => {
-                if (type == "down") {
-                    let prevText = this.element.text;
-                    if (this.editIndex > 0) {
-                        this.startLineIndicator()
-                        this.element.text = prevText.slice(0, this.editIndex - 1) + prevText.slice(this.editIndex);
-                        this.editIndex--;
-                    }
-                }
-            })
-        )
-
-
-        keyAttach.addListener((event: KeyboardEvent, type: "up" | "down") => {
-            if (type === "down") {
-                let newChar = "";
-                if (event.key === "Enter") {
-                    newChar = "\n";
-                } else if (event.key.length === 1) {
-                    newChar = event.key;
-                }
-
-                let newText = this.element.text;
-                if (newChar) {
-                    if (newText.length >= this.editIndex) {
-                        newText = newText.slice(0, this.editIndex) + newChar + newText.slice(this.editIndex);
-                    } else {
-                        newText += newChar;
-                    }
-                    this.element.text = newText;
-                    this.editIndex += 1;
-
-                    this.startLineIndicator()
-
-                    console.log("this.element.text", this.element.text + ";")
-                }
-            }
-        })
-
-        Editor.getEditor().keyboardManager.setAttach(keyAttach)
-    }
-
-    detachEvents() {
-        if (this.prevAttach) {
-            Editor.getEditor().keyboardManager.setAttach(this.prevAttach)
-            this.prevAttach = undefined;
-        }
-    }
-
     onInit() {
         this.graphicsContainer.addChild(this.graphics)
-        this.attachEvents()
-        this.startLineIndicator()
+
     }
 
     onDestroy() {
         this.graphicsContainer.removeChild(this.graphics)
-        this.detachEvents()
     }
 
 }

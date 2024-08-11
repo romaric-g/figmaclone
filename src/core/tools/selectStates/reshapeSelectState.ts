@@ -1,7 +1,7 @@
 import { Point } from "pixi.js";
 import { SelectTool } from "../selectTool";
 import { SelectToolState } from "./abstractSelectState";
-import { SelectionState } from "./selection";
+import { SelectionState } from "./selectionState";
 import { Editor } from "../../editor";
 import { UpdateSelectionPropertiesAction } from "../../actions/updateSelectionPropertiesAction";
 import { TreeBox } from "../../tree/treeBox";

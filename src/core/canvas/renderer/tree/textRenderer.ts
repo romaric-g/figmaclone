@@ -2,7 +2,7 @@ import { AbstractText, Container, Graphics, Text, TextStyle } from "pixi.js";
 import { CachableRenderer } from "../cachableRenderer";
 import { EventsManger } from "../../../event/eventManager";
 import { TreeText } from "../../../tree/treeText";
-import { formatTextForRendering } from "../selection/textEditUtils";
+import { TextEditUtils } from "../../../utils/textEditUtils";
 
 export class TextRenderer implements CachableRenderer {
 
@@ -80,11 +80,15 @@ export class TextRenderer implements CachableRenderer {
 
     render(zIndex: number) {
 
-        const style = TextRenderer.getTextStyle(this.element.width)
+        const style = TextEditUtils.getTextStyle({
+            wordWrapWidth: this.element.width,
+            fontSize: this.element.fontSize,
+            color: this.element.fillColor
+        })
 
         const text = this.element.text;
 
-        const formatedText = formatTextForRendering(text)
+        const formatedText = TextEditUtils.formatTextForRendering(text)
 
         this.text.zIndex = zIndex;
         this.text.x = this.element.x
@@ -92,28 +96,4 @@ export class TextRenderer implements CachableRenderer {
         this.text.text = formatedText;
         this.text.style = style
     }
-
-
-
-
-
-    public static getTextStyle(wordWrapWidth: number) {
-        return new TextStyle({
-            fontFamily: 'Arial',
-            fontSize: 22,
-            fill: {
-                r: 0,
-                g: 0,
-                b: 0,
-                a: 1
-            },
-            wordWrap: true,
-            wordWrapWidth: wordWrapWidth,
-            breakWords: true,
-            whiteSpace: "pre"
-        });
-    }
-
-
-
 }

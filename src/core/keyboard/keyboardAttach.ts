@@ -8,7 +8,7 @@ export class KeyboardAttach {
     private keyboardEventsListener: KeyboardEventListener[] = []
 
 
-    addAction(...keyboardAction: KeyboardAction[]) {
+    addActions(...keyboardAction: KeyboardAction[]) {
         this.keyboardActions.push(...keyboardAction)
         return this;
     }

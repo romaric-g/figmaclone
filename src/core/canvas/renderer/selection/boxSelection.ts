@@ -7,9 +7,9 @@ export class BoxSelectionRenderer implements CachableRenderer {
 
     private graphicsContainer: Container;
     private graphics: Graphics;
-    private element: TreeBox;
+    readonly element: TreeBox;
 
-    private positionConverter: PositionConverter;
+    protected positionConverter: PositionConverter;
     private isSingleSelected: () => boolean;
     private isHidden: () => boolean
 
@@ -46,30 +46,12 @@ export class BoxSelectionRenderer implements CachableRenderer {
         const [width, height] = this.positionConverter.getCanvasSize(this.element.width, this.element.height)
 
         const commonContext = new GraphicsContext()
-            .rect(0, 0, width, height)
+
 
         if (this.element.isSelected()) {
-            const strokeStyle = {
-                width: 2,
-                color: "blue"
-            }
-            commonContext.stroke(strokeStyle)
-
-            if (this.isSingleSelected()) {
-                commonContext.rect(-4, -4, 8, 8).fill("white").stroke(strokeStyle)
-                commonContext.rect(-4, height - 4, 8, 8).fill("white").stroke(strokeStyle)
-                commonContext.rect(width - 4, -4, 8, 8).fill("white").stroke(strokeStyle)
-                commonContext.rect(width - 4, height - 4, 8, 8).fill("white").stroke(strokeStyle)
-            }
-        }
-
-
-        if (this.element.isHover() && !this.element.isSelected()) {
-            commonContext
-                .stroke({
-                    width: 1,
-                    color: "blue"
-                })
+            this.applySelectEffect(commonContext, width, height)
+        } else if (this.element.isHover()) {
+            this.applyHoverEffect(commonContext, width, height)
         }
 
         this.graphics.zIndex = zIndex;
@@ -77,6 +59,31 @@ export class BoxSelectionRenderer implements CachableRenderer {
         this.graphics.x = startPoint.x;
         this.graphics.y = startPoint.y;
 
+    }
+
+    applySelectEffect(context: GraphicsContext, width: number, height: number) {
+        const strokeStyle = {
+            width: 2,
+            color: "#0C8CE9"
+        }
+        context.rect(0, 0, width, height)
+        context.stroke(strokeStyle)
+
+        if (this.isSingleSelected()) {
+            context.rect(-4, -4, 8, 8).fill("white").stroke(strokeStyle)
+            context.rect(-4, height - 4, 8, 8).fill("white").stroke(strokeStyle)
+            context.rect(width - 4, -4, 8, 8).fill("white").stroke(strokeStyle)
+            context.rect(width - 4, height - 4, 8, 8).fill("white").stroke(strokeStyle)
+        }
+    }
+
+    applyHoverEffect(context: GraphicsContext, width: number, height: number) {
+        context.rect(0, 0, width, height)
+        context
+            .stroke({
+                width: 1,
+                color: "#0C8CE9"
+            })
     }
 
     onInit() {

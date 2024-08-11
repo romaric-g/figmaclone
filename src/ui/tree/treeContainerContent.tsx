@@ -1,6 +1,6 @@
 import React from "react"
 import { TreeComponentData } from "../subjects"
-import TreeRectView from "./treeRect"
+import TreeBoxView from "./treeRect"
 import TreeContainerHeadView from "./treeContainerHead"
 import { DragOrigin, DragTarget } from "./tree"
 import classNames from "classnames"
@@ -63,7 +63,7 @@ const TreeContainerContentView: React.FC<Props> = ({
                         )
                     }
 
-                    return <TreeRectView
+                    return <TreeBoxView
                         key={key}
                         indexs={joinIndexs}
                         name={treeComponent.name}
@@ -72,6 +72,7 @@ const TreeContainerContentView: React.FC<Props> = ({
                         setDragOrigin={setDragOrigin}
                         dragTarget={dragTarget}
                         setDragTarget={setDragTarget}
+                        type={treeComponent.type}
                     />
                 })
             }
