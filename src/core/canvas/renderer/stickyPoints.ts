@@ -90,21 +90,25 @@ export class StickyPointsRenderer {
         }
 
         if (showLinesMatched) {
+
+            const canvasLeftTopPoint = this.editor.positionConverter.getCanvasPosition(new Point(leftX, topY))
+            const canvasBottomRightPoint = this.editor.positionConverter.getCanvasPosition(new Point(rightX, bottomY))
+
             if (stickyMatched.left) {
-                drawCross(commonContext, leftX, topY)
-                drawCross(commonContext, leftX, bottomY)
+                drawCross(commonContext, canvasLeftTopPoint.x, canvasLeftTopPoint.y)
+                drawCross(commonContext, canvasLeftTopPoint.x, canvasBottomRightPoint.y)
             }
             if (stickyMatched.right) {
-                drawCross(commonContext, rightX, topY)
-                drawCross(commonContext, rightX, bottomY)
+                drawCross(commonContext, canvasBottomRightPoint.x, canvasLeftTopPoint.y)
+                drawCross(commonContext, canvasBottomRightPoint.x, canvasBottomRightPoint.y)
             }
             if (stickyMatched.top) {
-                drawCross(commonContext, leftX, topY)
-                drawCross(commonContext, rightX, topY)
+                drawCross(commonContext, canvasLeftTopPoint.x, canvasLeftTopPoint.y)
+                drawCross(commonContext, canvasBottomRightPoint.x, canvasLeftTopPoint.y)
             }
             if (stickyMatched.bottom) {
-                drawCross(commonContext, leftX, bottomY)
-                drawCross(commonContext, rightX, bottomY)
+                drawCross(commonContext, canvasLeftTopPoint.x, canvasBottomRightPoint.y)
+                drawCross(commonContext, canvasBottomRightPoint.x, canvasBottomRightPoint.y)
             }
         }
 

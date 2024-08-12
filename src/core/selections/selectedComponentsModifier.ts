@@ -282,16 +282,11 @@ export class SelectedComponentsModifier {
 
     move(moveVector: Point) {
 
-        console.log("new vector", moveVector)
-
-
         const moveRect = (box: TreeBox) => {
             const movePositionOrigin = box.getOriginalPosition()
 
             const newX = movePositionOrigin.x + moveVector.x
             const newY = movePositionOrigin.y + moveVector.y
-
-            console.log("MOVE TO", [newX, newY])
 
             box.setPosition(newX, newY)
         }

@@ -89,16 +89,18 @@ function getLinesLocalPositions(text: string, style: TextStyle, startIndex = 0, 
     let lineEndIndex = 0;
 
     for (const line of fullLines) {
+        lineStartIndex = lineEndIndex;
         lineEndIndex = lineStartIndex + line.length;
 
-        if (lineEndIndex < startIndex || lineStartIndex > endIndex) {
-            continue;
-        }
-
         let textBefore = linesBefore.join("")
+        linesBefore.push(line)
 
         if (textBefore.endsWith("\n")) {
             textBefore = textBefore.slice(0, -1)
+        }
+
+        if (lineEndIndex < startIndex || lineStartIndex > endIndex) {
+            continue;
         }
 
         let xStart = 0
@@ -109,16 +111,12 @@ function getLinesLocalPositions(text: string, style: TextStyle, startIndex = 0, 
             if (lineEndIndex !== startIndex) {
                 const charsBeforeStart = line.slice(0, startIndex - lineStartIndex)
                 xStart = getTextWidth(charsBeforeStart, style)
-
-                console.log("charsBeforeStart", charsBeforeStart)
             }
         }
 
         if (endIndex > lineStartIndex && endIndex < lineEndIndex) {
             const charsBeforeEnd = line.slice(0, endIndex - lineEndIndex)
             xEnd = getTextWidth(charsBeforeEnd, style)
-
-            console.log("charsBeforeEnd", charsBeforeEnd)
         }
 
         const linePosition: LinePosition = {
@@ -127,9 +125,7 @@ function getLinesLocalPositions(text: string, style: TextStyle, startIndex = 0, 
         }
 
         linesPositions.push(linePosition)
-        linesBefore.push(line)
 
-        lineStartIndex = lineEndIndex;
     }
 
     return linesPositions;
@@ -202,9 +198,17 @@ function getTextStyle(props: TextStyleProps) {
     });
 }
 
-function getClosestLineIndex(text: string, yClick: number, style: TextStyle) {
-    const lines = getLinesFromStyle(text, style)
-    const fullLines = getFullLines(text, lines)
+function getClosestIndex(fullLines: string[], localPoint: Point, style: TextStyle) {
+    const lineIndex = getClosestLineIndex(fullLines, localPoint.y, style)
+
+    const fullLine = fullLines[lineIndex]
+    const letterIndex = getClosestLetterIndex(fullLine, localPoint.x, style)
+    const targetIndex = fullLines.slice(0, lineIndex).join("").length + letterIndex;
+
+    return targetIndex;
+}
+
+function getClosestLineIndex(fullLines: string[], yClick: number, style: TextStyle) {
 
     let minDiffHeight;
     let bestIndex = 0;
@@ -232,8 +236,21 @@ function getClosestLineIndex(text: string, yClick: number, style: TextStyle) {
     return fullLines.length - 1;
 }
 
-function getClosestLetterIndex(fullLine: string, localPoint: Point) {
 
+function getClosestLetterIndex(fullLine: string, xClick: number, style: TextStyle) {
+    let textBefore = ""
+    for (let index = 0; index < fullLine.length; index++) {
+        const char = fullLine[index];
+        textBefore += char;
+
+        const width = getTextWidth(textBefore, style)
+
+        if (width - 2 > xClick) {
+            return index;
+        }
+    }
+
+    return fullLine.length;
 }
 
 
@@ -245,6 +262,5 @@ export const TextEditUtils = {
     getIndexPointerLocalPosition: getIndexPointerPosition,
     formatTextForRendering,
     getTextStyle,
-    getClosestLineIndex,
-    getClosestLetterIndex
+    getClosestIndex
 }

@@ -55,7 +55,6 @@ export abstract class CachedRenderVisitor implements TreeComponentVisitor {
         const rendrers = this.cache.dropNotKeeped()
 
         for (const renderer of rendrers) {
-            console.log("DESTROY")
             renderer.onDestroy()
         }
     }

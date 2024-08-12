@@ -13,7 +13,6 @@ import { TextEditUtils } from "../../utils/textEditUtils";
 
 export class TextEditState extends SelectToolState {
 
-
     private _element: TreeText;
 
     private _editIndex: number = 0;
@@ -23,6 +22,8 @@ export class TextEditState extends SelectToolState {
     private indicatorIntervalId: NodeJS.Timeout | null = null;
 
     private prevAttach?: KeyboardAttach;
+
+    private dragStartIndex?: number;
 
     constructor(selectTool: SelectTool, treeText: TreeText) {
         super(selectTool)
@@ -42,34 +43,49 @@ export class TextEditState extends SelectToolState {
         this.detachKeyboardEvents()
     }
 
+    getTargetLocalIndex(pointerPosition: Point) {
+        const element = this._element;
+        const editor = Editor.getEditor()
+
+        const drawingPosition = editor.positionConverter.getDrawingPosition(pointerPosition)
+        const localPoint = new Point(drawingPosition.x - element.x, drawingPosition.y - element.y)
+
+        const style = this.getStyle()
+
+        const text = this._element.text;
+        const lines = TextEditUtils.getLinesFromStyle(text, style)
+        const fullLines = TextEditUtils.getFullLines(text, lines)
+
+        return TextEditUtils.getClosestIndex(fullLines, localPoint, style)
+    }
+
     onClickDown(element: TreeBox, shift: boolean, pointerPosition: Point, double: boolean): void {
-
         if (element === this._element) {
-            console.log("pointerPosition", pointerPosition)
+            const targetIndex = this.getTargetLocalIndex(pointerPosition);
 
-            const editor = Editor.getEditor()
+            this.dragStartIndex = targetIndex;
 
-            const drawingPosition = editor.positionConverter.getDrawingPosition(pointerPosition)
-            const localPoint = new Point(drawingPosition.x - element.x, drawingPosition.y - element.y)
-
-            const style = TextEditUtils.getTextStyle({
-                color: this.element.fillColor,
-                fontSize: this.element.fontSize,
-                wordWrapWidth: this.element.width
-            })
-            const lineIndex = TextEditUtils.getClosestLineIndex(this._element.text, localPoint.y, style)
-
-            console.log("lineIndex", lineIndex)
+            this._editIndex = targetIndex;
+            this.clearSelection()
+            this.startLineIndicator()
         }
     }
 
 
-
-
-    onClickUp(element: TreeBox, shift: boolean): void {
+    onClickUp(element: TreeBox, shift: boolean, pointerPosition: Point): void {
+        this.dragStartIndex = undefined;
     }
+
     onMove(newPosition: Point): void {
+        if (this.dragStartIndex !== undefined) {
+            const targetIndex = this.getTargetLocalIndex(newPosition);
+
+            if (targetIndex !== this.dragStartIndex) {
+                this.setSelection(targetIndex, this.dragStartIndex)
+            }
+        }
     }
+
     onBackgroundPointerDown(clickPosition: Point): void {
         this.exit()
     }
@@ -137,6 +153,42 @@ export class TextEditState extends SelectToolState {
                         this._editIndex--;
                     }
                 }
+            }),
+            new KeyboardAction("up", (type) => {
+                if (type == "down") {
+                    if (this._editIndex !== undefined) {
+
+                        const style = this.getStyle()
+                        const position = TextEditUtils.getIndexPointerLocalPosition(this._editIndex, this.element.text, style)
+
+                        const newPosition = new Point(position.x, position.y - style.fontSize - 1)
+
+                        const lines = TextEditUtils.getLinesFromStyle(this.element.text, style)
+                        const fullLines = TextEditUtils.getFullLines(this.element.text, lines)
+                        const newIndex = TextEditUtils.getClosestIndex(fullLines, newPosition, style)
+
+                        this._editIndex = newIndex;
+                        this.startLineIndicator()
+                    }
+                }
+            }),
+            new KeyboardAction("down", (type) => {
+                if (type == "down") {
+                    if (this._editIndex !== undefined) {
+
+                        const style = this.getStyle()
+                        const position = TextEditUtils.getIndexPointerLocalPosition(this._editIndex, this.element.text, style)
+
+                        const newPosition = new Point(position.x, position.y + style.fontSize + 1)
+
+                        const lines = TextEditUtils.getLinesFromStyle(this.element.text, style)
+                        const fullLines = TextEditUtils.getFullLines(this.element.text, lines)
+                        const newIndex = TextEditUtils.getClosestIndex(fullLines, newPosition, style)
+
+                        this._editIndex = newIndex;
+                        this.startLineIndicator()
+                    }
+                }
             })
         )
 
@@ -178,8 +230,26 @@ export class TextEditState extends SelectToolState {
         Editor.getEditor().keyboardManager.setAttach(keyAttach)
     }
 
+    getStyle() {
+        return TextEditUtils.getTextStyle({
+            color: this._element.fillColor,
+            fontSize: this._element.fontSize,
+            wordWrapWidth: this._element.width
+        })
+    }
+
     clearSelection() {
         this._selectIndexs = undefined;
+    }
+
+    setSelection(index1: number, index2: number) {
+        const start = Math.min(index1, index2)
+        const end = Math.max(index1, index2)
+
+        this._selectIndexs = {
+            start,
+            end
+        }
     }
 
     detachKeyboardEvents() {

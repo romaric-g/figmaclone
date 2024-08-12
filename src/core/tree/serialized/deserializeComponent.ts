@@ -84,7 +84,8 @@ function deserializeTreeText(serialisedTreeRect: SerialisedTreeText) {
         y: serialisedTreeRect.props.y,
         width: serialisedTreeRect.props.width,
         height: serialisedTreeRect.props.height,
-        fillColor: serialisedTreeRect.props.fillColor
+        fillColor: serialisedTreeRect.props.fillColor,
+        fontSize: serialisedTreeRect.props.fontSize
     })
 
     return newRect;

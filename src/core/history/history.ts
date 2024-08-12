@@ -18,8 +18,6 @@ export class History {
         }
         this.stack.push(snapshot)
 
-        console.log("ADD HISTORY", this.stack.length)
-
     }
 
     restoreLastSnapshot() {

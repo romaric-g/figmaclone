@@ -43,11 +43,19 @@ export class TextRenderer implements CachableRenderer {
         });
         this.textElement.on('pointerup', (event) => {
             if (event.button === 2) return
-            this.eventManager.onElementPressUp.emit({ element: this.element, button: event.button })
+            this.eventManager.onElementPressUp.emit({
+                element: this.element,
+                button: event.button,
+                pointerPosition: event.global
+            })
         })
         this.textElement.on('pointerupoutside', (event) => {
             if (event.button === 2) return
-            this.eventManager.onElementPressUp.emit({ element: this.element, button: event.button })
+            this.eventManager.onElementPressUp.emit({
+                element: this.element,
+                button: event.button,
+                pointerPosition: event.global
+            })
         })
 
         this.textElement.on('rightdown', (event) => {

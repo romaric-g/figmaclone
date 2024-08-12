@@ -17,7 +17,7 @@ export abstract class SelectToolState {
 
     abstract onClickDown(element: TreeBox, shift: boolean, pointerPosition: Point, double: boolean): void
 
-    abstract onClickUp(element: TreeBox, shift: boolean): void
+    abstract onClickUp(element: TreeBox, shift: boolean, pointerPosition: Point): void
 
     abstract onMove(newPosition: Point): void
 

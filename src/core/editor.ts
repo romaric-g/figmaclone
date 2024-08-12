@@ -15,8 +15,6 @@ import { SelectedComponentsModifier } from './selections/selectedComponentsModif
 import { deserializeTreeComponent } from './tree/serialized/deserializeComponent';
 import { PositionConverter } from './canvas/conversion/PositionConverter';
 
-console.log("log Editor")
-
 export class Editor {
     private static editor: Editor = new Editor()
 

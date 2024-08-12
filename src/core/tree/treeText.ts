@@ -97,7 +97,8 @@ export class TreeText extends TreeBox {
                 y: this.y,
                 width: this.width,
                 height: this.height,
-                fillColor: this._fillColor
+                fillColor: this._fillColor,
+                fontSize: this.fontSize
             }
         }
     }

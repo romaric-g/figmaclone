@@ -25,7 +25,6 @@ export class Menu {
                 label: item.name,
                 command: item.key,
                 onClick: () => {
-                    console.log('clicked')
                     item.apply()
                 }
             }))

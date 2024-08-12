@@ -13,8 +13,6 @@ export class CopyItem extends MenuItem {
     }
 
     apply(): void {
-        console.log("COPY")
-
         if (!this.selection.isEmpty()) {
             Editor.getEditor().selectionManager.copySelection()
         }

@@ -11,6 +11,7 @@ export interface SerialisedTreeText extends SerialisedTreeComponent {
         y: number,
         width: number,
         height: number,
-        fillColor: HsvaColor
+        fillColor: HsvaColor,
+        fontSize: number
     }
 }

@@ -104,14 +104,14 @@ export class SelectTool extends Tool {
         this._selectToolState.onClickDown(element, isShift, pointerPosition, isDouble)
     }
 
-    onElementPressUp({ element, button }: ElementPressUpEventData) {
+    onElementPressUp({ element, pointerPosition, button }: ElementPressUpEventData) {
         if (button === 1) {
             return;
         }
         const editor = Editor.getEditor()
         const isShift = editor.keyboardManager.keyboardController.keys.shift.pressed;
 
-        this._selectToolState.onClickUp(element, isShift)
+        this._selectToolState.onClickUp(element, isShift, pointerPosition)
     }
 
     onElementHoverOn({ component }: ElementOverOnEventData) {

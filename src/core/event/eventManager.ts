@@ -28,7 +28,7 @@ class EventManager<T> {
 
 export type ElementPressDownEventData = { element: TreeBox, pointerPosition: Point, button: number }
 
-export type ElementPressUpEventData = { element: TreeBox, button: number }
+export type ElementPressUpEventData = { element: TreeBox, pointerPosition: Point, button: number }
 
 export type PointerMoveEventData = { position: Point }
 

@@ -15,8 +15,6 @@ export class RectRenderer implements CachableRenderer {
         this.element = element;
         this.graphicsContainer = pixiContainer;
         this.eventManager = eventManager;
-
-        console.log("eventManager", eventManager)
     }
 
     onInit() {
@@ -37,11 +35,19 @@ export class RectRenderer implements CachableRenderer {
         });
         this.graphics.on('pointerup', (event) => {
             if (event.button === 2) return
-            this.eventManager.onElementPressUp.emit({ element: this.element, button: event.button })
+            this.eventManager.onElementPressUp.emit({
+                element: this.element,
+                button: event.button,
+                pointerPosition: event.global
+            })
         })
         this.graphics.on('pointerupoutside', (event) => {
             if (event.button === 2) return
-            this.eventManager.onElementPressUp.emit({ element: this.element, button: event.button })
+            this.eventManager.onElementPressUp.emit({
+                element: this.element,
+                button: event.button,
+                pointerPosition: event.global
+            })
         })
 
         this.graphics.on('rightdown', (event) => {
