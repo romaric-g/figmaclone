@@ -1,83 +1,71 @@
-import { GlobalSelectionBoxRenderer } from "../canvas/renderer/globalSelectionBox";
-import { Editor } from "../editor";
-import { Selection } from "./selection";
+import { SelectedComponentsModifier } from "./selectedComponentsModifier";
 import { TreeComponent } from "../tree/treeComponent";
-import { SerializedSelection } from "./serialized/serializedSelection";
+import { TreeContainer } from "../tree/treeContainer";
+import { SerialisedTreeComponentList } from "../tree/serialized/serialisedTreeComponentList";
 
 
 export class SelectionManager {
 
-    private _selection: Selection;
-    private _globalSelectionBoxRenderer: GlobalSelectionBoxRenderer;
-    private _copiedSelection?: SerializedSelection;
+    private _selectionModifier: SelectedComponentsModifier;
+    private _copiedComponents?: SerialisedTreeComponentList;
 
     constructor() {
-        this._selection = new Selection([])
-        this._globalSelectionBoxRenderer = new GlobalSelectionBoxRenderer()
+        this._selectionModifier = new SelectedComponentsModifier([])
     }
 
     init() {
-        this._globalSelectionBoxRenderer.init(Editor.getEditor().canvasApp.getSelectionLayer())
     }
 
-    setSelection(selection: Selection) {
-        if (this._selection.isSameSelection(selection)) {
+    setSelectionModifier(selection: SelectedComponentsModifier) {
+        if (this._selectionModifier.isSameSelection(selection)) {
             return;
         }
 
-        this._selection.destroy()
-        this._selection = selection;
-        this._selection.init()
+        this._selectionModifier.destroy()
+        this._selectionModifier = selection;
+        this._selectionModifier.init()
     }
 
-    getSelection() {
-        return this._selection;
+    getSelectionModifier() {
+        return this._selectionModifier;
     }
 
     unselectAll() {
-        this.setSelection(new Selection([]))
-    }
-
-    getRootContainer() {
-        return Editor.getEditor().treeManager.getTree()
+        this.setSelectionModifier(new SelectedComponentsModifier([]))
     }
 
     getComponentsChainFromRoot(component: TreeComponent, componentsChain: TreeComponent[] = []): TreeComponent[] {
 
-        const parentContainer = component.getParentContainer()
+        const parentContainer = component.getAnchor().getAnchorContainer()
 
         const newComponentsChain = [component].concat(componentsChain)
 
-        if (!parentContainer) {
+        if (!parentContainer || !(parentContainer.component instanceof TreeContainer)) {
             return newComponentsChain;
         }
 
-        const parentDepthComponents = parentContainer.getDepthComponents()
 
-        for (const selectedComponent of this.getSelection().getComponents()) {
+        const parentDepthComponents = parentContainer.component.getDepthComponents()
+
+        for (const selectedComponent of this.getSelectionModifier().getComponents()) {
             if (parentDepthComponents.includes(selectedComponent)) {
                 return newComponentsChain;
             }
         }
 
-        if (parentContainer === this.getRootContainer()) {
+        if (parentContainer.component.getAnchor().getAnchorContainer() === undefined) {
             return newComponentsChain;
         }
 
-        return this.getComponentsChainFromRoot(parentContainer, newComponentsChain)
+        return this.getComponentsChainFromRoot(parentContainer.component, newComponentsChain)
     }
-
-    render() {
-        this._globalSelectionBoxRenderer.render()
-    }
-
 
     copySelection() {
-        this._copiedSelection = this._selection.serialize()
+        this._copiedComponents = this._selectionModifier.serializeComponents()
     }
 
-    getCopiedSelection(): SerializedSelection | undefined {
-        return this._copiedSelection;
+    getCopiedSelection(): SerialisedTreeComponentList | undefined {
+        return this._copiedComponents;
     }
 
 }

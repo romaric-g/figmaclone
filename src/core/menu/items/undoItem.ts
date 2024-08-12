@@ -1,7 +1,7 @@
 import { PasteCopiedSelectionAction } from "../../actions/pasteCopiedSelectionAction";
 import { UndoAction } from "../../actions/undoAction";
 import { Editor } from "../../editor";
-import { Selection } from "../../selections/selection";
+import { SelectedComponentsModifier } from "../../selections/selectedComponentsModifier";
 import { MenuItem } from "../menuItem";
 
 

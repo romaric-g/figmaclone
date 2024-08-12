@@ -1,25 +1,27 @@
-import { currentToolSubject } from "../../ui/subjects";
+import { currentToolSubject, ToolType } from "../../ui/subjects";
 import { Editor } from "../editor";
-import { Selection } from "../selections/selection";
-import { DrawTool } from "./drawTool";
-import { FreeSelectState } from "./selectStates/freeSelect";
-import { SelectionState } from "./selectStates/selection";
+import { SelectedComponentsModifier } from "../selections/selectedComponentsModifier";
+import { RectTool } from "./rectTool";
+import { FreeSelectState } from "./selectStates/freeSelectState";
+import { SelectionState } from "./selectStates/selectionState";
 import { SelectTool } from "./selectTool";
+import { TextTool } from "./textTool";
 import { Tool } from "./tool";
-
-export type ToolType = "select" | "draw"
+import { ToolUtils } from "./toolUtils";
 
 export class ToolManager {
 
     private _selectTool: SelectTool;
-    private _drawTool: DrawTool;
+    private _rectTool: RectTool;
+    private _textTool: TextTool;
 
     private _currentTool?: Tool;
     private _freezed = false;
 
     constructor(editor: Editor) {
-        this._selectTool = new SelectTool(editor)
-        this._drawTool = new DrawTool(editor)
+        this._selectTool = new SelectTool()
+        this._rectTool = new RectTool()
+        this._textTool = new TextTool()
     }
 
     init() {
@@ -41,9 +43,12 @@ export class ToolManager {
             case "select":
                 newTool = this._selectTool;
                 break
-            case "draw":
-                newTool = this._drawTool;
-                break
+            case "rect":
+                newTool = this._rectTool;
+                break;
+            case "text":
+                newTool = this._textTool;
+                break;
         }
 
         if (newTool && newTool != this._currentTool) {
@@ -83,11 +88,7 @@ export class ToolManager {
         return this._freezed;
     }
 
-    render() {
-        this.getCurrentTool()?.render()
-    }
-
-    resetSelection(selection: Selection) {
+    resetSelection(selection: SelectedComponentsModifier) {
         if (selection.isEmpty()) {
             this._selectTool.setState(
                 new FreeSelectState(this._selectTool)
@@ -97,7 +98,9 @@ export class ToolManager {
                 new SelectionState(this._selectTool)
             )
         }
+    }
 
-
+    get utils() {
+        return new ToolUtils(this)
     }
 }

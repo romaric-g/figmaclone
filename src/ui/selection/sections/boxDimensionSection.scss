@@ -1,0 +1,29 @@
+
+.BoxDimensionSection {
+    &__position {
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+        width: 100%;
+        padding: 0 20px;
+        
+        &__input {
+            width: 100%;
+            flex-shrink: 1;
+        }
+
+    }
+
+    &__dimensions {
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+        width: 100%;
+        padding: 0 20px;
+
+        &__input {
+            width: 100%;
+            flex-shrink: 1;
+        }
+    }
+}

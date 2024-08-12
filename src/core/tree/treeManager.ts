@@ -1,15 +1,18 @@
 import { TreeData, treeElementSubject } from "../../ui/subjects";
-import { TreeRoot } from "./treeRoot";
 import { TreeComponent } from "./treeComponent";
-
+import { TreeRect } from "./treeRect";
+import { TreeContainer } from "./treeContainer";
+import { TreeBox } from "./treeBox";
 
 export class TreeManager {
 
-    private _treeRoot: TreeRoot;
+    private _treeRoot: TreeContainer;
     private _lastNameIndex: number = 0;
 
     constructor() {
-        this._treeRoot = new TreeRoot("root")
+        this._treeRoot = new TreeContainer({
+            name: "root"
+        })
     }
 
     init() {
@@ -20,8 +23,8 @@ export class TreeManager {
         return this._treeRoot;
     }
 
-    render() {
-        this._treeRoot.render(0)
+    getAllBoxComponents() {
+        return this._treeRoot.getDepthComponents().filter(r => r instanceof TreeBox)
     }
 
     getContainerByRootIndex(index: number) {
@@ -29,7 +32,7 @@ export class TreeManager {
     }
 
     getContainerByIndex(depthIndex: number[]) {
-        return this._treeRoot.getComponent(depthIndex)
+        return this._treeRoot.getChildComponent(depthIndex)
     }
 
     toData() {
@@ -50,11 +53,12 @@ export class TreeManager {
             child.destroy()
         }
 
-        this._treeRoot = new TreeRoot("root")
+        this._treeRoot = new TreeContainer({
+            name: "root"
+        })
 
         for (const component of treeComponents) {
-            component.init(false)
-            this._treeRoot.add(component)
+            this._treeRoot.getAnchor().add(component.getAnchor())
         }
 
     }

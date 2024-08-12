@@ -1,7 +1,7 @@
 import { treeElementSubject } from "../../ui/subjects";
-import { Editor } from "../editor";
+import { TreeContainer } from "../tree/treeContainer";
 import { Action } from "./action";
-
+import { Editor } from "../editor";
 
 export class MoveElementAction extends Action {
 
@@ -17,11 +17,44 @@ export class MoveElementAction extends Action {
     apply(editor: Editor) {
         const tree = editor.treeManager.getTree()
 
-        tree.moveFromIndexs(this.from, this.to)
+        this.moveFromIndexs(tree, this.from, this.to)
 
         treeElementSubject.next(editor.treeManager.toData())
 
         editor.history.add(editor.makeSnapshot())
 
+    }
+
+
+    moveFromIndexs(treeRoot: TreeContainer, fromIndexs: number[], toIndexs: number[]) {
+        const component = treeRoot.getChildComponent(fromIndexs)
+        const toComponent = treeRoot.getChildComponent(toIndexs.slice(0, -1))
+
+        if (component === undefined || toComponent === undefined || !(toComponent instanceof TreeContainer)) {
+            return false;
+        }
+
+        const fromContainer = component.getAnchor().getAnchorContainer()?.component
+
+        if (fromContainer && fromContainer instanceof TreeContainer) {
+            let fromIdx = fromIndexs.slice(-1)[0]
+            let toIdx = toIndexs.slice(-1)[0]
+
+            if (toComponent == fromContainer) {
+                if (fromIdx < toIdx) {
+                    toIdx--
+                }
+            }
+
+            fromContainer.getAnchor().remove(component.getAnchor())
+            toComponent.getAnchor().add(component.getAnchor(), toIdx)
+
+            if (fromContainer.isEmpty()) {
+                const parent = fromContainer.getAnchor().getAnchorContainer()
+                if (parent) {
+                    parent.remove(fromContainer.getAnchor())
+                }
+            }
+        }
     }
 }

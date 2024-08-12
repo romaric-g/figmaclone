@@ -1,18 +1,19 @@
-import { Point, ApplicationOptions } from 'pixi.js';
+import { ApplicationOptions } from 'pixi.js';
 import { SelectionManager } from './selections/selectionManager';
 import { EventsManger } from './event/eventManager';
 import { TreeManager } from './tree/treeManager';
 import { ToolManager } from './tools/toolManager';
 import { Zoom } from './zoom';
-import { CanvasApp } from './canvas/app';
+import { CanvasManager } from './canvas/canvasManager';
 import { KeyboardManager } from './keyboard/keyboardManager';
 import { CanvasAttach } from './keyboard/canvas/canvasAttach';
 import { ActionManager } from './actions/actionManger';
 import { MenuManager } from './menu/menuManager';
 import { Snapshot } from './history/snapshot';
-import { SerialisedTreeComponent } from './tree/serialized/serialisedTreeComponent';
 import { History } from './history/history';
-import { Selection } from './selections/selection';
+import { SelectedComponentsModifier } from './selections/selectedComponentsModifier';
+import { deserializeTreeComponent } from './tree/serialized/deserializeComponent';
+import { PositionConverter } from './canvas/conversion/PositionConverter';
 
 export class Editor {
     private static editor: Editor = new Editor()
@@ -31,12 +32,13 @@ export class Editor {
     readonly zoom: Zoom;
     readonly history: History;
 
-    readonly canvasApp: CanvasApp;
+    readonly canvasManager: CanvasManager;
+
+    readonly positionConverter: PositionConverter;
 
 
     constructor() {
-        this.canvasApp = new CanvasApp(this)
-
+        this.canvasManager = new CanvasManager(this)
         this.selectionManager = new SelectionManager()
         this.eventsManager = new EventsManger()
         this.treeManager = new TreeManager()
@@ -45,11 +47,13 @@ export class Editor {
         this.actionManager = new ActionManager()
         this.menuManager = new MenuManager()
         this.zoom = new Zoom(this)
-        this.history = new History()
+        this.history = new History(150)
+
+        this.positionConverter = new PositionConverter(this.canvasManager.getTreeContainer())
     }
 
     async init(options?: Partial<ApplicationOptions>) {
-        await this.canvasApp.init(options)
+        await this.canvasManager.init(options)
 
         this.menuManager.init()
         this.treeManager.init()
@@ -61,49 +65,28 @@ export class Editor {
         this.history.add(this.makeSnapshot())
     }
 
-    getDrawingSize(width: number, height: number) {
-        const scale = this.canvasApp.getTreeContainer().scale
-
-        return [width / scale.x, height / scale.y]
-    }
-
-    getCanvasSize(width: number, height: number) {
-        const scale = this.canvasApp.getTreeContainer().scale
-
-        return [scale.x * width, scale.y * height]
-    }
-
-    getDrawingPosition(canvasPosition: Point) {
-        return this.canvasApp.getTreeContainer().toLocal(canvasPosition)
-    }
-
-    getCanvasPosition(drawingPosition: Point) {
-        return this.canvasApp.getTreeContainer().toGlobal(drawingPosition)
-    }
-
     getCanvas() {
-        return this.canvasApp.getCanvas();
+        return this.canvasManager.getCanvas();
     }
-
 
     getBackgroundContainer() {
-        return this.canvasApp.getBackgroundContainer();
+        return this.canvasManager.getBackgroundContainer();
     }
 
     getTreeContainer() {
-        return this.canvasApp.getTreeContainer();
+        return this.canvasManager.getTreeContainer();
     }
 
     makeSnapshot(): Snapshot {
 
-        let selectedIds = this.selectionManager.getSelection().getSelectedIds()
+        let selectedIds = this.selectionManager.getSelectionModifier().getSelectedIds()
         let treeComponents = this.treeManager.getTree().serialize().props.components
         return new Snapshot(selectedIds, treeComponents)
 
     }
 
     restore(snapshot: Snapshot) {
-        const components = snapshot.treeComponents.map((c) => c.deserialize())
+        const components = snapshot.treeComponents.map((c) => deserializeTreeComponent(c)).filter(c => !!c)
         this.treeManager.restoreTree(components)
 
         const newComponentsSelection = this.treeManager.getTree().getComponents().filter((c) => {
@@ -115,8 +98,8 @@ export class Editor {
             return false;
         })
 
-        this.selectionManager.setSelection(new Selection(newComponentsSelection))
-        this.toolManager.resetSelection(this.selectionManager.getSelection())
+        this.selectionManager.setSelectionModifier(new SelectedComponentsModifier(newComponentsSelection))
+        this.toolManager.resetSelection(this.selectionManager.getSelectionModifier())
     }
 
 

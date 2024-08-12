@@ -1,5 +1,5 @@
 
-export type ValidKey = "shift" | "control" | 'backspace' | 'left' | 'right' | 'up' | 'down' | 'enter' | 'g' | 'c' | 'v' | 'y' | 'z'
+export type ValidKey = "shift" | "control" | 'backspace' | 'left' | 'right' | 'up' | 'down' | 'enter' | 'g' | 'c' | 'v' | 'y' | 'z' | 'a'
 
 const keyMap: { [key: string]: ValidKey } = {
     'ShiftLeft': 'shift',
@@ -14,7 +14,8 @@ const keyMap: { [key: string]: ValidKey } = {
     'KeyC': 'c',
     'KeyV': 'v',
     'KeyY': 'y',
-    'KeyW': 'z'
+    'KeyW': 'z',
+    'KeyQ': 'a'
 };
 
 type KeyState = {
@@ -28,25 +29,28 @@ type KeysState = {
 };
 
 
-export type KeyboardListener = ((type: "up" | "down") => void)
+export type KeyboardKeyListener = ((type: "up" | "down") => void)
+
+export type KeyboardEventListener = (event: KeyboardEvent, type: "up" | "down") => void
 
 // Class for handling keyboard inputs.
 export class KeyboardController {
 
     keys: KeysState
-    listeners: { [key in ValidKey]: KeyboardListener[] };
+    keyListeners: { [key in ValidKey]: KeyboardKeyListener[] };
+    eventListeners: KeyboardEventListener[] = []
 
     constructor() {
         const defaultKeyState: KeyState = { pressed: false, doubleTap: false, timestamp: 0 };
-        const validKeys: ValidKey[] = ["shift", "control", "backspace", "left", "right", "up", "down", "enter", "g", "c", "v", "y", "z"];
+        const validKeys: ValidKey[] = ["shift", "control", "backspace", "left", "right", "up", "down", "enter", "g", "c", "v", "y", "z", 'a'];
 
         this.keys = Object.fromEntries(
             validKeys.map(key => [key, { ...defaultKeyState }])
         ) as KeysState;
 
-        this.listeners = Object.fromEntries(
-            validKeys.map(key => [key, [] as KeyboardListener[]])
-        ) as { [key in ValidKey]: KeyboardListener[] };
+        this.keyListeners = Object.fromEntries(
+            validKeys.map(key => [key, [] as KeyboardKeyListener[]])
+        ) as { [key in ValidKey]: KeyboardKeyListener[] };
 
         document.addEventListener('keydown', (event) => this.keydownHandler(event));
         document.addEventListener('keyup', (event) => this.keyupHandler(event));
@@ -59,6 +63,10 @@ export class KeyboardController {
     }
 
     keydownHandler(event: KeyboardEvent) {
+        for (const eventListener of this.eventListeners) {
+            eventListener(event, "down")
+        }
+
         if (!(event.code in keyMap)) {
             return
         }
@@ -66,7 +74,7 @@ export class KeyboardController {
         const key = keyMap[event.code]
         const now = Date.now();
 
-        for (const listener of this.listeners[key]) {
+        for (const listener of this.keyListeners[key]) {
             listener("down")
         }
 
@@ -78,6 +86,10 @@ export class KeyboardController {
     }
 
     keyupHandler(event: KeyboardEvent) {
+        for (const eventListener of this.eventListeners) {
+            eventListener(event, "up")
+        }
+
         if (!(event.code in keyMap)) {
             return
         }
@@ -85,7 +97,7 @@ export class KeyboardController {
         const key = keyMap[event.code]
         const now = Date.now();
 
-        for (const listener of this.listeners[key]) {
+        for (const listener of this.keyListeners[key]) {
             listener("up")
         }
 
@@ -98,17 +110,28 @@ export class KeyboardController {
         else this.keys[key].timestamp = now;
     }
 
-    addListener(key: ValidKey, callback: (type: "up" | "down") => void) {
-        this.listeners[key].push(callback)
+    addKeyListener(key: ValidKey, callback: (type: "up" | "down") => void) {
+        this.keyListeners[key].push(callback)
     }
 
-    removeListener(key: ValidKey, callback: (type: "up" | "down") => void) {
-        const callbacks = this.listeners[key];
+    removeKeyListener(key: ValidKey, callback: (type: "up" | "down") => void) {
+        const callbacks = this.keyListeners[key];
         if (callbacks) {
             const index = callbacks.indexOf(callback);
             if (index !== -1) {
                 callbacks.splice(index, 1); // Supprimer la fonction de rappel
             }
+        }
+    }
+
+    addEventListener(listener: KeyboardEventListener) {
+        this.eventListeners.push(listener)
+    }
+
+    removeEventListener(listener: KeyboardEventListener) {
+        const index = this.eventListeners.indexOf(listener);
+        if (index !== -1) {
+            this.eventListeners.splice(index, 1);
         }
     }
 }

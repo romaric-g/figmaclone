@@ -1,7 +1,8 @@
 import { selectionChangeSubject, treeElementSubject } from "../../ui/subjects";
 import { Editor } from "../editor";
-import { Selection } from "../selections/selection";
-import { SerializedSelection } from "../selections/serialized/serializedSelection";
+import { SelectedComponentsModifier } from "../selections/selectedComponentsModifier";
+import { deserializeTreeComponentList } from "../tree/serialized/deserializeComponent";
+import { SerialisedTreeComponentList } from "../tree/serialized/serialisedTreeComponentList";
 import { TreeComponent } from "../tree/treeComponent";
 import { Action } from "./action";
 
@@ -10,21 +11,21 @@ export class PasteCopiedSelectionAction extends Action {
 
     private components: TreeComponent[];
 
-    constructor(serializedSelection: SerializedSelection) {
+    constructor(serializedComponents: SerialisedTreeComponentList) {
         super("Paste copied selection")
-        this.components = serializedSelection.components.map((c) => c.deserialize())
+        this.components = deserializeTreeComponentList(serializedComponents)
     }
 
     apply(editor: Editor) {
 
         for (const component of this.components) {
-            component.init(true)
-            editor.treeManager.getTree().add(component)
+            component.resetId()
+            editor.treeManager.getTree().getAnchor().add(component.getAnchor())
         }
 
-        const selection = new Selection(this.components)
+        const selection = new SelectedComponentsModifier(this.components)
 
-        editor.selectionManager.setSelection(selection)
+        editor.selectionManager.setSelectionModifier(selection)
 
         selectionChangeSubject.next(selection.toData())
         treeElementSubject.next(editor.treeManager.toData())

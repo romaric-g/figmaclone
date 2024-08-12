@@ -20,9 +20,9 @@ export class CanvasAttach extends KeyboardAttach {
 
         const editor = Editor.getEditor()
 
-        this.add(
+        this.addActions(
             new KeyboardAction("backspace", (type) => {
-                const selection = editor.selectionManager.getSelection()
+                const selection = editor.selectionManager.getSelectionModifier()
 
                 if (type == "down") {
                     if (!selection.isEmpty()) {
@@ -34,7 +34,7 @@ export class CanvasAttach extends KeyboardAttach {
 
             }),
             new KeyboardAction("left", (type) => {
-                const selection = editor.selectionManager.getSelection()
+                const selection = editor.selectionManager.getSelectionModifier()
                 if (!selection.isEmpty()) {
                     if (type == "down") {
                         editor.actionManager.push(
@@ -49,7 +49,7 @@ export class CanvasAttach extends KeyboardAttach {
 
             }),
             new KeyboardAction("right", (type) => {
-                const selection = editor.selectionManager.getSelection()
+                const selection = editor.selectionManager.getSelectionModifier()
                 if (!selection.isEmpty()) {
                     if (type == "down") {
                         editor.actionManager.push(
@@ -63,7 +63,7 @@ export class CanvasAttach extends KeyboardAttach {
                 }
             }),
             new KeyboardAction("up", (type) => {
-                const selection = editor.selectionManager.getSelection()
+                const selection = editor.selectionManager.getSelectionModifier()
                 if (!selection.isEmpty()) {
                     if (type == "down") {
                         editor.actionManager.push(
@@ -77,7 +77,7 @@ export class CanvasAttach extends KeyboardAttach {
                 }
             }),
             new KeyboardAction("down", (type) => {
-                const selection = editor.selectionManager.getSelection()
+                const selection = editor.selectionManager.getSelectionModifier()
                 if (!selection.isEmpty()) {
                     if (type == "down") {
                         editor.actionManager.push(
@@ -93,7 +93,7 @@ export class CanvasAttach extends KeyboardAttach {
             new KeyboardAction("g", (type) => {
                 if (type == "down") {
                     if (editor.keyboardManager.keyboardController.keys.control.pressed) {
-                        const selection = editor.selectionManager.getSelection()
+                        const selection = editor.selectionManager.getSelectionModifier()
                         if (!selection.isEmpty()) {
                             editor.actionManager.push(
                                 new GroupeSelectionAction(selection)
@@ -105,7 +105,7 @@ export class CanvasAttach extends KeyboardAttach {
             new KeyboardAction("c", (type) => {
                 if (type == "down") {
                     if (editor.keyboardManager.keyboardController.keys.control.pressed) {
-                        const selection = editor.selectionManager.getSelection()
+                        const selection = editor.selectionManager.getSelectionModifier()
                         if (!selection.isEmpty()) {
                             editor.selectionManager.copySelection()
                         }

@@ -1,6 +1,6 @@
 import { PasteCopiedSelectionAction } from "../../actions/pasteCopiedSelectionAction";
 import { Editor } from "../../editor";
-import { Selection } from "../../selections/selection";
+import { SelectedComponentsModifier } from "../../selections/selectedComponentsModifier";
 import { MenuItem } from "../menuItem";
 
 

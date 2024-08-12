@@ -1,16 +1,8 @@
-import { TreeComponent } from "../treeComponent";
 
-interface Props {
-    name: string;
-    id?: string;
-}
-
-export abstract class SerialisedTreeComponent<T extends Props = Props, O extends TreeComponent = TreeComponent> {
-    readonly props: T;
-
-    constructor(props: T) {
-        this.props = props;
+export interface SerialisedTreeComponent {
+    type: string,
+    props: {
+        name: string;
+        id?: string;
     }
-
-    abstract deserialize(): O
 }

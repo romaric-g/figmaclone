@@ -18,7 +18,8 @@ const ToolbarView: React.FC<Props> = ({ selectedTool }) => {
     return (
         <div className="Toolbar">
             <Button selected={selectedTool == "select"} onClick={() => selectTool("select")}>Selection</Button>
-            <Button selected={selectedTool == "draw"} onClick={() => selectTool("draw")}>Dessin</Button>
+            <Button selected={selectedTool == "rect"} onClick={() => selectTool("rect")}>Dessin</Button>
+            <Button selected={selectedTool == "text"} onClick={() => selectTool("text")}>Texte</Button>
         </div>
     )
 }

@@ -66,7 +66,7 @@ const FocusInput: React.FC<Props> = ({ value, onValueConfirm, className, disable
 
             prevAttach.current = keyboardManager.getAttach()
 
-            keyboardManager.setAttach(new KeyboardAttach().add(
+            keyboardManager.setAttach(new KeyboardAttach().addActions(
                 new KeyboardAction("enter", enterKeyPress)
             ))
         }

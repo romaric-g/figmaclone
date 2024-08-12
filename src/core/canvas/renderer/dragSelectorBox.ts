@@ -1,22 +1,23 @@
-import { Graphics, GraphicsContext, Point } from "pixi.js";
-import { DragSelectionState } from "../../tools/selectStates/dragSelection";
-import { Editor } from "../../editor";
-
+import { Container, Graphics, GraphicsContext, Point } from "pixi.js";
+import { DragSelectionState } from "../../tools/selectStates/dragSelectionState";
 
 export class DragSelectionBoxRenderer {
 
+    private graphicsContainer: Container;
     private graphics: Graphics;
-    private dragSelectionState: DragSelectionState;
 
-    constructor(dragSelectionState: DragSelectionState) {
+    constructor(graphicsContainer: Container) {
         this.graphics = new Graphics()
-        this.dragSelectionState = dragSelectionState;
+        this.graphicsContainer = graphicsContainer;
     }
 
-    render() {
-        const editor = Editor.getEditor()
+    render(dragSelectionState?: DragSelectionState) {
+        if (!dragSelectionState) {
+            this.graphics.context = new GraphicsContext();
+            return;
+        }
 
-        const coveredRect = this.dragSelectionState.getCoveredRect()
+        const coveredRect = dragSelectionState.getCanvasCoveredZone()
 
         if (!coveredRect) {
             return
@@ -31,7 +32,7 @@ export class DragSelectionBoxRenderer {
 
         const strokeStyle = {
             width: 1,
-            color: "blue"
+            color: "#0C8CE9"
         }
 
         const commonContext = new GraphicsContext()
@@ -52,15 +53,11 @@ export class DragSelectionBoxRenderer {
     }
 
     init() {
-        const selectionLayer = Editor.getEditor().canvasApp.getSelectionLayer()
-
-        selectionLayer.getContainer().addChild(this.graphics)
+        this.graphicsContainer.addChild(this.graphics)
     }
 
     destroy() {
-        const selectionLayer = Editor.getEditor().canvasApp.getSelectionLayer()
-
-        selectionLayer.getContainer().removeChild(this.graphics)
+        this.graphicsContainer.removeChild(this.graphics)
     }
 
 }

@@ -12,7 +12,7 @@ export class ClearSelection extends Action {
     apply(editor: Editor) {
         editor.selectionManager.unselectAll()
 
-        selectionChangeSubject.next(editor.selectionManager.getSelection().toData())
+        selectionChangeSubject.next(editor.selectionManager.getSelectionModifier().toData())
         treeElementSubject.next(editor.treeManager.toData())
     }
 

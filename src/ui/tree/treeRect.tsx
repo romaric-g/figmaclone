@@ -1,12 +1,5 @@
 import React from "react";
-import { Editor } from "../../core/editor";
-import { Selection } from "../../core/selections/selection";
-import classNames from "classnames";
-import { SelectTool } from "../../core/tools/selectTool";
-import { SelectionState } from "../../core/tools/selectStates/selection";
-import { TreeRect } from "../../core/tree/treeRect";
 import "./treeRect.scss";
-import { TreeComponent } from "../../core/tree/treeComponent";
 import TreeComponentView from "./treeComponent";
 import { DragOrigin, DragTarget } from "./tree";
 
@@ -18,23 +11,25 @@ interface Props {
     setDragOrigin: (dragOrigin: DragOrigin) => void,
     dragTarget: DragTarget | undefined,
     setDragTarget: (dragTarget: DragTarget) => void,
+    type: "rect" | "text"
 }
 
-const TreeRectView: React.FC<Props> = ({
+const TreeBoxView: React.FC<Props> = ({
     indexs,
     name,
     isSelected,
     dragTarget,
     isDragging,
     setDragOrigin,
-    setDragTarget
+    setDragTarget,
+    type
 }) => {
 
     return (
         <TreeComponentView
             indexs={indexs}
             name={name}
-            type={"rect"}
+            type={type}
             isSelected={isSelected}
             isDragging={isDragging}
             dragTarget={dragTarget}
@@ -44,4 +39,4 @@ const TreeRectView: React.FC<Props> = ({
     )
 }
 
-export default TreeRectView;
+export default TreeBoxView;

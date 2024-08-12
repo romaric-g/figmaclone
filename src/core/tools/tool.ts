@@ -1,20 +1,14 @@
-import { Point } from "pixi.js";
-import { Editor } from "../editor";
-import { ToolType } from "./toolManager";
+import { ToolType } from "../../ui/subjects";
 
 export abstract class Tool {
-    readonly editor: Editor;
     readonly toolType: ToolType;
 
-    constructor(editor: Editor, toolType: ToolType) {
-        this.editor = editor;
+    constructor(toolType: ToolType) {
         this.toolType = toolType;
     }
 
     abstract enable(): void;
 
     abstract disable(): void;
-
-    abstract render(): void
 
 }

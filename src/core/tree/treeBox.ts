@@ -1,7 +1,6 @@
 import { Point } from "pixi.js";
-import { TreeComponentData, TreeRectData } from "../../ui/subjects";
 import { TreeComponent } from "./treeComponent";
-import { Editor } from "../editor";
+import { SquaredZone } from "../utils/squaredZone";
 
 export interface TreeBoxProps {
     name: string,
@@ -12,8 +11,8 @@ export interface TreeBoxProps {
     height: number
 }
 
-
-export abstract class TreeBox<T extends TreeComponentData = TreeComponentData> extends TreeComponent<T> {
+export abstract class TreeBox extends TreeComponent {
+    private _movePositionOrigin?: Point;
 
     protected _hover: boolean = false;
     protected _selected: boolean = false;
@@ -24,7 +23,10 @@ export abstract class TreeBox<T extends TreeComponentData = TreeComponentData> e
     private _height!: number;
 
     constructor({ id, name, x, y, width, height }: TreeBoxProps) {
-        super({ id, name })
+        super({
+            name: name,
+            id: id
+        })
         this._x = x;
         this._y = y;
         this._width = width;
@@ -63,26 +65,79 @@ export abstract class TreeBox<T extends TreeComponentData = TreeComponentData> e
         return this._height
     }
 
-    getDrawingCoveredRect(): { minX: number; minY: number; maxX: number; maxY: number; } {
+    get position() {
+        return new Point(this.x, this.y)
+    }
+
+    unfreezeOriginalPosition() {
+        this._movePositionOrigin = undefined;
+    }
+
+    getOriginalPosition() {
+        if (this._movePositionOrigin) {
+            return this._movePositionOrigin;
+        }
+        return new Point(this.x, this.y)
+    }
+
+    freezeOriginalPosition() {
+        this._movePositionOrigin = new Point(this.x, this.y);
+    }
+
+    getSquaredZone(): SquaredZone {
         return {
             minX: this.x,
             minY: this.y,
-            maxX: this.x + this.width,
-            maxY: this.y + this.height
+            maxX: Math.round((this.x + this.width) * 100) / 100,
+            maxY: Math.round((this.y + this.height) * 100) / 100
         }
     }
 
-    getCanvasCoveredRect(): { minX: number; minY: number; maxX: number; maxY: number; } {
-        const editor = Editor.getEditor()
-
-        const globalPoint = editor.getCanvasPosition(new Point(this.x, this.y))
-        const [globalWidth, globalHeight] = editor.getCanvasSize(this.width, this.height)
+    getSquaredZoneFromOrigin(): SquaredZone {
+        const x = this.getOriginalPosition().x;
+        const y = this.getOriginalPosition().y;
 
         return {
-            minX: globalPoint.x,
-            minY: globalPoint.y,
-            maxX: globalPoint.x + globalWidth,
-            maxY: globalPoint.y + globalHeight
+            minX: x,
+            minY: y,
+            maxX: x + this.width,
+            maxY: y + this.height
         }
+    }
+
+    isSelected() {
+        return this._selected;
+    }
+
+    isHover() {
+        return this._hover;
+    }
+
+    setHover(value: boolean) {
+        this._hover = value;
+    }
+
+    render(zIndex: number) {
+        return zIndex + 1;
+    }
+
+
+    setPosition(x: number, y: number) {
+        this.x = x;
+        this.y = y;
+    }
+
+
+    onSelectionInit() {
+        this._selected = true;
+    }
+
+    onSelectionDestroy() {
+        this._selected = false;
+        this._hover = false;
+    }
+
+    destroy(): void {
+        super.destroy()
     }
 }

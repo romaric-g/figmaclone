@@ -1,6 +1,7 @@
 import { Point } from "pixi.js";
 import { SelectTool } from "../selectTool";
 import { TreeRect } from "../../tree/treeRect";
+import { TreeBox } from "../../tree/treeBox";
 
 export abstract class SelectToolState {
 
@@ -14,17 +15,15 @@ export abstract class SelectToolState {
 
     abstract onDestroy(): void
 
-    abstract onClickDown(element: TreeRect, shift: boolean, pointerPosition: Point, double: boolean): void
+    abstract onClickDown(element: TreeBox, shift: boolean, pointerPosition: Point, double: boolean): void
 
-    abstract onClickUp(element: TreeRect, shift: boolean): void
+    abstract onClickUp(element: TreeBox, shift: boolean, pointerPosition: Point): void
 
     abstract onMove(newPosition: Point): void
 
     abstract onBackgroundPointerDown(clickPosition: Point): void
 
     abstract onBackgroundPointerUp(clickPosition: Point): void
-
-    abstract render(): void
 
 }
 

@@ -1,20 +1,18 @@
 import { Editor } from "../../editor";
-import { Selection } from "../../selections/selection";
+import { SelectedComponentsModifier } from "../../selections/selectedComponentsModifier";
 import { MenuItem } from "../menuItem";
 
 
 export class CopyItem extends MenuItem {
 
-    private selection: Selection;
+    private selection: SelectedComponentsModifier;
 
-    constructor(selection: Selection) {
+    constructor(selection: SelectedComponentsModifier) {
         super("Copier", "Ctrl+C")
         this.selection = selection;
     }
 
     apply(): void {
-        console.log("COPY")
-
         if (!this.selection.isEmpty()) {
             Editor.getEditor().selectionManager.copySelection()
         }

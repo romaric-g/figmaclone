@@ -1,16 +1,13 @@
 import React, { MouseEvent } from "react";
 import TreeView from "./tree/tree";
 import ToolbarView from "./tool/toolbar";
-import { ToolType } from "../core/tools/toolManager";
 import Canvas from "./canvas/canvas";
-import SelectionEditor from "./selection/selectionEditor";
 import { Editor } from "../core/editor";
-import { contextMenuChangeSubject, ContextMenuData, currentToolSubject, TreeData, treeElementSubject } from "./subjects";
+import { contextMenuChangeSubject, ContextMenuData, currentToolSubject, ToolType, TreeData, treeElementSubject } from "./subjects";
+import SelectionEditorContainer from "./selection/selectionEditorContainer";
+import ContextMenu from "./components/ContextMenu";
 import "./app.scss";
 import "./reset.scss"
-import SelectionEditorBox from "./selection/selectionEditorBox";
-import ContextMenu from "./components/ContextMenu";
-
 
 
 const App: React.FC = () => {
@@ -22,15 +19,6 @@ const App: React.FC = () => {
 
     const handleContextMenu = (event: MouseEvent<HTMLDivElement>) => {
         event.preventDefault();
-        // setContextMenu({
-        //     x: event.clientX,
-        //     y: event.clientY,
-        //     items: [
-        //         { label: 'Option 1', onClick: () => alert('Option 1 clicked') },
-        //         { label: 'Option 2', onClick: () => alert('Option 2 clicked') },
-        //         { label: 'Option 3', onClick: () => alert('Option 3 clicked') },
-        //     ],
-        // });
     };
 
     const handleClick = () => {
@@ -79,7 +67,7 @@ const App: React.FC = () => {
                 <Canvas />
             </div>
             <div className="App__rightside">
-                <SelectionEditorBox />
+                <SelectionEditorContainer />
             </div>
             {contextMenu &&
                 <ContextMenu
